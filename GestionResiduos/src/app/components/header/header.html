@@ -1,0 +1,40 @@
+ <header class="bg-green-700 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a routerLink="/"><div class="flex items-center space-x-2">
+                <i class="fas fa-recycle text-2xl"></i>
+                <h1 class="text-xl font-bold">EcoBolívar</h1>
+            </div></a>
+            <!-- Desktop Menu -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="#mapa" class="hover:text-green-200 transition">Mapa EcoPuntos</a>
+                <a href="#calendario" class="hover:text-green-200 transition">Calendario</a>
+                <a href="#educacion" class="hover:text-green-200 transition">Educación</a>
+                <a href="#reportes" class="hover:text-green-200 transition">Reportes</a>
+                <button (click)="openLogin()" id="login-btn" class="bg-white text-green-700 px-4 py-1 rounded-full font-medium hover:bg-green-100 transition">Iniciar Sesión</button>
+            </nav>
+            
+            <button id="mobile-menu-btn" class="md:hidden text-2xl">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+       <app-login [visible]="showLogin" (closed)="closeLogin()"></app-login>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="mobile-menu fixed inset-y-0 left-0 w-64 bg-green-800 text-white z-50 p-4 md:hidden">
+            <div class="flex justify-between items-center mb-8">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-recycle text-2xl"></i>
+                    <h1 class="text-xl font-bold">EcoBolívar</h1>
+                </div>
+                <button id="close-menu-btn" class="text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <nav class="flex flex-col space-y-4">
+                <a href="#mapa" class="hover:text-green-200 transition">Mapa EcoPuntos</a>
+                <a href="#calendario" class="hover:text-green-200 transition">Calendario</a>
+                <a href="#educacion" class="hover:text-green-200 transition">Educación</a>
+                <a href="#reportes" class="hover:text-green-200 transition">Reportes</a>
+                <button class="bg-white text-green-700 px-4 py-2 rounded-full font-medium hover:bg-green-100 transition">Iniciar Sesión</button>
+            </nav>
+        </div>
+    </header>
