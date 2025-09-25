@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import * as mapboxgl from 'mapbox-gl';
+import { Component, AfterViewInit } from '@angular/core';
+import { IconService } from '../../services/icon.service';
 
 @Component({
   selector: 'app-home',
@@ -7,13 +7,10 @@ import * as mapboxgl from 'mapbox-gl';
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
-export class Home implements OnInit {
-  map!: mapboxgl.Map;
-  
+export class Home implements AfterViewInit {
+  constructor(private iconService: IconService) {}
 
-  accordions: boolean[] = [false, false, false]; // controla cada acordeón
-
-  ngOnInit(): void {
-    
+  ngAfterViewInit() {
+   
   }
 }

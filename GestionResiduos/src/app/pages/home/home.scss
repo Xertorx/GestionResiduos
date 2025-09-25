@@ -1,36 +1,3 @@
-.map-container {
-  height: 400px;
-  width: 100%;
-  border-radius: 1rem;
-}
-
-.progress-bar {
-  height: 8px;
-  border-radius: 4px;
-  background-color: #e5e7eb;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 4px;
-  background-color: #10b981;
-  transition: width 0.3s ease;
-}
-
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-}
-
-.accordion.active .accordion-content {
-  max-height: 500px;
-}
-
-.calendar-day {
-  transition: all 0.2s ease;
-}
-
-.calendar-day:hover {
-  transform: scale(1.05);
+.hero-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
