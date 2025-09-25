@@ -3,7 +3,27 @@
     transform: translateX(-100%);
     transition: transform 0.3s ease;
   }
+
   .mobile-menu.open {
     transform: translateX(0);
   }
 }
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.btn-primary {
+  background-color: #059669;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #047857;
+  transform: translateY(-2px);
+}
+// feature-card hover handled by Tailwind utilities in component templates

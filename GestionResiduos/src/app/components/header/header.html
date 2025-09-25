@@ -1,40 +1,34 @@
- <header class="bg-green-700 text-white shadow-lg">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a routerLink="/"><div class="flex items-center space-x-2">
-                <i class="fas fa-recycle text-2xl"></i>
-                <h1 class="text-xl font-bold">EcoBolívar</h1>
-            </div></a>
-            <!-- Desktop Menu -->
-            <nav class="hidden md:flex space-x-6">
-                <a href="#mapa" class="hover:text-green-200 transition">Mapa EcoPuntos</a>
-                <a href="#calendario" class="hover:text-green-200 transition">Calendario</a>
-                <a href="#educacion" class="hover:text-green-200 transition">Educación</a>
-                <a href="#reportes" class="hover:text-green-200 transition">Reportes</a>
-                <button (click)="openLogin()" id="login-btn" class="bg-white text-green-700 px-4 py-1 rounded-full font-medium hover:bg-green-100 transition">Iniciar Sesión</button>
-            </nav>
-            
-            <button id="mobile-menu-btn" class="md:hidden text-2xl">
-                <i class="fas fa-bars"></i>
-            </button>
+<nav class="bg-white shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between h-16">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 flex items-center">
+          <i data-feather="trash-2" class="h-8 w-8 text-emerald-600"></i>
+          <span class="ml-2 text-xl font-bold text-gray-900">EcoBolívar</span>
         </div>
-       <app-login [visible]="showLogin" (closed)="closeLogin()"></app-login>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="mobile-menu fixed inset-y-0 left-0 w-64 bg-green-800 text-white z-50 p-4 md:hidden">
-            <div class="flex justify-between items-center mb-8">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-recycle text-2xl"></i>
-                    <h1 class="text-xl font-bold">EcoBolívar</h1>
-                </div>
-                <button id="close-menu-btn" class="text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <nav class="flex flex-col space-y-4">
-                <a href="#mapa" class="hover:text-green-200 transition">Mapa EcoPuntos</a>
-                <a href="#calendario" class="hover:text-green-200 transition">Calendario</a>
-                <a href="#educacion" class="hover:text-green-200 transition">Educación</a>
-                <a href="#reportes" class="hover:text-green-200 transition">Reportes</a>
-                <button class="bg-white text-green-700 px-4 py-2 rounded-full font-medium hover:bg-green-100 transition">Iniciar Sesión</button>
-            </nav>
-        </div>
-    </header>
+      </div>
+      <div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
+        <a href="index.html" class="text-emerald-600 font-medium">Inicio</a>
+        <a href="mapa.html" class="text-gray-500 hover:text-emerald-600">Mapa Eco-Puntos</a>
+        <a href="reportes.html" class="text-gray-500 hover:text-emerald-600">Reportes</a>
+        <a href="calendario.html" class="text-gray-500 hover:text-emerald-600">Calendario</a>
+        <a href="educacion.html" class="text-gray-500 hover:text-emerald-600">Educación</a>
+        <a href="foro.html" class="text-gray-500 hover:text-emerald-600">Foro</a>
+      </div>
+      <div class="flex items-center">
+        <a [routerLink]="'/login'" class="text-gray-500 hover:text-emerald-600 mr-4">
+          Iniciar Sesión
+        </a>
+
+        <a href="registro.html" class="btn-primary text-white px-4 py-2 rounded-md font-medium">Registrarse</a>
+      </div>
+      <div class="-mr-2 flex items-center md:hidden">
+        <button type="button"
+          class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500"
+          aria-expanded="false">
+          <i data-feather="menu"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
