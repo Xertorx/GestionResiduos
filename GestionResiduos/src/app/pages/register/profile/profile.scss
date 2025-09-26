@@ -1,0 +1,15 @@
+.form-input:focus {
+    border-color: #059669;
+    box-shadow: 0 0 0 1px #059669;
+}
+.form-input{
+    margin-top: 10px;
+    margin-bottom: 9px;
+}
+.btn-primary {
+    background-color: #059669;
+    transition: all 0.3s ease;
+}
+.btn-primary:hover {
+    background-color: #047857;
+}

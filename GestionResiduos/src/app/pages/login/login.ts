@@ -5,7 +5,7 @@ import { IconService } from '../../services/icon.service';
 
 @Component({
   selector: 'app-login',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
