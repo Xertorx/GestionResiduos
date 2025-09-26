@@ -1,0 +1,346 @@
+ <!-- Main Content -->
+ <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        Calendario de Recolección
+      </h1>
+      <p class="text-lg text-gray-600">
+        Consulta los horarios y días de recolección en tu localidad
+      </p>
+    </div>
+
+    <!-- Localidad Selector -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div class="mb-4 sm:mb-0">
+          <h2 class="text-lg font-medium text-gray-900">
+            Selecciona tu localidad
+          </h2>
+          <p class="text-sm text-gray-600">
+            Para ver el calendario específico de tu zona
+          </p>
+        </div>
+        <div class="flex-1 sm:max-w-xs">
+          <select
+            id="localidad-select"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          >
+            <option value="ciudad-bolivar">Ciudad Bolívar</option>
+            <option value="usme">Usme</option>
+            <option value="bosa">Bosa</option>
+            <option value="kennedy">Kennedy</option>
+            <option value="suba">Suba</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Diciembre 2023</h2>
+        <div class="flex space-x-2">
+          <button class="p-2 rounded-md bg-gray-100 hover:bg-gray-200">
+            <i data-feather="chevron-left" class="h-4 w-4"></i>
+          </button>
+          <button class="p-2 rounded-md bg-gray-100 hover:bg-gray-200">
+            <i data-feather="chevron-right" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-2 mb-4">
+        <div class="text-center text-sm font-medium text-gray-500">Dom</div>
+        <div class="text-center text-sm font-medium text-gray-500">Lun</div>
+        <div class="text-center text-sm font-medium text-gray-500">Mar</div>
+        <div class="text-center text-sm font-medium text-gray-500">Mié</div>
+        <div class="text-center text-sm font-medium text-gray-500">Jue</div>
+        <div class="text-center text-sm font-medium text-gray-500">Vie</div>
+        <div class="text-center text-sm font-medium text-gray-500">Sáb</div>
+      </div>
+
+      <div class="grid grid-cols-7 gap-2">
+        <!-- Week 1 -->
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          26
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          27
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          28
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          29
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          30
+        </div>
+        <div
+          class="calendar-day collection-day p-2 text-center text-sm rounded-md cursor-pointer"
+          title="Recolección orgánica"
+        >
+          <div class="font-medium">1</div>
+          <div class="text-xs text-emerald-600">Orgánica</div>
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          2
+        </div>
+
+        <!-- Week 2 -->
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          3
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          4
+        </div>
+        <div
+          class="calendar-day collection-day p-2 text-center text-sm rounded-md cursor-pointer"
+          title="Recolección reciclable"
+        >
+          <div class="font-medium">5</div>
+          <div class="text-xs text-blue-600">Reciclable</div>
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          6
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          7
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          8
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          9
+        </div>
+
+        <!-- Week 3 -->
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          10
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          11
+        </div>
+        <div
+          class="calendar-day collection-day p-2 text-center text-sm rounded-md cursor-pointer"
+          title="Recolección orgánica"
+        >
+          <div class="font-medium">12</div>
+          <div class="text-xs text-emerald-600">Orgánica</div>
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          13
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          14
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          15
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          16
+        </div>
+
+        <!-- Week 4 -->
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          17
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          18
+        </div>
+        <div
+          class="calendar-day collection-day p-2 text-center text-sm rounded-md cursor-pointer"
+          title="Recolección reciclable"
+        >
+          <div class="font-medium">19</div>
+          <div class="text-xs text-blue-600">Reciclable</div>
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          20
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          21
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          22
+        </div>
+        <div
+          class="calendar-day special-collection p-2 text-center text-sm rounded-md cursor-pointer"
+          title="Recolección especial - Residuos peligrosos"
+        >
+          <div class="font-medium">23</div>
+          <div class="text-xs text-blue-600">Especial</div>
+        </div>
+
+        <!-- Week 5 -->
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          24
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          25
+        </div>
+        <div
+          class="calendar-day collection-day p-2 text-center text-sm rounded-md cursor-pointer"
+          title="Recolección orgánica"
+        >
+          <div class="font-medium">26</div>
+          <div class="text-xs text-emerald-600">Orgánica</div>
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          27
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          28
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          29
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          30
+        </div>
+
+        <!-- Week 6 -->
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md"
+        >
+          31
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md opacity-50"
+        >
+          1
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md opacity-50"
+        >
+          2
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md opacity-50"
+        >
+          3
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md opacity-50"
+        >
+          4
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md opacity-50"
+        >
+          5
+        </div>
+        <div
+          class="calendar-day p-2 text-center text-sm border border-gray-200 rounded-md opacity-50"
+        >
+          6
+        </div>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Leyenda</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="flex items-center">
+          <div
+            class="w-4 h-4 bg-emerald-100 border-2 border-emerald-500 rounded mr-3"
+          ></div>
+          <span class="text-sm">Recolección Orgánica</span>
+        </div>
+        <div class="flex items-center">
+          <div
+            class="w-4 h-4 bg-blue-100 border-2 border-blue-500 rounded mr-3"
+          ></div>
+          <span class="text-sm">Recolección Reciclable</span>
+        </div>
+        <div class="flex items-center">
+          <div
+            class="w-4 h-4 bg-indigo-100 border-2 border-indigo-500 rounded mr-3"
+          ></div>
+          <span class="text-sm">Recolección Especial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download & Sync Options -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">
+        Opciones adicionales
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button
+          class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <i data-feather="download" class="h-4 w-4 mr-2"></i>
+          Descargar calendario
+        </button>
+        <button
+          class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <i data-feather="calendar" class="h-4 w-4 mr-2"></i>
+          Sincronizar con Google Calendar
+        </button>
+      </div>
+    </div>
+  </div>

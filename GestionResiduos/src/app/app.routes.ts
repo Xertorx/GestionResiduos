@@ -5,6 +5,7 @@ import { Register } from './pages/register/register';
 import { Verify } from './pages/register/verify/verify';
 import { Profile } from './pages/register/profile/profile';
 import { Login } from './pages/login/login';
+import { Calendar } from './pages/calendar/calendar';
 
 
 export const routes: Routes = [
@@ -14,5 +15,6 @@ export const routes: Routes = [
     {path: 'register/verify',component:Verify},
     {path: 'login',component:Login},
     {path: 'register/profile',component:Profile},
+    {path: 'calendar',component:Calendar},
     {path: '**',redirectTo:''}
 ];
