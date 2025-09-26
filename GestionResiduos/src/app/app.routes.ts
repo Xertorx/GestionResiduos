@@ -5,14 +5,21 @@ import { Register } from './pages/register/register';
 import { Verify } from './pages/register/verify/verify';
 import { Profile } from './pages/register/profile/profile';
 import { Login } from './pages/login/login';
+import { Calendar } from './pages/calendar/calendar';
 
 
 export const routes: Routes = [
-    {path: '',component:Home},
-    {path: 'about_us',component:About},
-    {path: 'register',component:Register},
-    {path: 'register/verify',component:Verify},
-    {path: 'login',component:Login},
-    {path: 'register/profile',component:Profile},
-    {path: '**',redirectTo:''}
+    {path: '', component: Home, pathMatch: 'full'},
+    {path: 'about_us', component: About},
+    {path: 'register', component: Register},
+    {path: 'register/verify', component: Verify},
+    {path: 'login', component: Login},
+    {path: 'register/profile', component: Profile},
+    {path: 'calendar', component: Calendar},
+    // Redirecciones con slash final
+    {path: 'calendar/', component: Calendar},
+    {path: 'about_us/', component: About},
+    {path: 'register/', component: Register},
+    {path: 'login/', component: Login},
+    {path: '**', redirectTo: ''}
 ];
