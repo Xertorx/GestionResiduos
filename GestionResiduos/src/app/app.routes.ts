@@ -9,6 +9,8 @@ import { Calendar } from './pages/calendar/calendar';
 import { EcoPoints } from './pages/eco-points/eco-points';
 import { Reports } from './pages/reports/reports';
 import { Education } from './pages/education/education';
+import { Foro } from './pages/foro/foro';
+import { Detalles } from './pages/foro/detalles/detalles';
 
 
 export const routes: Routes = [
@@ -25,7 +27,9 @@ export const routes: Routes = [
     {path: 'about_us/', component: About},
     {path: 'register/', component: Register},
     {path: 'reports', component: Reports},
-     {path: 'education', component: Education},
+    {path: 'education', component: Education},
+    { path: 'foro', component: Foro },
+    { path: 'foro/:id', component: Detalles },
 
     {path: 'eco-points', component: EcoPoints},
     {path: '**', redirectTo: ''}
