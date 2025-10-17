@@ -1,0 +1,49 @@
+<div class="text-center mb-8">
+    <h1 class="flex items-center justify-center gap-2 text-3xl font-bold text-gray-900 mb-2">
+        <i data-feather="map" class="text-emerald-600 h-8 w-8"></i>
+        Mapa de Eco Puntos
+    </h1>
+    <p class="text-lg text-gray-600">
+        Visualiza los eco puntos disponibles en tu ciudad para reciclar tus residuos de manera responsable.
+    </p>
+</div>
+
+<div class="p-6 mb-8 bg-white rounded-lg shadow-md flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-9">
+
+    <section class="container flex-col md:w-[30%] w-full  gap-2 p-4 divide-y">
+        <h1 class="text-xl text-center font-bold ">Ecopuntos Disponibles</h1>
+        <div class="sidebar rounded-lg p-4 h-[500px] overflow-y-auto " id="sidebar">
+            @for (place of placeResource.value();
+            let index = $index;
+            track place.idPlace) {
+            <div 
+            #places class="places" 
+            [class.active]="selectedPlace()?.idPlace === place.idPlace" 
+            (click)="changeLocation(place,undefined,index)">
+                <strong>{{ place.place }}</strong><br>
+                {{ place.direccion }}<br>
+                Horario: {{ place.openingHours }} - {{ place.closingHours }}
+            </div>
+            }
+
+        </div>
+
+    </section>
+    <div class="w-[100%]">
+        <google-map [center]="center" [zoom]="zoom" [options]="mapOptions">
+            @for (place of placeResource.value(); track place.idPlace) {
+            <map-advanced-marker 
+            #marker="mapAdvancedMarker"
+            [position]="{
+            lat: place.latitud,
+            lng: place.longitud
+            }" 
+            [options]="markerOptions"
+            (mapClick)="changeLocation(place, marker)"
+            [content]="getMarkerContent(place)"
+            />
+            }
+             <map-info-window>Info Window content</map-info-window>
+        </google-map>
+    </div>
+</div>
