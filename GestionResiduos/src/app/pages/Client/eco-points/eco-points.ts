@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { Map } from '../../components/map/map';
+import { Map } from '../../../components/map/map';
+
 
 
 @Component({

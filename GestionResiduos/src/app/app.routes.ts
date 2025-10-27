@@ -1,16 +1,21 @@
 import { Routes } from '@angular/router';
-import { Home } from './pages/home/home';
-import { About } from './pages/about/about';
-import { Register } from './pages/register/register';
-import { Verify } from './pages/register/verify/verify';
-import { Profile } from './pages/register/profile/profile';
-import { Login } from './pages/login/login';
-import { Calendar } from './pages/calendar/calendar';
-import { EcoPoints } from './pages/eco-points/eco-points';
-import { Reports } from './pages/reports/reports';
-import { Education } from './pages/education/education';
-import { Foro } from './pages/foro/foro';
-import { Detalles } from './pages/foro/detalles/detalles';
+
+
+
+import { Foro } from './pages/Client/foro/foro';
+import { Detalles } from './pages/Client/foro/detalles/detalles';
+import { Home } from './pages/Client/home/home';
+import { Calendar } from './pages/Client/calendar/calendar';
+import { Login } from './pages/Client/login/login';
+import { About } from './pages/Client/about/about';
+import { Reports } from './pages/Client/reports/reports';
+import { Education } from './pages/Client/education/education';
+import { EcoPoints } from './pages/Client/eco-points/eco-points';
+import { Dashboard } from './pages/Admin/dashboard/dashboard';
+import { Register } from './pages/Client/register/register';
+
+import { Profile } from './pages/Client/register/profile/profile';
+import { Verify } from './pages/Client/register/verify/verify';
 
 
 export const routes: Routes = [
@@ -19,18 +24,25 @@ export const routes: Routes = [
     // Redirecciones con slash final
     {path: 'calendar/', component: Calendar},
     //Paginas
-    {path: 'register', component: Register},
-    {path: 'register/verify', component: Verify},
+    {path: 'register', component: Register,
+        children: [
+            {path: 'verify', component: Verify},
+            {path: 'profile', component: Profile}
+        ]
+    },
+    
+  
+    { path: 'foro', component: Foro,
+        children: [
+            { path: ':id', component: Detalles }
+        ]
+    },
     {path: 'login', component: Login},
-    {path: 'register/profile', component: Profile},
     {path: 'calendar', component: Calendar},
     {path: 'about_us/', component: About},
-    {path: 'register/', component: Register},
     {path: 'reports', component: Reports},
     {path: 'education', component: Education},
-    { path: 'foro', component: Foro },
-    { path: 'foro/:id', component: Detalles },
-
     {path: 'eco-points', component: EcoPoints},
+    {path: 'dashboard', component: Dashboard},
     {path: '**', redirectTo: ''}
 ];
