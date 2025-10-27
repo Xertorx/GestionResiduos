@@ -1,5 +1,5 @@
 import { Component, AfterViewInit } from '@angular/core';
-import { IconService } from '../../services/icon.service';
+import { IconService } from '../../../services/icon.service';
 import { RouterLink } from '@angular/router';
 
 @Component({
