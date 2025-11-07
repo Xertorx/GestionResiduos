@@ -1,0 +1,80 @@
+<div class="max-w-screen-2xl h-[550px] mx-auto py-8 px-4 sm:px-6 lg:px-8 m-5 flex">
+
+	<!-- Sidebar -->
+	<aside class="w-64 bg-white border-r border-gray-200 p-6 overflow-y-auto border rounded-lg shadow-lg">
+		<h2 class="text-xl font-bold mb-4">Contenido del curso</h2>
+		<ul class="space-y-2">
+			@for (section of resource?.sections; track section) {
+			<li>
+				<button (click)="selectSection(section)"
+					class="w-full text-left px-3 py-2 rounded hover:bg-emerald-100 transition-colors">
+					{{ section?.title }}
+				</button>
+				<ul class="ml-4 mt-1 text-gray-500 text-sm space-y-1">
+					@for (topic of section?.topics ?? []; track topic) {
+					<li>
+						<button (click)="selectTopic(topic)"
+							class="w-full text-left px-2 py-1 rounded hover:bg-gray-100 transition-colors">
+							{{ topic?.title }}
+						</button>
+					</li>
+					}
+				</ul>
+			</li>
+			}
+		</ul>
+	</aside>
+
+	<!-- Área principal -->
+	<main class="flex-1 p-8 overflow-y-auto justify-items-center ">
+		<h1 class="text-3xl text-center font-bold text-gray-900 mb-6">{{ resource?.title }}</h1>
+
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6  p-6 w-full ">
+			@for (section of resource?.sections ?? []; track section) {
+			<div class="bg-white rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-xl transition-shadow"
+				(click)="openModal(section)">
+				<div class="flex items-center gap-3 mb-4">
+					<img [src]="section.icon || 'assets/icons/default.png'" class="w-10 h-10 rounded-full"
+						alt="{{ section.title }}">
+					<h2 class="text-lg font-semibold">{{ section.title }}</h2>
+				</div>
+				<p class="text-gray-600 text-sm">{{ section.summary || 'Haz click para ver más...' }}</p>
+			</div>
+			}
+		</div>
+	</main>
+
+	<!-- Modal -->
+	<div *ngIf="selectedSection" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+		<div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 overflow-y-auto max-h-[90vh]">
+			<div class="flex justify-between items-center mb-4">
+				<h3 class="text-2xl font-bold">{{ selectedSection.title }}</h3>
+				<button (click)="closeModal()" class="text-gray-500 hover:text-gray-800">&times;</button>
+			</div>
+
+			<!-- Contenido del módulo -->
+			<div class="space-y-4 text-gray-700">
+				<p *ngIf="selectedSection.content">{{ selectedSection.content }}</p>
+
+				<!-- Imágenes -->
+				<div *ngIf="selectedSection.images && selectedSection.images.length > 0" class="grid grid-cols-2 gap-4">
+					<img *ngFor="let img of selectedSection.images" [src]="img"
+						class="w-full h-36 object-cover rounded-lg shadow-sm" />
+				</div>
+
+				<!-- PDFs -->
+				<ul *ngIf="selectedSection.pdfs && selectedSection.pdfs.length > 0"
+					class="list-disc list-inside space-y-1">
+					<li *ngFor="let pdf of selectedSection.pdfs">
+						<a [href]="pdf.url" target="_blank"
+							class="text-emerald-600 hover:underline flex items-center gap-2">
+							<lucide-icon name="download" class="h-4 w-4"></lucide-icon>
+							{{ pdf.name }}
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+</div>

@@ -1,0 +1,12 @@
+:host {
+  display: block;
+}
+
+/* Suaviza los scrolls y anima la apertura del menú */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(16, 185, 129, 0.4); /* emerald-500 con transparencia */
+  border-radius: 8px;
+}

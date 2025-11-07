@@ -1,0 +1,42 @@
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-xl font-semibold">Prueba dinámica</h2>
+    <button (click)="addQuestion()" class="px-3 py-2 bg-emerald-600 text-white rounded">
+      Agregar pregunta
+    </button>
+  </div>
+
+  <div class="grid gap-4">
+  @for (q of questions; track q.id) {
+      <div class="bg-white p-4 rounded shadow">
+        <div class="flex justify-between items-center mb-2">
+          <input
+            class="w-full border p-2 rounded"
+            [(ngModel)]="q.question"
+            (ngModelChange)="emitChange()"
+          />
+          <button (click)="removeQuestion(q.id)" class="ml-3 text-red-600">Eliminar</button>
+        </div>
+
+        <div class="space-y-2">
+          @for (opt of q.options; track opt) {
+            <div class="flex items-center gap-2">
+              <input
+                class="flex-1 border p-2 rounded"
+                [(ngModel)]="q.options[q.options.indexOf(opt)]"
+                (ngModelChange)="emitChange()"
+              />
+              <button (click)="removeOption(q, q.options.indexOf(opt))" class="text-red-500">-</button>
+            </div>
+          }
+        </div>
+
+        <div class="mt-2 flex gap-2">
+          <button (click)="addOption(q)" class="px-3 py-1 border rounded">
+            Agregar opción
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

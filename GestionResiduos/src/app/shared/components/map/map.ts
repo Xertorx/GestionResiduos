@@ -1,11 +1,13 @@
 import { httpResource } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, ElementRef, signal, Signal, viewChild, ViewChild, viewChildren } from '@angular/core';
 import { GoogleMap, GoogleMapsModule, MapAdvancedMarker,MapInfoWindow} from '@angular/google-maps';
+import { LucideAngularModule } from 'lucide-angular';
 
 
 @Component({
   selector: 'app-map',
-  imports: [GoogleMapsModule, GoogleMap, MapAdvancedMarker, MapInfoWindow],
+  standalone: true,
+  imports: [GoogleMapsModule, GoogleMap, MapAdvancedMarker, MapInfoWindow, LucideAngularModule],
   templateUrl: './map.html',
   styleUrl: './map.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

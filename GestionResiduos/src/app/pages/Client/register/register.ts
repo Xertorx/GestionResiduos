@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router'
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-register',
-  imports: [],
+  imports: [LucideAngularModule],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })

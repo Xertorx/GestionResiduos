@@ -11,38 +11,63 @@ import { About } from './pages/Client/about/about';
 import { Reports } from './pages/Client/reports/reports';
 import { Education } from './pages/Client/education/education';
 import { EcoPoints } from './pages/Client/eco-points/eco-points';
-import { Dashboard } from './pages/Admin/dashboard/dashboard';
 import { Register } from './pages/Client/register/register';
 
 import { Profile } from './pages/Client/register/profile/profile';
 import { Verify } from './pages/Client/register/verify/verify';
 
+import { ClientLayout } from './layouts/client-layout/client-layout';
+import { DashboardLayout } from './layouts/dashboard-layout/dashboard-layout';
+import { StartAdmin } from './pages/Admin/start-admin/start-admin';
+import { EducationDetail } from './pages/Client/education/education-detail/education-detail';
+import { DynamicQuiz } from './shared/components/dynamic-quiz/dynamic-quiz';
 
 export const routes: Routes = [
-    {path: '', component: Home, pathMatch: 'full'},
-    
-    // Redirecciones con slash final
-    {path: 'calendar/', component: Calendar},
-    //Paginas
-    {path: 'register', component: Register,
+
+
+ {
+    path: '',
+    component: ClientLayout,
+    children: [
+      { path: '', component: Home, pathMatch: 'full' },
+      { path: 'login', component: Login },
+      { path: 'calendar', component: Calendar },
+      { path: 'about_us', component: About },
+      { path: 'reports', component: Reports },
+      { path: 'eco-points', component: EcoPoints },
+      { path: 'calendar', component: Calendar },
+      { path: 'education', component: Education },
+      { path: 'education/:id', component: EducationDetail },
+      { path: 'education/:id/quiz', component: DynamicQuiz },
+      {
+        path: 'register',
+        component: Register,
         children: [
-            {path: 'verify', component: Verify},
-            {path: 'profile', component: Profile}
+          { path: 'verify', component: Verify },
+          { path: 'profile', component: Profile }
         ]
-    },
-    
-  
-    { path: 'foro', component: Foro,
+      },
+
+      {
+        path: 'foro',
+        component: Foro,
         children: [
-            { path: ':id', component: Detalles }
+          { path: ':id', component: Detalles }
         ]
-    },
-    {path: 'login', component: Login},
-    {path: 'calendar', component: Calendar},
-    {path: 'about_us/', component: About},
-    {path: 'reports', component: Reports},
-    {path: 'education', component: Education},
-    {path: 'eco-points', component: EcoPoints},
-    {path: 'dashboard', component: Dashboard},
-    {path: '**', redirectTo: ''}
+      },
+    ],
+  },
+
+  {
+    path: 'dashboard',
+    component: DashboardLayout,
+    children: [
+     { path: '', component: StartAdmin }
+    ],
+  },
+
+  // 🔹 Wildcard: siempre al final, fuera de los layouts
+  { path: '**', redirectTo: '', pathMatch: 'full' },
+
+   
 ];

@@ -1,13 +1,14 @@
 import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FullCalendarModule } from '@fullcalendar/angular';
+import { LucideAngularModule } from 'lucide-angular';
 import { CalendarOptions } from '@fullcalendar/core';
 import { isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [FullCalendarModule],
+  imports: [FullCalendarModule, LucideAngularModule],
   templateUrl: './calendar.html',
   styleUrl: './calendar.scss'
 })

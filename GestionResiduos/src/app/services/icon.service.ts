@@ -1,47 +1,23 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Injectable } from '@angular/core';
+import * as icons from 'lucide-angular';
 
+/**
+ * Minimal IconService adapter for Lucide Angular.
+ * Lucide Angular renders icons via components, so no DOM replace is required.
+ * This service keeps a reference to the icons map (if needed elsewhere)
+ * and exposes init()/refresh() helpers used across the app.
+ */
 @Injectable({ providedIn: 'root' })
 export class IconService {
-  private loaded = false;
+  readonly icons = icons;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
-
+  /** No-op for compatibility with previous feather-based calls. */
   async init(): Promise<void> {
-    if (!isPlatformBrowser(this.platformId)) return;
-    try {
-      const feather = await import('feather-icons');
-      feather.replace();
-      this.loaded = true;
-
-      // Observa el DOM y refresca Feather automáticamente cuando se agregan nodos
-      const observer = new MutationObserver(async (mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.addedNodes.length > 0) {
-            const feather = await import('feather-icons');
-            feather.replace();
-            break;
-          }
-        }
-      });
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-    } catch (e) {
-      console.warn('Could not load feather-icons', e);
-    }
+    return;
   }
 
-  // Call when new DOM nodes with data-feather may have been added
-  async refresh(): Promise<void> {
-    if (!isPlatformBrowser(this.platformId)) return;
-    try {
-      const feather = await import('feather-icons');
-      // Small delay to allow DOM to settle after navigation
-      setTimeout(() => feather.replace(), 0);
-    } catch (e) {
-      // ignore
-    }
+  /** No-op for compatibility; kept for places that call refresh() after navigation. */
+  refresh(): void {
+    // Lucide Angular uses components; nothing to refresh at runtime.
   }
 }
