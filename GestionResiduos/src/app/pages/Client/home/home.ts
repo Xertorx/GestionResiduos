@@ -1,10 +1,11 @@
 import { Component, AfterViewInit } from '@angular/core';
 import { IconService } from '../../../services/icon.service';
 import { RouterLink } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, LucideAngularModule],
   templateUrl: './home.html',
   styleUrl: './home.scss'
 })
