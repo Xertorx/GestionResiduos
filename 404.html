@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>GestionResiduos</title>
+    <script>
+        var pathSegmentsToKeep = 1;
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            '/GestionResiduos/' + l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/') +
+            (l.search ? '?' + l.search.slice(1) : '') +
+            (l.hash ? '#' + l.hash.slice(1) : '')
+        );
+    </script>
+</head>
+<body>
+</body>
+</html>
