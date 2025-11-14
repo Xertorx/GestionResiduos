@@ -49,7 +49,7 @@ import {
   Settings,
   BarChart2,
   Leaf,
-  RefreshCw 
+  RefreshCw
 } from 'lucide-angular';
 
 // 🎯 Solo los íconos realmente utilizados en tus componentes
@@ -92,7 +92,7 @@ const LUCIDE_ICONS_MAP = {
   Settings,
   BarChart2,
   Leaf,
-  RefreshCw 
+  RefreshCw
 };
 
 export const appConfig: ApplicationConfig = {

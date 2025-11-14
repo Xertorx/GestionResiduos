@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, NgZone, ViewChild } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -8,46 +8,31 @@ import { CommonModule } from '@angular/common';
   templateUrl: './carousel.html',
   styleUrls: ['./carousel.scss']
 })
-export class CarouselComponent implements AfterViewInit {
+export class CarouselComponent implements OnInit {
   @Input() images: string[] = [];
-  @ViewChild('swiperContainer', { static: false }) swiperContainer!: ElementRef;
+  currentIndex = 0;
 
-  constructor(private ngZone: NgZone) {}
-
-  ngAfterViewInit(): void {
-    // Esperar a que Angular termine de renderizar completamente el DOM
-    setTimeout(() => {
-      this.initSwiper();
-    }, 300); // pequeño retardo para evitar inicializar antes de tiempo
+  ngOnInit(): void {
+    if (this.images.length > 0) {
+      this.startAutoplay();
+    }
   }
 
-  private async initSwiper() {
-    if (!this.swiperContainer?.nativeElement || this.images.length === 0) return;
+  nextSlide(): void {
+    this.currentIndex = (this.currentIndex + 1) % this.images.length;
+  }
 
-    // Import dinámico (evita errores de SSR o falta de typings)
-    const { default: Swiper } = await import('swiper');
-    const { Navigation, Pagination, Autoplay } = await import('swiper/modules');
+  prevSlide(): void {
+    this.currentIndex = (this.currentIndex - 1 + this.images.length) % this.images.length;
+  }
 
-    // Inicializar Swiper fuera de la zona de Angular (mejor rendimiento)
-    this.ngZone.runOutsideAngular(() => {
-      new Swiper(this.swiperContainer.nativeElement, {
-        modules: [Navigation, Pagination, Autoplay],
-        slidesPerView: 1,
-        spaceBetween: 10,
-        loop: true,
-        autoplay: {
-          delay: 3000,
-          disableOnInteraction: false
-        },
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true
-        },
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev'
-        }
-      });
-    });
+  goToSlide(index: number): void {
+    this.currentIndex = index;
+  }
+
+  private startAutoplay(): void {
+    setInterval(() => {
+      this.nextSlide();
+    }, 5000);
   }
 }

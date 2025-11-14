@@ -1,17 +1,104 @@
-.swiper {
+.carousel-container {
   width: 100%;
-  height: 100%;
+  position: relative;
+  background: #f5f5f5;
 }
 
-.swiper-slide {
+.carousel-wrapper {
+  width: 100%;
+  height: 400px;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   background: #fff;
 }
 
-img {
+.carousel-image {
   width: 100%;
-  height: auto;
-  border-radius: 1rem;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+  animation: fadeIn 0.5s ease-in-out;
+
+  &.active {
+    display: block;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Controles de navegación */
+.carousel-controls {
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  transform: translateY(-50%);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 10px;
+  pointer-events: none;
+}
+
+.carousel-button {
+  background: rgba(255, 255, 255, 0.7);
+  color: #000;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  &.prev {
+    margin-left: 10px;
+  }
+
+  &.next {
+    margin-right: 10px;
+  }
+}
+
+/* Paginación */
+.carousel-pagination {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s ease;
+
+  &.active {
+    background: #fff;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
 }

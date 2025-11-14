@@ -1,14 +1,23 @@
-<div #swiperContainer class="swiper w-full rounded-2xl overflow-hidden relative">
-  <div class="swiper-wrapper">
-    @for (image of images; track image) {
-      <div class="swiper-slide">
-        <img [src]="image" alt="Imagen del carrusel" class="w-full h-64 object-cover" />
-      </div>
+<div class="carousel-container rounded-2xl overflow-hidden">
+  <div class="carousel-wrapper">
+    @for (image of images; track $index) {
+      @if ($index === currentIndex) {
+        <img [src]="image" alt="Imagen del carrusel" class="carousel-image active" />
+      }
     }
   </div>
 
-  <!-- Controles -->
-  <div class="swiper-pagination"></div>
-  <div class="swiper-button-prev"></div>
-  <div class="swiper-button-next"></div>
+  <!-- Paginación -->
+  @if (images.length > 0) {
+    <div class="carousel-pagination">
+      @for (image of images; track $index) {
+        <button 
+          class="pagination-dot"
+          [class.active]="$index === currentIndex"
+          (click)="goToSlide($index)"
+          [attr.aria-label]="'Ir a la imagen ' + ($index + 1)"
+        ></button>
+      }
+    </div>
+  }
 </div>

@@ -1,0 +1,33 @@
+<div class="bg-white rounded-lg shadow p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold">Usuarios</h2>
+    <div class="flex items-center gap-2">
+      <input type="text" placeholder="Buscar usuario..." [(ngModel)]="buscar" class="border px-3 py-2 rounded" />
+      <button class="px-4 py-2 bg-emerald-600 text-white rounded">Nuevo</button>
+    </div>
+  </div>
+
+  <table class="w-full text-left text-sm">
+    <thead>
+      <tr class="text-gray-600 border-b">
+        <th class="py-2">Nombre</th>
+        <th class="py-2">Correo</th>
+        <th class="py-2">Rol</th>
+        <th class="py-2">Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (u of usuarios; track u.id) {
+        <tr class="border-b">
+          <td class="py-2">{{ u.nombre }}</td>
+          <td class="py-2">{{ u.correo }}</td>
+          <td class="py-2">{{ u.rol }}</td>
+          <td class="py-2">
+            <button class="text-emerald-600 mr-2" (click)="editar(u)">Editar</button>
+            <button class="text-red-600" (click)="eliminar(u)">Eliminar</button>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
