@@ -1,0 +1,144 @@
+<div class="min-h-screen flex bg-gray-50 ">
+  <!-- Sidebar -->
+  <aside
+    class="w-64 bg-white border-r border-emerald-100 flex flex-col fixed inset-y-0 z-30 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0"
+    [class.-translate-x-full]="!isSidebarOpen"
+  >
+    <!-- Header del Sidebar -->
+    <div class="p-4 bg-emerald-600 text-white font-semibold flex items-center justify-between">
+      <a href="" class="flex items-center space-x-2">
+        <lucide-icon name="trash-2" class="h-8 w-8"></lucide-icon>
+        <span class="text-lg">EcoBolivar</span>
+      </a>
+      <button class="lg:hidden p-1 hover:bg-emerald-700 rounded-md" (click)="toggleSidebar()">
+        <lucide-icon name="chevron-left" class="h-5 w-5"></lucide-icon>
+      </button>
+    </div>
+
+    <!-- Navegación -->
+    <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+      @for (item of menuItems; track item.label) {
+        <a
+          [href]="item.route"
+          class="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+          (click)="onMenuClick($event, item)"
+          [attr.data-father]="item.label"
+        >
+          <lucide-icon [name]="item.icon" class="w-5 h-5 mr-2 text-emerald-600"></lucide-icon>
+          {{ item.label }}
+        </a>
+      }
+    </nav>
+
+    <!-- Footer del Sidebar -->
+    <div class="p-4 border-t border-emerald-100">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+          <lucide-icon name="user" class="w-6 h-6"></lucide-icon>
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-gray-800">Erica</p>
+          <p class="text-xs text-gray-500">erica@example.com</p>
+        </div>
+        <button
+          class="p-2 rounded-md hover:bg-emerald-50 text-emerald-600"
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión"
+        >
+          <lucide-icon name="log-out" class="h-5 w-5"></lucide-icon>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Overlay móvil -->
+  @if (isSidebarOpen) {
+    <div
+      class="fixed inset-0 bg-black/40 z-20 lg:hidden"
+      (click)="toggleSidebar()"
+    ></div>
+  }
+
+  <!-- Contenido principal -->
+  <div class="flex-1 flex flex-col min-h-screen">
+    <!-- Header -->
+    <header #headerRef class="bg-white border border-b p-4 flex items-center justify-between sticky top-0 border-b border-emerald-100 transition-all duration-200 ease-in-out z-40"  [class.shadow-md]="isScrolled" >
+      <div class="flex-1 flex items-center space-x-2 lg:ml-32">
+        <button class="lg:hidden p-2 rounded-md hover:bg-emerald-50 text-emerald-700" (click)="toggleSidebar()" >
+          <lucide-icon name="menu" class="h-6 w-6"></lucide-icon>
+        </button>
+        <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
+      </div>
+
+      <!--  Sección de notificaciones + menú de usuario -->
+      <div class="flex items-center space-x-4 relative ">
+        <button class="p-2 text-gray-500 hover:text-emerald-600">
+          <lucide-icon name="bell" class="w-5 h-5"></lucide-icon>
+        </button>
+
+        <!-- Botón del perfil -->
+        <div class="relative" (click)="isProfileMenuOpen = !isProfileMenuOpen">
+            <div
+            class="flex items-center cursor-pointer bg-white rounded-full border border-emerald-100 hover:bg-emerald-50 p-1"
+          >
+            <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center">
+              <lucide-icon name="user" class="w-5 h-5 text-emerald-600"></lucide-icon>
+            </div>
+            <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-500 ml-2"></lucide-icon>
+          </div>
+
+          <!-- Menú desplegable -->
+          @if (isProfileMenuOpen) {
+            <div class="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-xl shadow-lg py-2 z-50">
+              <div class="px-4 py-3 border-b border-gray-100 flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-800">Erica</p>
+                  <p class="text-sm text-gray-500">erica@example.com</p>
+                </div>
+              </div>
+              <a
+                href="#"
+                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50"
+              >
+                <lucide-icon name="user" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> My account
+              </a>
+              <a
+                href="#"
+                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50"
+              >
+                <lucide-icon name="shield" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Privacy policy
+              </a>
+              <a
+                href="#"
+                class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50"
+              >
+                <lucide-icon name="message-square" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Share feedback
+              </a>
+              <div class="border-t border-gray-100"></div>
+              <button class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50" (click)="openModal()">
+                <lucide-icon name="log-out" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Sign out
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenido dinámico -->
+    <main class="flex-1 p-6 transition-all duration-200 ease-in-out lg:ml-32">
+      <div class="p-6 rounded-lg z-50">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer
+      class="bg-white border-t border-emerald-100 text-center py-4 text-gray-500 text-sm transition-all duration-200 ease-in-out lg:ml-64"
+    >
+      © 2025 Ciudad Bolívar Verde — Todos los derechos reservados
+    </footer>
+  </div>
+</div>

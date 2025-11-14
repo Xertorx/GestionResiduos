@@ -1,0 +1,94 @@
+[
+  {
+    "idPlace": 1,
+    "place": "Ecopunto",
+    "direccion": "ciudad bolivar",
+    "openingHours": "07:00",
+    "closingHours": "22:00",
+    "latitud": 4.585245,
+    "longitud": -74.1613293,
+    "ciudad": "Bogota",
+    "localidad": "Ciudad Bolivar",
+    "barrio": "Perdomo",
+    "closeStoreString": "Cierra a las 10:00 pm"
+  },
+   {
+    "idPlace": 2,
+    "place": "Ecopunto",
+    "direccion": "ciudad bolivar",
+    "openingHours": "07:00",
+    "closingHours": "22:00",
+    "latitud": 4.5854026,
+    "longitud": -74.1598619,
+    "ciudad": "Bogota",
+    "localidad": "Ciudad Bolivar",
+    "barrio": "Perdomo",
+    "closeStoreString": "Cierra a las 10:00 pm"
+  },
+   {
+    "idPlace": 3,
+    "place": "Ecopunto",
+    "direccion": "ciudad bolivar",
+    "openingHours": "07:00",
+    "closingHours": "22:00",
+    "latitud": 4.585245,
+    "longitud": -74.1613293,
+    "ciudad": "Bogota",
+    "localidad": "Ciudad Bolivar",
+    "barrio": "Perdomo",
+    "closeStoreString": "Cierra a las 10:00 pm"
+  },
+   {
+    "idPlace": 4,
+    "place": "Ecopunto",
+    "direccion": "ciudad bolivar",
+    "openingHours": "07:00",
+    "closingHours": "22:00",
+    "latitud": 4.585245,
+    "longitud": -74.1613293,
+    "ciudad": "Bogota",
+    "localidad": "Ciudad Bolivar",
+    "barrio": "Perdomo",
+    "closeStoreString": "Cierra a las 10:00 pm"
+  },
+   {
+    "idPlace": 5,
+    "place": "Ecopunto",
+    "direccion": "ciudad bolivar",
+    "openingHours": "07:00",
+    "closingHours": "22:00",
+    "latitud": 4.585245,
+    "longitud": -74.1613293,
+    "ciudad": "Bogota",
+    "localidad": "Ciudad Bolivar",
+    "barrio": "Perdomo",
+    "closeStoreString": "Cierra a las 10:00 pm"
+  },
+   {
+    "idPlace": 6,
+    "place": "Ecopunto",
+    "direccion": "ciudad bolivar",
+    "openingHours": "07:00",
+    "closingHours": "22:00",
+    "latitud": 4.5644871,
+    "longitud": -74.1472078,
+    "ciudad": "Bogota",
+    "localidad": "Ciudad Bolivar",
+    "barrio": "Perdomo",
+    "closeStoreString": "Cierra a las 10:00 pm"
+  },
+   {
+    "idPlace": 7,
+    "place": "Ecopunto",
+    "direccion": "ciudad bolivar",
+    "openingHours": "07:00",
+    "closingHours": "22:00",
+    "latitud": 4.538846,
+    "longitud": -74.1462293,
+    "ciudad": "Bogota",
+    "localidad": "Ciudad Bolivar",
+    "barrio": "Perdomo",
+    "closeStoreString": "Cierra a las 10:00 pm"
+  }
+  
+]

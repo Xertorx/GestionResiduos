@@ -1,0 +1,103 @@
+<div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <!-- Botón para volver -->
+      <div class="mb-6">
+        <button (click)="volverAlForo()" class="text-emerald-600 hover:text-emerald-800 font-medium flex items-center gap-2">
+          ← Volver al Foro
+        </button>
+      </div>
+
+      <!-- Header -->
+        <div class="text-center mb-12 ">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4">Tema </h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Detalles y comentarios sobre el tema seleccionado.
+        </div>
+    <!-- Tema principal -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ tema.titulo }}</h2>
+        <p class="text-gray-700 mb-4">{{ tema.descripcion }}</p>
+        <p class="text-sm text-gray-500">
+            Publicado por <strong>{{ tema.autor }}</strong> · {{ tema.fecha }}
+        </p>
+    </div>
+
+    <!-- Mensaje de éxito -->
+    @if (mensajeExito) {
+    <div class="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-md mb-6">
+        {{ mensajeExito }}
+    </div>
+    }
+
+    <!-- Comentarios -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Comentarios</h3>
+
+        @if (comentarios.length > 0) {
+        <div class="space-y-4">
+            @for (c of comentarios; track c.fecha) {
+            <div class="border border-gray-200 rounded-lg p-4">
+                <p class="text-gray-800 mb-2">{{ c.texto }}</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">
+                        Por {{ c.usuario }} · {{ c.fecha }}
+                    </span>
+                    <button class="text-sm text-emerald-600 hover:text-emerald-800 font-medium" (click)="abrirModal(c)">
+                        Responder
+                    </button>
+                </div>
+
+                <!-- Respuestas -->
+                @if (c.respuestas && c.respuestas.length > 0) {
+                <div class="mt-3 ml-4 border-l-2 border-emerald-200 pl-3 space-y-2">
+                    @for (r of c.respuestas; track r.fecha) {
+                    <div class="bg-emerald-50 rounded-md p-2 text-sm text-gray-700">
+                        <p>{{ r.texto }}</p>
+                        <span class="text-xs text-gray-500">Por {{ r.usuario }} · {{ r.fecha }}</span>
+                    </div>
+                    }
+                </div>
+                }
+            </div>
+            }
+        </div>
+        } @else {
+        <p class="text-gray-500">Aún no hay comentarios. ¡Sé el primero en opinar!</p>
+        }
+    </div>
+
+    <!-- Nuevo comentario -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Agregar un comentario</h3>
+        <textarea [(ngModel)]="textoComentario" placeholder="Escribe tu comentario..." rows="4"
+            class="w-full border border-gray-300 rounded-md p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+        <button class="bg-emerald-600 text-white px-6 py-2 rounded-md font-medium hover:bg-emerald-700"
+            (click)="enviarComentario()">
+            Comentar
+        </button>
+    </div>
+</div>
+
+<!-- Modal de respuesta -->
+@if (mostrarModal) {
+<div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            Responder a {{ comentarioSeleccionado?.usuario }}
+        </h3>
+
+        <textarea [(ngModel)]="textoRespuesta" placeholder="Escribe tu respuesta..." rows="4"
+            class="w-full border border-gray-300 rounded-md p-3 mb-4 focus:outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+
+        <div class="flex justify-end space-x-3">
+            <button class="px-4 py-2 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100"
+                (click)="cerrarModal()">
+                Cancelar
+            </button>
+            <button class="px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700"
+                (click)="enviarRespuesta()">
+                Aceptar
+            </button>
+        </div>
+    </div>
+</div>
+}

@@ -1,0 +1,67 @@
+::ng-deep .map-container {
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 15px;
+}
+
+
+/* You can add global styles to this file, and also import other style files */
+
+body {
+  margin: 0;
+  padding: 0;
+    font-family: "Arial", sans-serif;
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: content-box;
+}
+
+.container {
+  display: flex;
+  height: 100%;
+  width: 25%;
+}
+
+.sidebar {
+  width: 100%;
+  padding: 20px;
+  height: 500px;
+
+  .places {
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+
+    &.active {
+      background-color: #d4e9e2;
+      border: 2px solid #006241;
+
+      &:hover {
+        background-color: #d4e9e2;
+      }
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &:hover {
+      background-color: #0596681a;
+    }
+  }
+}
+

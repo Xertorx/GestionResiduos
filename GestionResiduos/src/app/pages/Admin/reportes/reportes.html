@@ -1,0 +1,16 @@
+<div class="bg-white rounded-lg shadow p-6">
+  <h2 class="text-xl font-semibold mb-4">Reportes</h2>
+  <ul class="space-y-3">
+    @for (r of reportes; track r.id) {
+      <li class="p-3 border rounded flex justify-between items-center">
+        <div>
+          <div class="font-medium">{{ r.titulo }}</div>
+          <div class="text-sm text-gray-500">Estado: {{ r.estado }}</div>
+        </div>
+        <div>
+          <button class="text-emerald-600">Ver</button>
+        </div>
+      </li>
+    }
+  </ul>
+</div>

@@ -1,0 +1,97 @@
+<!-- Main Content -->
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+        Calendario de Recolección
+      </h1>
+      <p class="text-lg text-gray-600">
+        Consulta los horarios y días de recolección en tu localidad
+      </p>
+    </div>
+
+    <!-- Localidad Selector -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      >
+        <div class="mb-4 sm:mb-0">
+          <h2 class="text-lg font-medium text-gray-900">
+            Selecciona tu localidad
+          </h2>
+          <p class="text-sm text-gray-600">
+            Para ver el calendario específico de tu zona
+          </p>
+        </div>
+        <div class="flex-1 sm:max-w-xs">
+          <select
+            id="localidad-select"
+            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+          >
+            <option value="ciudad-bolivar">Ciudad Bolívar</option>
+            <option value="usme">Usme</option>
+            <option value="bosa">Bosa</option>
+            <option value="kennedy">Kennedy</option>
+            <option value="suba">Suba</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calendar -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      @if (calendarOptions) {
+        <full-calendar [options]="calendarOptions"></full-calendar>
+      } @else {
+        <div class="flex justify-center items-center h-64">
+          <p class="text-gray-500">Cargando calendario...</p>
+        </div>
+      }
+    </div>
+
+     
+
+    <!-- Legend -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">Leyenda</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="flex items-center">
+          <div
+            class="w-4 h-4 bg-emerald-100 border-2 border-emerald-500 rounded mr-3"
+          ></div>
+          <span class="text-sm">Recolección Orgánica</span>
+        </div>
+        <div class="flex items-center">
+          <div
+            class="w-4 h-4 bg-blue-100 border-2 border-blue-500 rounded mr-3"
+          ></div>
+          <span class="text-sm">Recolección Reciclable</span>
+        </div>
+        <div class="flex items-center">
+          <div
+            class="w-4 h-4 bg-indigo-100 border-2 border-indigo-500 rounded mr-3"
+          ></div>
+          <span class="text-sm">Recolección Especial</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download & Sync Options 
+    <div class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-medium text-gray-900 mb-4">
+        Opciones adicionales
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <button
+          class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <lucide-icon name="download" class="h-4 w-4 mr-2"></lucide-icon>
+          Descargar calendario
+        </button>
+        <button
+          class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <lucide-icon name="calendar" class="h-4 w-4 mr-2"></lucide-icon>
+          Sincronizar con Google Calendar
+        </button>
+      </div>
+    </div>-->
