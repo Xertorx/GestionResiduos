@@ -19,6 +19,13 @@ import { Verify } from './pages/Client/register/verify/verify';
 import { ClientLayout } from './layouts/client-layout/client-layout';
 import { DashboardLayout } from './layouts/dashboard-layout/dashboard-layout';
 import { StartAdmin } from './pages/Admin/start-admin/start-admin';
+import { UsuariosAdmin } from './pages/Admin/usuarios/usuarios';
+import { EcoPuntosAdmin } from './pages/Admin/eco-puntos/eco-puntos';
+import { CalendarioRecoleccionAdmin } from './pages/Admin/calendario-recoleccion/calendario-recoleccion';
+import { ReportesAdmin } from './pages/Admin/reportes/reportes';
+import { EducacionAdmin } from './pages/Admin/educacion/educacion';
+import { SeguimientoAdmin } from './pages/Admin/seguimiento/seguimiento';
+import { ForoAdmin } from './pages/Admin/foro/foro';
 import { EducationDetail } from './pages/Client/education/education-detail/education-detail';
 import { DynamicQuiz } from './shared/components/dynamic-quiz/dynamic-quiz';
 
@@ -63,6 +70,13 @@ export const routes: Routes = [
     component: DashboardLayout,
     children: [
      { path: '', component: StartAdmin }
+     ,{ path: 'usuarios', component: UsuariosAdmin }
+     ,{ path: 'eco-puntos', component: EcoPuntosAdmin }
+     ,{ path: 'calendario-recoleccion', component: CalendarioRecoleccionAdmin }
+     ,{ path: 'reportes', component: ReportesAdmin }
+     ,{ path: 'educacion', component: EducacionAdmin }
+     ,{ path: 'seguimiento', component: SeguimientoAdmin }
+     ,{ path: 'foro', component: ForoAdmin }
     ],
   },
 

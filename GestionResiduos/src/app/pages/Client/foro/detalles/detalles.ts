@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 interface Respuesta {
   usuario: string;
@@ -19,7 +20,7 @@ interface Comentario {
 @Component({
   selector: 'app-detalles',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, RouterModule, CommonModule],
   templateUrl: './detalles.html',
   styleUrls: ['./detalles.scss']
 })
@@ -46,7 +47,7 @@ export class Detalles implements OnInit {
   textoComentario: string = '';
   mensajeExito: string | null = null;
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute, private router: Router) { }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -101,10 +102,22 @@ export class Detalles implements OnInit {
         fecha: new Date().toLocaleDateString(),
         respuestas: []
       };
-      this.mensajeExito = 'Tu comentario se ha guardado correctamente.';
-      setTimeout(() => (this.mensajeExito = null), 3000);
       this.comentarios.push(nuevoComentario);
       this.textoComentario = '';
+      this.mensajeExito = 'Tu comentario se ha guardado correctamente.';
+      setTimeout(() => (this.mensajeExito = null), 3000);
     }
+  }
+
+  crearNuevoTema() {
+    // Método placeholder para nuevos temas si es necesario
+  }
+
+  // feedback modal removed per request; success messages used instead
+
+  volverAlForo() {
+    this.router.navigate(['/foro']).then(() => {
+      window.location.reload();
+    });
   }
 }

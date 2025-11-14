@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-education',
@@ -82,5 +83,13 @@ export class Education {
   },
 ];
 
+
+openModal() {
+  Swal.fire({
+    title: "Gracias Por daros tu Opinion",
+  icon: "success",
+  draggable: true
+  });
+}
 
 }

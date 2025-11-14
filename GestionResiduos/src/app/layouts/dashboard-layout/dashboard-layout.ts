@@ -24,10 +24,13 @@ export class DashboardLayout{
   // Definición del menú de la barra lateral
   menuItems = [
     { label: 'Inicio', route: '/dashboard', icon: 'home' },
-    { label: 'Proyectos', route: '/dashboard/projects', icon: 'folder' },
-    { label: 'Usuarios', route: '/dashboard/users', icon: 'users' },
-    { label: 'Reportes', route: '/dashboard/reports', icon: 'BarChart2' },
-    { label: 'Configuración', route: '/dashboard/settings', icon: 'settings' },
+    { label: 'Usuarios', route: '/dashboard/usuarios', icon: 'users' },
+    { label: 'Eco-puntos', route: '/dashboard/eco-puntos', icon: 'map-pin' },
+    { label: 'Calendario', route: '/dashboard/calendario-recoleccion', icon: 'calendar' },
+    { label: 'Reportes', route: '/dashboard/reportes', icon: 'BarChart2' },
+    { label: 'Educación', route: '/dashboard/educacion', icon: 'book-open' },
+    { label: 'Seguimiento', route: '/dashboard/seguimiento', icon: 'trending-up' },
+    { label: 'Foro', route: '/dashboard/foro', icon: 'message-square' }
   ];
 
   toggleSidebar() {

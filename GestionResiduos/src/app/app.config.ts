@@ -48,6 +48,8 @@ import {
   Folder,
   Settings,
   BarChart2,
+  Leaf,
+  RefreshCw
 } from 'lucide-angular';
 
 // 🎯 Solo los íconos realmente utilizados en tus componentes
@@ -89,6 +91,8 @@ const LUCIDE_ICONS_MAP = {
   Folder,
   Settings,
   BarChart2,
+  Leaf,
+  RefreshCw
 };
 
 export const appConfig: ApplicationConfig = {

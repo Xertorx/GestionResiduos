@@ -1,31 +1,75 @@
 <div class="py-12 bg-gray-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="lg:text-center">
-      <p
-        class="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl"
-      >
-        Todo lo que necesitas para gestionar residuos
-      </p>
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-extrabold text-gray-900">Panel de Administración</h1>
+        <p class="text-sm text-gray-600">Accede a las secciones administrativas para gestionar contenidos, usuarios y operaciones.</p>
+      </div>
+      <div class="flex gap-3">
+        <!-- <button class="px-4 py-2 bg-emerald-600 text-white rounded-md">Crear elemento</button>
+        <button class="px-4 py-2 border border-emerald-600 text-emerald-600 rounded-md">Exportar</button>-->
+      </div>
     </div>
 
-    <div class="mt-10">
-      <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Estadísticas rápidas 
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
+        <div>
+          <div class="text-sm text-gray-500">Usuarios</div>
+          <div class="text-2xl font-bold">1.234</div>
+        </div>
+        <div class="bg-emerald-100 p-3 rounded-full">
+          <lucide-icon name="users" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
+        <div>
+          <div class="text-sm text-gray-500">Eco-puntos</div>
+          <div class="text-2xl font-bold">45</div>
+        </div>
+        <div class="bg-emerald-100 p-3 rounded-full">
+          <lucide-icon name="map-pin" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
+        <div>
+          <div class="text-sm text-gray-500">Reportes</div>
+          <div class="text-2xl font-bold">12</div>
+        </div>
+        <div class="bg-emerald-100 p-3 rounded-full">
+          <lucide-icon name="alert-triangle" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
+        <div>
+          <div class="text-sm text-gray-500">Satisfacción</div>
+          <div class="text-2xl font-bold">85%</div>
+        </div>
+        <div class="bg-emerald-100 p-3 rounded-full">
+          <lucide-icon name="award" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjetas de acciones -->
+    <div class="mt-6">
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         @for (card of cards; track card.title) {
-          <a href="">
-          <div class="bg-white rounded-lg shadow p-6">
-            <div
-              class="flex items-center justify-center h-12 w-12 rounded-md bg-emerald-500 text-white"
-            >
-              <!-- Icono Lucide -->
-              <lucide-icon [name]="card.icon" class="w-6 h-6"></lucide-icon>
+          <a [href]="card.title === 'Foro Comunitario' ? '/dashboard/foro' : '/'" class="block">
+            <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <div class="h-12 w-12 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600">
+                    <lucide-icon [name]="card.icon" class="w-6 h-6"></lucide-icon>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-medium text-gray-900">{{ card.title }}</h3>
+                    <p class="text-sm text-gray-500">{{ card.description }}</p>
+                  </div>
+                </div>
+                <div class="text-gray-400">›</div>
+              </div>
             </div>
-            <h3 class="mt-6 text-lg leading-6 font-medium text-gray-900">
-              {{ card.title }}
-            </h3>
-            <p class="mt-4 text-base text-gray-500">
-              {{ card.description }}
-            </p>
-          </div>
           </a>
         }
       </div>

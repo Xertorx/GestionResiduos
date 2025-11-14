@@ -1,4 +1,4 @@
-<div class="max-w-screen-2xl h-[550px] mx-auto py-8 px-4 sm:px-6 lg:px-8 m-5 flex">
+<div class="max-w-screen-2xl min-h-screen mx-auto py-8 px-4 sm:px-6 lg:px-8 m-5 flex gap-8">
 
 	<!-- Sidebar -->
 	<aside class="w-64 bg-white border-r border-gray-200 p-6 overflow-y-auto border rounded-lg shadow-lg">
@@ -26,55 +26,126 @@
 	</aside>
 
 	<!-- Área principal -->
-	<main class="flex-1 p-8 overflow-y-auto justify-items-center ">
-		<h1 class="text-3xl text-center font-bold text-gray-900 mb-6">{{ resource?.title }}</h1>
+	<main class="flex-1 p-8 overflow-y-auto justify-items-center">
+		<div class="flex justify-between items-center mb-8">
+			<div>
+				<h1 class="text-3xl font-bold text-gray-900 mb-2">{{ resource?.title }}</h1>
+				<p class="text-sm text-gray-600">{{ resource?.description }}</p>
+			</div>
+			<button (click)="toggleResourceCompleted()"
+				[class.bg-emerald-600]="isResourceCompleted()"
+				[class.bg-gray-400]="!isResourceCompleted()"
+				class="text-white px-5 py-3 rounded-lg flex items-center gap-2 transition text-sm font-medium hover:shadow-lg whitespace-nowrap">
+				<lucide-icon name="award" class="h-5 w-5"></lucide-icon>
+				{{ isResourceCompleted() ? 'Completado' : 'Marcar todo como completado' }}
+			</button>
+		</div>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6  p-6 w-full ">
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 w-full">
 			@for (section of resource?.sections ?? []; track section) {
 			<div class="bg-white rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-xl transition-shadow"
 				(click)="openModal(section)">
 				<div class="flex items-center gap-3 mb-4">
+
+					<!-- Mostrar Lucide Icon si es un nombre de ícono -->
+					@if (section.icon && !section.icon.includes('/')) {
+					<lucide-icon [name]="section.icon" class="w-10 h-10 text-emerald-600"></lucide-icon>
+					}
+					<!-- Mostrar imagen si es una ruta -->
+					@else {
 					<img [src]="section.icon || 'assets/icons/default.png'" class="w-10 h-10 rounded-full"
-						alt="{{ section.title }}">
+						alt="{{ section.title }}" />
+					}
+
 					<h2 class="text-lg font-semibold">{{ section.title }}</h2>
 				</div>
-				<p class="text-gray-600 text-sm">{{ section.summary || 'Haz click para ver más...' }}</p>
+
+				<p class="text-gray-600 text-sm">
+					{{ section.summary || 'Haz click para ver más...' }}
+				</p>
 			</div>
 			}
 		</div>
-	</main>
+		<section class="py-10">
+			<h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Galería Destacada</h2>
 
+			<app-carousel [images]="resource?.images ?? []"></app-carousel>
+
+		</section>
+
+	</main>
 	<!-- Modal -->
-	<div *ngIf="selectedSection" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+	@if (selectedSection) {
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 		<div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 overflow-y-auto max-h-[90vh]">
-			<div class="flex justify-between items-center mb-4">
-				<h3 class="text-2xl font-bold">{{ selectedSection.title }}</h3>
-				<button (click)="closeModal()" class="text-gray-500 hover:text-gray-800">&times;</button>
+			<div class="flex justify-between items-center mb-6">
+				<div class="flex items-center gap-3">
+					<h3 class="text-2xl font-bold">{{ selectedSection.title }}</h3>
+					<button (click)="toggleSectionCompleted(selectedSection)"
+						[class.bg-emerald-600]="isSectionCompleted(selectedSection)"
+						[class.bg-gray-300]="!isSectionCompleted(selectedSection)"
+						class="text-white px-3 py-1 rounded-lg flex items-center gap-2 transition text-sm font-medium hover:shadow-md">
+						<lucide-icon name="award" class="h-4 w-4"></lucide-icon>
+						{{ isSectionCompleted(selectedSection) ? 'Completado' : 'Marcar como hecho' }}
+					</button>
+				</div>
+				<button (click)="closeModal()" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
 			</div>
 
 			<!-- Contenido del módulo -->
-			<div class="space-y-4 text-gray-700">
-				<p *ngIf="selectedSection.content">{{ selectedSection.content }}</p>
-
-				<!-- Imágenes -->
-				<div *ngIf="selectedSection.images && selectedSection.images.length > 0" class="grid grid-cols-2 gap-4">
-					<img *ngFor="let img of selectedSection.images" [src]="img"
-						class="w-full h-36 object-cover rounded-lg shadow-sm" />
+			<div class="space-y-6 text-gray-700">
+				@if (selectedSection.content) {
+				<div>
+					<h4 class="text-lg font-semibold text-gray-800 mb-2">Descripción</h4>
+					<p class="text-gray-600">{{ selectedSection.content }}</p>
 				</div>
+				}
 
-				<!-- PDFs -->
-				<ul *ngIf="selectedSection.pdfs && selectedSection.pdfs.length > 0"
-					class="list-disc list-inside space-y-1">
-					<li *ngFor="let pdf of selectedSection.pdfs">
-						<a [href]="pdf.url" target="_blank"
-							class="text-emerald-600 hover:underline flex items-center gap-2">
-							<lucide-icon name="download" class="h-4 w-4"></lucide-icon>
-							{{ pdf.name }}
-						</a>
-					</li>
-				</ul>
+				<!-- Visor de PDF -->
+				@if (selectedSection.pdfs && selectedSection.pdfs.length > 0) {
+				<div>
+					<h4 class="text-lg font-semibold text-gray-800 mb-3">Documentos PDF</h4>
+					<div class="space-y-3">
+						@for (pdf of selectedSection.pdfs; track $index) {
+						<div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-4 border-2 border-red-200">
+							<div class="flex items-center justify-between">
+								<div class="flex items-center gap-3">
+									<lucide-icon name="file-text" class="h-8 w-8 text-red-600"></lucide-icon>
+									<div>
+										<h5 class="font-semibold text-gray-800">{{ pdf.name }}</h5>
+										<p class="text-sm text-gray-500">Documento PDF disponible para consultar</p>
+									</div>
+								</div>
+								<div class="flex gap-2">
+									<a [href]="pdf.url" target="_blank"
+										class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
+										<lucide-icon name="file-text" class="h-4 w-4"></lucide-icon>
+										Ver
+									</a>
+								</div>
+							</div>
+						</div>
+						}
+					</div>
+				</div>
+				}
+
+				<!-- Imágenes (opcional, si existen) -->
+				@if (selectedSection.images && selectedSection.images.length > 0) {
+				<div>
+					<h4 class="text-lg font-semibold text-gray-800 mb-3">Galería de Imágenes</h4>
+					<div class="grid grid-cols-2 gap-4">
+						@for (img of selectedSection.images; track img) {
+						<img [src]="img" class="w-full h-36 object-cover rounded-lg shadow-sm hover:shadow-md transition" />
+						}
+					</div>
+				</div>
+				}
+
 			</div>
 		</div>
 	</div>
+	}
+
 
 </div>

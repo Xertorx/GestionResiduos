@@ -1,13 +1,15 @@
 import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, signal, Signal, viewChild, ViewChild, viewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, signal, Signal, viewChild, ViewChild, viewChildren, computed } from '@angular/core';
 import { GoogleMap, GoogleMapsModule, MapAdvancedMarker,MapInfoWindow} from '@angular/google-maps';
 import { LucideAngularModule } from 'lucide-angular';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [GoogleMapsModule, GoogleMap, MapAdvancedMarker, MapInfoWindow, LucideAngularModule],
+  imports: [GoogleMapsModule, GoogleMap, MapAdvancedMarker, MapInfoWindow, LucideAngularModule, CommonModule, FormsModule],
   templateUrl: './map.html',
   styleUrl: './map.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -17,6 +19,26 @@ export class Map {
   zoom = 14;
 
   placeResource = httpResource<Places[]>(() => '/places.json');
+  searchTerm = signal<string>('');
+
+  // Computed para filtrar lugares según el término de búsqueda
+  filteredPlaces = computed(() => {
+    const places = this.placeResource.value();
+    const search = this.searchTerm().toLowerCase();
+    
+    if (!search) return places;
+    
+    return places?.filter(place => 
+      place.place.toLowerCase().includes(search) ||
+      place.barrio.toLowerCase().includes(search) ||
+      place.localidad.toLowerCase().includes(search) ||
+      place.direccion.toLowerCase().includes(search)
+    );
+  });
+
+  onSearchChange(value: string): void {
+    this.searchTerm.set(value);
+  }
 
   mapOptions: google.maps.MapOptions = {
     mapId: 'd5b799dc1d3eef6cabf958d0',

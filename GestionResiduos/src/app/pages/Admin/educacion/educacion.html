@@ -1,0 +1,16 @@
+<div class="bg-white rounded-lg shadow p-6">
+  <h2 class="text-xl font-semibold mb-4">Educación</h2>
+  <div class="space-y-3">
+    @for (c of contenidos; track c.id) {
+      <div class="p-3 border rounded flex justify-between items-center">
+        <div>
+          <div class="font-medium">{{ c.titulo }}</div>
+          <div class="text-sm text-gray-500">Tipo: {{ c.tipo }}</div>
+        </div>
+        <div>
+          <button class="text-emerald-600">Editar</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
