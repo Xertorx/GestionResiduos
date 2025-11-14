@@ -3,16 +3,18 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
+import { CarouselComponent } from '../../../../shared/components/carousel/carousel'; 
+
 
 export interface Resource {
   id: number;
   title: string;
   description: string;
-  type?: string;      // "Guía PDF", "Video", etc.
-  time?: string;      // "15 min"
+  type?: string;      
+  time?: string;      
   author?: string;
-  date?: string;      // "01/11/2025"
-  images?: string[];  // URLs de imágenes
+  date?: string;      
+  images?: string[];  
   pdfs?: { name: string; url: string }[];
   sections?: {
     title: string;
@@ -25,8 +27,8 @@ export interface Resource {
 
 @Component({
   selector: 'app-education-detail',
- 
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  standalone: true, 
+  imports: [CommonModule, RouterModule, LucideAngularModule,CarouselComponent],
   templateUrl: './education-detail.html',
   styleUrls: ['./education-detail.scss']
 })
@@ -39,23 +41,21 @@ export class EducationDetail implements OnInit {
       id: 1,
       title: 'Guía de Separación de Residuos',
       description: 'Aprende a separar correctamente los residuos orgánicos, reciclables y especiales.',
-      type: 'Guía PDF',
-      time: '15 min',
-      author: 'Juan Pérez',
-      date: '01/11/2025',
+      type: 'Guía PDF', //Datos que se pueden eliminar 
+      time: '15 min', //Datos que se pueden eliminar
+      author: 'Juan Pérez', //Datos que se pueden eliminar
+      date: '01/11/2025', //Datos que se pueden eliminar
       images: [
-        'https://picsum.photos/seed/101/600/400',
-        'https://picsum.photos/seed/102/600/400'
+        '/img/icons/Reciclaje.png'
       ],
-      pdfs: [
-        { name: 'Guía PDF', url: '/static/guides/separacion.pdf' },
-        { name: 'Checklist', url: '/static/guides/checklist.pdf' }
+      pdfs:   [
+        { name: 'Guía PDF', url: 'https://www.uaesp.gov.co/images/Guia-UAESP_SR.pdf' }
       ],
       sections: [
         {
           title: 'Residuos Orgánicos',
           content: 'Incluye restos de comida, cáscaras, café, etc.',
-          icon: 'leaf', // Lucide icon
+          icon: 'leaf', 
           summary: 'Aprende a identificar residuos orgánicos',
           topics: [
             { title: 'Frutas y verduras', content: 'Se deben colocar en compost o contenedor orgánico.' },
@@ -65,7 +65,7 @@ export class EducationDetail implements OnInit {
         {
           title: 'Residuos Reciclables',
           content: 'Papel, cartón, plásticos y metales limpios.',
-          icon: 'refresh-cw', // Lucide icon
+          icon: 'refresh-cw',
           summary: 'Clasificación de reciclables',
           topics: [
             { title: 'Plásticos', content: 'Lávalos antes de depositarlos.' },
@@ -75,7 +75,7 @@ export class EducationDetail implements OnInit {
         {
           title: 'Residuos Especiales',
           content: 'Baterías, pilas, electrónicos y químicos.',
-          icon: 'alert-triangle', // Lucide icon
+          icon: 'alert-triangle', 
           summary: 'Cómo manejar residuos peligrosos',
           topics: [
             { title: 'Baterías y pilas', content: 'Llévalas a puntos de recolección especializados.' },
@@ -97,7 +97,9 @@ export class EducationDetail implements OnInit {
         'https://picsum.photos/seed/202/600/400',
         'https://picsum.photos/seed/203/600/400'
       ],
-      pdfs: [],
+      pdfs: [
+        { name: 'Infografía', url: '/static/guides/plasticos.pdf' }
+      ],
       sections: [
         {
           title: 'Qué es el Compostaje',
@@ -158,6 +160,23 @@ export class EducationDetail implements OnInit {
     }
   ];
 
+carouselItems = [
+    {
+      title: 'Montañas Nevadas',
+      image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&q=80',
+      description: 'Paisaje de montañas cubiertas de nieve.'
+    },
+    {
+      title: 'Ciudad Nocturna',
+      image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=1200&q=80',
+      description: 'Luces de la ciudad bajo la noche.'
+    },
+    {
+      title: 'Playa Tropical',
+      image: 'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1200&q=80',
+      description: 'Arena dorada y aguas cristalinas.'
+    }
+  ];
 
   constructor(private route: ActivatedRoute, private router: Router) { }
 

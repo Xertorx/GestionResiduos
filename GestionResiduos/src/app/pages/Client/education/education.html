@@ -2,7 +2,7 @@
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
   <!-- Header -->
   <div class="text-center mb-12">
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Educación Ambiental</h1>
+    <h1 class="text-3xl font-bold text-gray-900 mb-4 mt-8">Educación Ambiental</h1>
     <p class="text-lg text-gray-600 max-w-3xl mx-auto">
       Aprende sobre manejo de residuos, reciclaje y sostenibilidad con nuestros recursos educativos
     </p>
@@ -55,7 +55,7 @@
             {{ guide.description }}
           </p>
           <div class="flex justify-between items-center">
-            <button class="btn-primary text-white px-4 py-2 rounded-md text-sm font-medium">
+            <button class="btn-primary  px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-100 transition-colors">
               {{ guide.button }}
             </button>
             <div class="flex items-center text-sm text-gray-500">
@@ -75,12 +75,12 @@
   <div class="bg-white rounded-lg shadow-md p-6">
     <h2 class="text-xl font-semibold text-gray-900 mb-4">¿Te fue útil este contenido?</h2>
     <div class="flex space-x-4">
-      <button
+      <button (click)="openModal()"
         class="flex items-center justify-center px-6 py-3 border border-emerald-600 text-emerald-600 rounded-md font-medium hover:bg-emerald-50">
         <lucide-icon name="thumbs-up" class="h-5 w-5 mr-2"></lucide-icon>
         Sí, me fue útil
       </button>
-      <button
+      <button (click)="openModal()"
         class="flex items-center justify-center px-6 py-3 border border-gray-300 text-gray-700 rounded-md font-medium hover:bg-gray-50">
         <lucide-icon name="thumbs-down" class="h-5 w-5 mr-2"></lucide-icon>
         No me fue útil

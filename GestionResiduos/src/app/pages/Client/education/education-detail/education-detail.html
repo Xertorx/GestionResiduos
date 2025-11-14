@@ -26,26 +26,50 @@
 	</aside>
 
 	<!-- Área principal -->
-	<main class="flex-1 p-8 overflow-y-auto justify-items-center ">
+	<main class="flex-1 p-8 overflow-y-auto justify-items-center">
 		<h1 class="text-3xl text-center font-bold text-gray-900 mb-6">{{ resource?.title }}</h1>
+		<h1 class="text-sm text-center  text-gray-900 mb-6">{{ resource?.description }}</h1>
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6  p-6 w-full ">
+		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 w-full">
 			@for (section of resource?.sections ?? []; track section) {
 			<div class="bg-white rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-xl transition-shadow"
 				(click)="openModal(section)">
 				<div class="flex items-center gap-3 mb-4">
+
+					<!-- Mostrar Lucide Icon si es un nombre de ícono -->
+					@if (section.icon && !section.icon.includes('/')) {
+					<lucide-icon [name]="section.icon" class="w-10 h-10 text-emerald-600"></lucide-icon>
+					}
+					<!-- Mostrar imagen si es una ruta -->
+					@else {
 					<img [src]="section.icon || 'assets/icons/default.png'" class="w-10 h-10 rounded-full"
-						alt="{{ section.title }}">
+						alt="{{ section.title }}" />
+					}
+
 					<h2 class="text-lg font-semibold">{{ section.title }}</h2>
 				</div>
-				<p class="text-gray-600 text-sm">{{ section.summary || 'Haz click para ver más...' }}</p>
+
+				<p class="text-gray-600 text-sm">
+					{{ section.summary || 'Haz click para ver más...' }}
+				</p>
 			</div>
 			}
 		</div>
-	</main>
+		<section class="py-10">
+			<h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Galería Destacada</h2>
 
+						<app-carousel [images]="[
+			'https://picsum.photos/id/1015/800/400',
+			'https://picsum.photos/id/1020/800/400',
+			'https://picsum.photos/id/1035/800/400'
+			]"></app-carousel>
+
+		</section>
+
+	</main>
 	<!-- Modal -->
-	<div *ngIf="selectedSection" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+	@if (selectedSection) {
+	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
 		<div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 overflow-y-auto max-h-[90vh]">
 			<div class="flex justify-between items-center mb-4">
 				<h3 class="text-2xl font-bold">{{ selectedSection.title }}</h3>
@@ -54,27 +78,37 @@
 
 			<!-- Contenido del módulo -->
 			<div class="space-y-4 text-gray-700">
-				<p *ngIf="selectedSection.content">{{ selectedSection.content }}</p>
+				@if (selectedSection.content) {
+				<p>{{ selectedSection.content }}</p>
+				}
 
 				<!-- Imágenes -->
-				<div *ngIf="selectedSection.images && selectedSection.images.length > 0" class="grid grid-cols-2 gap-4">
-					<img *ngFor="let img of selectedSection.images" [src]="img"
-						class="w-full h-36 object-cover rounded-lg shadow-sm" />
+				@if (selectedSection.images && selectedSection.images.length > 0) {
+				<div class="grid grid-cols-2 gap-4">
+					@for (img of selectedSection.images; track img) {
+					<img [src]="img" class="w-full h-36 object-cover rounded-lg shadow-sm" />
+					}
 				</div>
+				}
 
 				<!-- PDFs -->
-				<ul *ngIf="selectedSection.pdfs && selectedSection.pdfs.length > 0"
-					class="list-disc list-inside space-y-1">
-					<li *ngFor="let pdf of selectedSection.pdfs">
+				@if (selectedSection.pdfs && selectedSection.pdfs.length > 0) {
+				<ul class="list-disc list-inside space-y-1">
+					@for (pdf of selectedSection.pdfs; track $index) {
+					<li>
 						<a [href]="pdf.url" target="_blank"
 							class="text-emerald-600 hover:underline flex items-center gap-2">
 							<lucide-icon name="download" class="h-4 w-4"></lucide-icon>
 							{{ pdf.name }}
 						</a>
 					</li>
+					}
 				</ul>
+				}
 			</div>
 		</div>
 	</div>
+	}
+
 
 </div>
