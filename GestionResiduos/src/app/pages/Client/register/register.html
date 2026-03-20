@@ -1,4 +1,5 @@
 <div class="min-h-screen  w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+
     <div class="max-w-4xl w-full bg-white p-14 rounded-lg shadow-md">
         <div class="mb-8 ">
             <lucide-icon name="user-plus" class="mx-auto h-12 w-12 text-emerald-600"></lucide-icon>
@@ -6,28 +7,35 @@
                 Crear una cuenta
             </h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                O <a href="login.html" class="font-medium text-emerald-600 hover:text-emerald-500">inicia sesión si ya tienes una cuenta</a>
+                O <a href="login.html" class="font-medium text-emerald-600 hover:text-emerald-500">inicia sesión si ya
+                    tienes una cuenta</a>
             </p>
         </div>
-        
+
         <form class="space-y-10 mt-12 " action="#" method="POST">
             <div class="grid grid-cols-2 gap-4 w-full rounded-md shadow-sm -space-y-px flex-col">
                 <!-- Nombres -->
                 <div>
                     <label for="nombres" class="mb-8">Nombres</label>
-                    <input id="nombres" name="nombres" type="text" required class="form-input relative block w-full rounded-lg border border px-3 py-2 text-gray-900 focus:outline-none" placeholder="Nombres" >
+                    <input id="nombres" name="nombres" type="text" required
+                        class="form-input relative block w-full rounded-lg border border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Nombres" [(ngModel)]="names">
                 </div>
-                
+
                 <!-- Apellidos -->
                 <div>
                     <label for="apellidos" class="">Apellidos</label>
-                    <input id="apellidos" name="apellidos" type="text" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none" placeholder="Apellidos">
+                    <input id="apellidos" name="apellidos" type="text" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Apellidos" [(ngModel)]="lastName">
                 </div>
-                
+
                 <!-- Tipo Documento -->
                 <div>
                     <label for="tipo-documento" class="">Tipo de Documento</label>
-                    <select id="tipo-documento" name="tipo-documento" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
+                    <select id="tipo-documento" name="tipo-documento" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        [(ngModel)]="documentType">
                         <option value="">Seleccione tipo de documento</option>
                         <option value="CC">Cédula de Ciudadanía</option>
                         <option value="TI">Tarjeta de Identidad</option>
@@ -35,35 +43,44 @@
                         <option value="PA">Pasaporte</option>
                     </select>
                 </div>
-                
+
                 <!-- Número Documento -->
                 <div>
                     <label for="numero-documento" class="">Número de Documento</label>
-                    <input id="numero-documento" name="numero-documento" type="text" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none" placeholder="Número de documento">
+                    <input id="numero-documento" name="numero-documento" type="text" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Número de documento" [(ngModel)]="documentNumber">
                 </div>
-                
+
                 <!-- Correo -->
                 <div>
                     <label for="correo" class="">Correo electrónico</label>
-                    <input id="correo" name="correo" type="email" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none" placeholder="Correo electrónico">
+                    <input id="correo" name="correo" type="email" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Correo electrónico" [(ngModel)]="email">
                 </div>
-                
+
                 <!-- Fecha Nacimiento -->
                 <div>
-                    <label for="fecha-nacimiento" class="">Fecha de Nacimiento</label>
-                    <input id="fecha-nacimiento" name="fecha-nacimiento" type="date" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
+                    <label for="birthDate" class="">Fecha de Nacimiento</label>
+                    <input id="birthDate" name="birthDate" type="date" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        [(ngModel)]="birthDate">
                 </div>
-                
+
                 <!-- Ciudad -->
                 <div>
                     <label for="ciudad" class="">Ciudad</label>
-                    <input id="ciudad" name="ciudad" type="text" required class="form-input relative block w-full border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none" placeholder="Ciudad" value="Bogotá" readonly>
+                    <input id="ciudad" name="ciudad" type="text" required
+                        class="form-input relative block w-full border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Ciudad" value="Bogotá" readonly>
                 </div>
-                
+
                 <!-- Localidad -->
                 <div>
                     <label for="localidad" class="">Localidad</label>
-                    <select id="localidad" name="localidad" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
+                    <select id="localidad" name="localidad" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
                         <option value="">Seleccione localidad</option>
                         <option value="Ciudad Bolívar" selected>Ciudad Bolívar</option>
                         <option value="Usaquén">Usaquén</option>
@@ -86,73 +103,130 @@
                         <option value="Rafael Uribe Uribe">Rafael Uribe Uribe</option>
                     </select>
                 </div>
-                
-                <!-- Dirección -->
-                <div class="col-span-2">
-                    <label for="direccion" class="">Dirección</label>
-                    <input id="direccion" name="direccion" type="text" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none" placeholder="Dirección completa">
+
+                <!-- Barrio -->
+                <div>
+                    <label for="neighborhood" class="">Barrio</label>
+                    <select id="neighborhood" name="neighborhood" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        [(ngModel)]="neighborhoodId">
+                        <option value="">Seleccione barrio</option>
+                        <option value="1" selected>Ciudad Bolívar</option>
+                        <option value="2">Usaquén</option>
+                        <option value="3">Chapinero</option>
+                        <option value="4">Santa Fe</option>
+                        <option value="5">San Cristóbal</option>
+                        <option value="6">Usme</option>
+                        <option value="7">Tunjuelito</option>
+                        <option value="8">Bosa</option>
+                        <option value="9">Kennedy</option>
+                        <option value="10">Fontibón</option>
+                        <option value="11">Engativá</option>
+                        <option value="12">Suba</option>
+                        <option value="13">Barrios Unidos</option>
+                        <option value="14">Teusaquillo</option>
+                        <option value="15">Los Mártires</option>
+                        <option value="16">Antonio Nariño</option>
+                        <option value="17">Puente Aranda</option>
+                        <option value="18">La Candelaria</option>
+                        <option value="19">Rafael Uribe Uribe</option>
+                    </select>
                 </div>
-                
+
+                <!-- Dirección -->
+                <div>
+                    <label for="address" class="">Dirección</label>
+                    <input id="address" name="address" type="text" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Dirección completa" [(ngModel)]="address">
+                </div>
+                <!-- Telefono -->
+                <div class="col-span-2 ">
+                    <label for="phoneNumber" class="">Teléfono</label>
+                    <input id="phoneNumber" name="phoneNumber" type="text" required
+                        class="form-input relative block w-full border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Número de teléfono" [(ngModel)]="phoneNumber">
+                </div>
+
                 <!-- Contraseña -->
                 <div>
                     <label for="password" class="">Contraseña</label>
-                    <input id="password" name="password" type="password" required class="form-input relative block w-full border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none" placeholder="Contraseña">
+                    <input id="password" name="password" type="password" required
+                        class="form-input relative block w-full border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Contraseña" [(ngModel)]="password">
                     <div class="mt-1">
                         <div class="password-strength-meter bg-gray-200 w-full"></div>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500">La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, un número y un carácter especial.</p>
+                    <p class="mt-1 text-xs text-gray-500">La contraseña debe tener al menos 8 caracteres, incluir una
+                        mayúscula, un número y un carácter especial.</p>
                 </div>
-                
+
                 <!-- Confirmar Contraseña -->
                 <div>
                     <label for="confirm-password" class="">Confirmar Contraseña</label>
-                    <input id="confirm-password" name="confirm-password" type="password" required class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none" placeholder="Confirmar contraseña">
+                    <input id="confirm-password" name="confirm-password" type="password" required
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                        placeholder="Confirmar contraseña">
                     <div class="mt-1">
                         <div class="password-strength-meter bg-gray-200 w-full"></div>
                     </div>
-                    <p class="mt-1 text-xs text-gray-500">La contraseña debe tener al menos 8 caracteres, incluir una mayúscula, un número y un carácter especial.</p>
+                    <p class="mt-1 text-xs text-gray-500">La contraseña debe tener al menos 8 caracteres, incluir una
+                        mayúscula, un número y un carácter especial.</p>
                 </div>
             </div>
 
-             <!-- Checkboxes -->
-             <div class="flex items-center">
-                <input d="terminos" name="terminos" type="checkbox" required class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded-lg">
+            <!-- Checkboxes -->
+            <div class="flex items-center">
+                <input d="terminos" name="terminos" type="checkbox" required
+                    class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded-lg">
                 <label for="terminos" class="ml-2 block text-sm text-gray-900">
                     Acepto los <a href="#" class="text-emerald-600 hover:text-emerald-500">Términos y Condiciones</a>
                 </label>
             </div>
 
-            
-            
 
-        <div class="mt-6">
-            <div class="relative">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-2 bg-white text-gray-500">O regístrate con tu cuenta de Google</span>
+
+
+            <div class="mt-6">
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-white text-gray-500">O regístrate con tu cuenta de Google</span>
+                    </div>
                 </div>
             </div>
-        </div>
 
 
-<!-- Google Sign Up -->
-        <div class="mt-6">
-            <button class="google-btn w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                <lucide-icon name="chrome" class="h-5 w-5 text-blue-500 mr-2"></lucide-icon>
-                Continuar con Google
-            </button>
-        </div>
+            <!-- Google Sign Up -->
+            <div class="mt-6">
+                <button
+                    class="google-btn w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                    <lucide-icon name="chrome" class="h-5 w-5 text-blue-500 mr-2"></lucide-icon>
+                    Continuar con Google
+                </button>
+            </div>
 
-
+            <!-- Mensaje de error -->
+            @if (errorMessage) {
+            <div class="flex items-center gap-3 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+                <lucide-icon name="circle-alert" class="h-5 w-5 text-red-500 flex-shrink-0"></lucide-icon>
+                <span class="text-sm">{{ errorMessage }}</span>
+            </div>
+            }
 
             <div>
-                <button (click)="onRegister()" class="btn-primary group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                <button (click)="onRegister()"
+                    class="btn-primary group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                     Crear cuenta
                 </button>
             </div>
+
         </form>
+
+        <!-- Mostrar contenido hijo (verify/profile) solo cuando la ruta hija se activa -->
+        <router-outlet></router-outlet>
     </div>
 </div>
-
+<router-outlet></router-outlet>
