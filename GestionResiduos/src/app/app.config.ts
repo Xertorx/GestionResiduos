@@ -49,7 +49,8 @@ import {
   Settings,
   BarChart2,
   Leaf,
-  RefreshCw
+  RefreshCw,
+  CircleCheckBig
 } from 'lucide-angular';
 
 // 🎯 Solo los íconos realmente utilizados en tus componentes
@@ -92,7 +93,8 @@ const LUCIDE_ICONS_MAP = {
   Settings,
   BarChart2,
   Leaf,
-  RefreshCw
+  RefreshCw,
+  CircleCheckBig
 };
 
 export const appConfig: ApplicationConfig = {
