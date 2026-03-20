@@ -1,85 +1,132 @@
-<div class="min-h-screen  w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-
+<div class="min-h-screen w-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl w-full bg-white p-14 rounded-lg shadow-md">
-        <div class="mb-8 ">
+
+        <div class="mb-8">
             <lucide-icon name="user-plus" class="mx-auto h-12 w-12 text-emerald-600"></lucide-icon>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Crear una cuenta
-            </h2>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">Crear una cuenta</h2>
             <p class="mt-2 text-center text-sm text-gray-600">
-                O <a href="login.html" class="font-medium text-emerald-600 hover:text-emerald-500">inicia sesión si ya
-                    tienes una cuenta</a>
+                O <a [routerLink]="'/login'" class="font-medium text-emerald-600 hover:text-emerald-500">
+                    inicia sesión si ya tienes una cuenta
+                </a>
             </p>
         </div>
+        @if (showErrorModal) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-8 relative">
 
-        <form class="space-y-10 mt-12 " action="#" method="POST">
-            <div class="grid grid-cols-2 gap-4 w-full rounded-md shadow-sm -space-y-px flex-col">
+                <div class="flex flex-col items-center mb-6">
+                    <div class="bg-red-100 rounded-full p-4 mb-4">
+                        <lucide-icon name="circle-alert" class="h-10 w-10 text-red-500"></lucide-icon>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800">Error</h3>
+                    <p class="text-sm text-gray-600 mt-2 text-center">{{ errorMessage }}</p>
+                </div>
+
+                <button (click)="showErrorModal = false" type="button"
+                    class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-emerald-700 transition">
+                    Entendido
+                </button>
+
+            </div>
+        </div>
+        }
+
+        <form [formGroup]="form" class="space-y-10 mt-12">
+            <div class="grid grid-cols-2 gap-4 w-full">
+
                 <!-- Nombres -->
                 <div>
-                    <label for="nombres" class="mb-8">Nombres</label>
-                    <input id="nombres" name="nombres" type="text" required
-                        class="form-input relative block w-full rounded-lg border border px-3 py-2 text-gray-900 focus:outline-none"
-                        placeholder="Nombres" [(ngModel)]="names">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombres</label>
+                    <input formControlName="names" type="text"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Nombres">
+                    @if (f['names'].touched && f['names'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">El nombre es obligatorio.</p>
+                    }
+                    @if (f['names'].touched && f['names'].errors?.['minlength']) {
+                    <p class="text-red-500 text-xs mt-1">Mínimo 2 caracteres.</p>
+                    }
                 </div>
 
                 <!-- Apellidos -->
                 <div>
-                    <label for="apellidos" class="">Apellidos</label>
-                    <input id="apellidos" name="apellidos" type="text" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
-                        placeholder="Apellidos" [(ngModel)]="lastName">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Apellidos</label>
+                    <input formControlName="lastName" type="text"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Apellidos">
+                    @if (f['lastName'].touched && f['lastName'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">El apellido es obligatorio.</p>
+                    }
+                    @if (f['lastName'].touched && f['lastName'].errors?.['minlength']) {
+                    <p class="text-red-500 text-xs mt-1">Mínimo 2 caracteres.</p>
+                    }
                 </div>
 
                 <!-- Tipo Documento -->
                 <div>
-                    <label for="tipo-documento" class="">Tipo de Documento</label>
-                    <select id="tipo-documento" name="tipo-documento" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
-                        [(ngModel)]="documentType">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                    <select formControlName="documentType"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
                         <option value="">Seleccione tipo de documento</option>
                         <option value="CC">Cédula de Ciudadanía</option>
                         <option value="TI">Tarjeta de Identidad</option>
                         <option value="CE">Cédula de Extranjería</option>
                         <option value="PA">Pasaporte</option>
                     </select>
+                    @if (f['documentType'].touched && f['documentType'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">Seleccione un tipo de documento.</p>
+                    }
                 </div>
 
                 <!-- Número Documento -->
                 <div>
-                    <label for="numero-documento" class="">Número de Documento</label>
-                    <input id="numero-documento" name="numero-documento" type="text" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
-                        placeholder="Número de documento" [(ngModel)]="documentNumber">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Número de Documento</label>
+                    <input formControlName="documentNumber" type="text"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Número de documento">
+                    @if (f['documentNumber'].touched && f['documentNumber'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">El número de documento es obligatorio.</p>
+                    }
+                    @if (f['documentNumber'].touched && f['documentNumber'].errors?.['pattern']) {
+                    <p class="text-red-500 text-xs mt-1">Solo se permiten números.</p>
+                    }
                 </div>
 
                 <!-- Correo -->
                 <div>
-                    <label for="correo" class="">Correo electrónico</label>
-                    <input id="correo" name="correo" type="email" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
-                        placeholder="Correo electrónico" [(ngModel)]="email">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
+                    <input formControlName="email" type="email"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Correo electrónico">
+                    @if (f['email'].touched && f['email'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">El correo es obligatorio.</p>
+                    }
+                    @if (f['email'].touched && f['email'].errors?.['email']) {
+                    <p class="text-red-500 text-xs mt-1">Formato de correo inválido.</p>
+                    }
                 </div>
 
                 <!-- Fecha Nacimiento -->
                 <div>
-                    <label for="birthDate" class="">Fecha de Nacimiento</label>
-                    <input id="birthDate" name="birthDate" type="date" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
-                        [(ngModel)]="birthDate">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+                    <input formControlName="birthDate" type="date"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
+                    @if (f['birthDate'].touched && f['birthDate'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">La fecha de nacimiento es obligatoria.</p>
+                    }
                 </div>
 
                 <!-- Ciudad -->
                 <div>
-                    <label for="ciudad" class="">Ciudad</label>
-                    <input id="ciudad" name="ciudad" type="text" required
-                        class="form-input relative block w-full border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
-                        placeholder="Ciudad" value="Bogotá" readonly>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+                    <input type="text" value="Bogotá" readonly
+                        class="form-input relative block w-full border border-gray-300 px-3 py-2 text-gray-900 bg-gray-50 focus:outline-none">
                 </div>
 
                 <!-- Localidad -->
                 <div>
-                    <label for="localidad" class="">Localidad</label>
-                    <select id="localidad" name="localidad" required
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Localidad</label>
+                    <select
                         class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
                         <option value="">Seleccione localidad</option>
                         <option value="Ciudad Bolívar" selected>Ciudad Bolívar</option>
@@ -106,12 +153,11 @@
 
                 <!-- Barrio -->
                 <div>
-                    <label for="neighborhood" class="">Barrio</label>
-                    <select id="neighborhood" name="neighborhood" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
-                        [(ngModel)]="neighborhoodId">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Barrio</label>
+                    <select formControlName="neighborhoodId"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
                         <option value="">Seleccione barrio</option>
-                        <option value="1" selected>Ciudad Bolívar</option>
+                        <option value="1">Ciudad Bolívar</option>
                         <option value="2">Usaquén</option>
                         <option value="3">Chapinero</option>
                         <option value="4">Santa Fe</option>
@@ -131,62 +177,79 @@
                         <option value="18">La Candelaria</option>
                         <option value="19">Rafael Uribe Uribe</option>
                     </select>
+                    @if (f['neighborhoodId'].touched && f['neighborhoodId'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">Seleccione un barrio.</p>
+                    }
                 </div>
 
                 <!-- Dirección -->
                 <div>
-                    <label for="address" class="">Dirección</label>
-                    <input id="address" name="address" type="text" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
-                        placeholder="Dirección completa" [(ngModel)]="address">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                    <input formControlName="address" type="text"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Dirección completa">
+                    @if (f['address'].touched && f['address'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">La dirección es obligatoria.</p>
+                    }
                 </div>
-                <!-- Telefono -->
-                <div class="col-span-2 ">
-                    <label for="phoneNumber" class="">Teléfono</label>
-                    <input id="phoneNumber" name="phoneNumber" type="text" required
-                        class="form-input relative block w-full border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
-                        placeholder="Número de teléfono" [(ngModel)]="phoneNumber">
+
+                <!-- Teléfono -->
+                <div class="col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input formControlName="phoneNumber" type="text"
+                        class="form-input relative block w-full border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Número de teléfono">
+                    @if (f['phoneNumber'].touched && f['phoneNumber'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">El teléfono es obligatorio.</p>
+                    }
+                    @if (f['phoneNumber'].touched && f['phoneNumber'].errors?.['pattern']) {
+                    <p class="text-red-500 text-xs mt-1">El teléfono debe tener 10 dígitos.</p>
+                    }
                 </div>
 
                 <!-- Contraseña -->
                 <div>
-                    <label for="password" class="">Contraseña</label>
-                    <input id="password" name="password" type="password" required
-                        class="form-input relative block w-full border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
-                        placeholder="Contraseña" [(ngModel)]="password">
-                    <div class="mt-1">
-                        <div class="password-strength-meter bg-gray-200 w-full"></div>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">La contraseña debe tener al menos 8 caracteres, incluir una
-                        mayúscula, un número y un carácter especial.</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+                    <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
+                        class="form-input relative block w-full border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Contraseña">
+                    @if (f['password'].touched && f['password'].errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">La contraseña es obligatoria.</p>
+                    }
+                    @if (f['password'].touched && f['password'].errors?.['minlength']) {
+                    <p class="text-red-500 text-xs mt-1">Mínimo 8 caracteres.</p>
+                    }
+                    @if (f['password'].touched && f['password'].errors?.['pattern']) {
+                    <p class="text-red-500 text-xs mt-1">Debe incluir mayúscula, número y carácter especial.</p>
+                    }
                 </div>
 
                 <!-- Confirmar Contraseña -->
                 <div>
-                    <label for="confirm-password" class="">Confirmar Contraseña</label>
-                    <input id="confirm-password" name="confirm-password" type="password" required
-                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none"
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Confirmar Contraseña</label>
+                    <input formControlName="confirmPassword" [type]="showConfirmPassword ? 'text' : 'password'"
+                        class="form-input relative block w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
                         placeholder="Confirmar contraseña">
-                    <div class="mt-1">
-                        <div class="password-strength-meter bg-gray-200 w-full"></div>
-                    </div>
-                    <p class="mt-1 text-xs text-gray-500">La contraseña debe tener al menos 8 caracteres, incluir una
-                        mayúscula, un número y un carácter especial.</p>
+                    @if (f['confirmPassword'].touched && form.errors?.['passwordsMismatch']) {
+                    <p class="text-red-500 text-xs mt-1">Las contraseñas no coinciden.</p>
+                    }
                 </div>
+
             </div>
 
-            <!-- Checkboxes -->
+            <!-- Términos -->
             <div class="flex items-center">
-                <input d="terminos" name="terminos" type="checkbox" required
+                <input formControlName="terminos" type="checkbox"
                     class="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded-lg">
-                <label for="terminos" class="ml-2 block text-sm text-gray-900">
+                <label class="ml-2 block text-sm text-gray-900">
                     Acepto los <a href="#" class="text-emerald-600 hover:text-emerald-500">Términos y Condiciones</a>
                 </label>
             </div>
+            @if (f['terminos'].touched && f['terminos'].errors?.['required']) {
+            <p class="text-red-500 text-xs mt-1">Debes aceptar los términos y condiciones.</p>
+            }
 
-
-
-
+            <!-- Separador Google -->
             <div class="mt-6">
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
@@ -198,34 +261,26 @@
                 </div>
             </div>
 
-
-            <!-- Google Sign Up -->
+            <!-- Google -->
             <div class="mt-6">
-                <button
+                <button type="button"
                     class="google-btn w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                     <lucide-icon name="chrome" class="h-5 w-5 text-blue-500 mr-2"></lucide-icon>
                     Continuar con Google
                 </button>
             </div>
 
-            <!-- Mensaje de error -->
-            @if (errorMessage) {
-            <div class="flex items-center gap-3 bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
-                <lucide-icon name="circle-alert" class="h-5 w-5 text-red-500 flex-shrink-0"></lucide-icon>
-                <span class="text-sm">{{ errorMessage }}</span>
-            </div>
-            }
 
+            <!-- Botón submit -->
             <div>
-                <button (click)="onRegister()"
-                    class="btn-primary group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                <button (click)="onRegister()" type="button" [disabled]="form.invalid"
+                    class="btn-primary group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed">
                     Crear cuenta
                 </button>
             </div>
 
         </form>
 
-        <!-- Mostrar contenido hijo (verify/profile) solo cuando la ruta hija se activa -->
         <router-outlet></router-outlet>
     </div>
 </div>
