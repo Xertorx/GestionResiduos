@@ -2,10 +2,15 @@ import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AuthStateService } from '../../../../services/auth-state.service';
 
 interface AuthResponse {
   accessToken: string;
   refreshToken: string;
+  email: string;
+  nickName: string;
+  photo: string;
+  role: string;
 }
 
 @Component({
@@ -26,8 +31,9 @@ export class Verify implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
+    private authState: AuthStateService, // ← agrega esto
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.startCountdown();
@@ -101,8 +107,7 @@ export class Verify implements OnInit, OnDestroy {
     this.http.get<AuthResponse>(verifyUrl).subscribe({
       next: (res) => {
         if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('accessToken', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
+          localStorage.setItem('userEmail', res.email || this.emailRegister);
         }
         this.message = '¡Token válido! Redirigiendo al perfil...';
         setTimeout(() => this.router.navigate(['/register/profile'], { replaceUrl: true }), 800);

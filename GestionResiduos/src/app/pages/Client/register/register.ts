@@ -1,28 +1,59 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { AuthStateService } from '../../../services/auth-state.service';
+import { LoadingService } from '../../../services/loading.service';
+import { environment } from '../../../../enviroment/enviroment';
+
+declare const google: any;
+
+export interface GoogleRegisterRequest {
+  names: string;
+  lastName: string;
+  email: string;
+  photo: string;
+  googleId: string;
+  documentType: string;
+  documentNumber: string;
+  birthDate: string;
+  neighborhoodId: number;
+  address: string;
+  phoneNumber: string;
+}
 
 @Component({
   selector: 'app-register',
+  standalone: true,
   imports: [LucideAngularModule, ReactiveFormsModule, RouterOutlet, RouterLink, CommonModule],
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
-export class Register {
+export class Register implements OnInit {
 
   form: FormGroup;
+  googleForm: FormGroup;
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   errorMessage: string = '';
   showErrorModal: boolean = false;
+  googleUser: any = null;
+  showCompleteForm: boolean = false;
 
-  constructor(private router: Router, private http: HttpClient, private fb: FormBuilder) {
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private fb: FormBuilder,
+    private authState: AuthStateService,
+    private loadingService: LoadingService,
+    private ngZone: NgZone,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) {
     this.form = this.fb.group({
-      names:          ['', [Validators.required, Validators.minLength(8)]],
-      lastName:       ['', [Validators.required, Validators.minLength(8)]],
+      names:          ['', [Validators.required, Validators.minLength(2)]],
+      lastName:       ['', [Validators.required, Validators.minLength(2)]],
       documentType:   ['', Validators.required],
       documentNumber: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
       email:          ['', [Validators.required, Validators.email]],
@@ -34,6 +65,121 @@ export class Register {
       confirmPassword:['', Validators.required],
       terminos:       [false, Validators.requiredTrue]
     }, { validators: this.passwordsMatch });
+
+    this.googleForm = this.fb.group({
+      documentType:   ['', Validators.required],
+      documentNumber: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
+      birthDate:      ['', Validators.required],
+      neighborhoodId: ['', Validators.required],
+      address:        ['', Validators.required],
+      phoneNumber:    ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]]
+    });
+  }
+
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.initGoogleSDK();
+    }
+  }
+
+  initGoogleSDK() {
+    const waitForGoogle = setInterval(() => {
+      if (typeof (window as any).google !== 'undefined') {
+        clearInterval(waitForGoogle);
+
+        google.accounts.id.initialize({
+          client_id: environment.googleClientId,
+          callback: (response: any) => {
+            this.ngZone.run(async () => {
+              await this.handleGoogleCallback(response);
+            });
+          }
+        });
+
+        google.accounts.id.renderButton(
+          document.getElementById('google-btn'),
+          {
+            theme: 'outline',
+            size: 'large',
+            width: 400,
+            text: 'continue_with',
+            locale: 'es'
+          }
+        );
+      }
+    }, 100);
+  }
+
+  async handleGoogleCallback(response: any) {
+    const payload = this.decodeJwt(response.credential);
+
+    // Descarga la foto y conviértela a Base64
+    let photoBase64 = '';
+    try {
+      const photoResponse = await fetch(payload.picture);
+      const blob = await photoResponse.blob();
+      photoBase64 = await this.blobToBase64(blob);
+    } catch (e) {
+      console.warn('No se pudo cargar la foto de Google:', e);
+      photoBase64 = '';
+    }
+
+    this.googleUser = {
+      firstName: payload.given_name,
+      lastName:  payload.family_name,
+      email:     payload.email,
+      photoUrl:  photoBase64 || payload.picture,
+      id:        payload.sub
+    };
+
+    this.showCompleteForm = true;
+  }
+
+  blobToBase64(blob: Blob): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  decodeJwt(token: string): any {
+    const base64 = token.split('.')[1];
+    const decoded = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
+    return JSON.parse(decoded);
+  }
+
+  completeGoogleRegister() {
+    if (this.googleForm.invalid) {
+      this.googleForm.markAllAsTouched();
+      return;
+    }
+
+    const payload: GoogleRegisterRequest = {
+      names:    this.googleUser?.firstName || '',
+      lastName: this.googleUser?.lastName  || '',
+      email:    this.googleUser?.email     || '',
+      photo:    this.googleUser?.photoUrl  || '',
+      googleId: this.googleUser?.id        || '',
+      ...this.googleForm.value
+    };
+
+    this.loadingService.show();
+
+    this.http.post('http://localhost:8080/auth/register/google', payload).subscribe({
+      next: (response: any) => {
+        this.loadingService.hide();
+        this.authState.login(response);
+        this.router.navigate(['/'], { replaceUrl: true });
+      },
+      error: (error) => {
+        this.loadingService.hide();
+        console.error('Error registro Google:', error);
+        this.errorMessage = 'Error al registrar con Google. Intenta de nuevo.';
+        this.showErrorModal = true;
+      }
+    });
   }
 
   passwordsMatch(group: AbstractControl) {
@@ -54,38 +200,50 @@ export class Register {
 
     const { confirmPassword, terminos, ...payload } = this.form.value;
 
+    this.loadingService.show();
+
     this.http.post('http://localhost:8080/auth/register/user', payload).subscribe({
       next: (response: any) => {
+        this.loadingService.hide();
         const emailRegister = response?.email ?? this.form.value.email;
-        localStorage.setItem('userEmail', emailRegister || '');
+
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem('userEmail', emailRegister || '');
+        }
 
         if (response?.message === 'PENDIENTE') {
           this.router.navigate(['/register/verify'], { replaceUrl: true });
           return;
         }
 
-        localStorage.setItem('registerCompleted', '1');
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem('registerCompleted', '1');
+        }
         this.router.navigate(['/register/verify'], { replaceUrl: true });
       },
       error: (error) => {
+        this.loadingService.hide();
         console.error('Error en el registro', error);
 
         if (error.status === 409) {
           const mensaje = error.error?.message;
-       
+
           if (mensaje === 'PENDIENTE') {
-            localStorage.setItem('userEmail', this.form.value.email);
-            localStorage.setItem('registerCompleted', '1');
+            if (isPlatformBrowser(this.platformId)) {
+              localStorage.setItem('userEmail', this.form.value.email);
+              localStorage.setItem('registerCompleted', '1');
+            }
             this.router.navigate(['/register/verify'], { replaceUrl: true });
             return;
           }
+
           this.errorMessage = 'Este documento ya está registrado.';
-          this.showErrorModal = true; // ← abre el modal
+          this.showErrorModal = true;
           return;
         }
 
         this.errorMessage = 'Ocurrió un error al crear la cuenta. Intenta de nuevo.';
-        this.showErrorModal = true; // ← abre el modal
+        this.showErrorModal = true;
       }
     });
   }

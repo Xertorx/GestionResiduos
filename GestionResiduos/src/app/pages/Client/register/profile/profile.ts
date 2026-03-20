@@ -1,12 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { AuthStateService } from '../../../../services/auth-state.service';
+import { LoadingService } from '../../../../services/loading.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
 })
@@ -16,7 +19,10 @@ export class Profile {
 
   constructor(
     private http: HttpClient,
-    private router: Router  
+    private router: Router,
+    private authState: AuthStateService,
+    private loadingService: LoadingService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   onFileSelected(event: any) {
@@ -29,7 +35,9 @@ export class Profile {
   }
 
   onSubmit() {
-    const email = localStorage.getItem('userEmail');
+    const email = isPlatformBrowser(this.platformId)
+      ? localStorage.getItem('userEmail')
+      : null;
 
     if (!email) {
       console.error('No se encontró el email en localStorage');
@@ -39,18 +47,29 @@ export class Profile {
     const body = {
       email: email,
       nickName: this.nickname,
-      photo: this.preview  // Ya es Base64 gracias al FileReader
+      photo: this.preview
     };
 
+    this.loadingService.show();
+
     this.http.put('http://localhost:8080/auth/update-profile', body).subscribe({
-      next: (res) => {
-          //console.log('Perfil actualizado:', res);
-          localStorage.setItem('userEmail', email || '');
-          localStorage.setItem('nickname', this.nickname);
-          localStorage.setItem('photo', this.preview as string);
-          this.router.navigate(['/'], { replaceUrl: true });
+      next: (res: any) => {
+        this.loadingService.hide();
+
+        // Actualiza nickname y photo en el servicio y localStorage
+        this.authState.updateProfile(this.nickname, this.preview as string);
+
+        // Fuerza recarga del estado completo para que isLoggedIn sea true
+        if (isPlatformBrowser(this.platformId)) {
+          this.authState.loadFromStorage();
+        }
+
+        this.router.navigate(['/login'], { replaceUrl: true });
       },
-      error: (err) => console.error('Error al actualizar perfil:', err)
+      error: (err) => {
+        this.loadingService.hide();
+        console.error('Error al actualizar perfil:', err);
+      }
     });
   }
 }

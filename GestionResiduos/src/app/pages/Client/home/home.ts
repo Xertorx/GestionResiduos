@@ -1,9 +1,9 @@
 import { Component, AfterViewInit, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { IconService } from '../../../services/icon.service';
-import { RouterLink, Router } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { CommonModule } from '@angular/common';
+import { AuthStateService } from '../../../services/auth-state.service';
 
 @Component({
   selector: 'app-home',
@@ -20,16 +20,15 @@ export class Home implements AfterViewInit, OnInit {
 
   constructor(
     private iconService: IconService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object  // ← inyecta esto
+    private authState: AuthStateService, // ← reemplaza el PLATFORM_ID directo
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit() {
-    if (isPlatformBrowser(this.platformId)) { 
-      this.isLoggedIn = !!localStorage.getItem('accessToken');
-      this.nickname = localStorage.getItem('nickname') || '';
-      this.photo = localStorage.getItem('photo') || '';
-    }
+    // ← suscripción al servicio en lugar de leer localStorage directo
+    this.authState.isLoggedIn$.subscribe(v => this.isLoggedIn = v);
+    this.authState.nickname$.subscribe(v => this.nickname = v);
+    this.authState.photo$.subscribe(v => this.photo = v);
   }
 
   ngAfterViewInit() {
@@ -37,10 +36,6 @@ export class Home implements AfterViewInit, OnInit {
   }
 
   logout() {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.clear();
-    }
-    this.isLoggedIn = false;
-    this.router.navigate(['/']);
+    this.authState.logout(); // ← usa el servicio
   }
 }

@@ -48,6 +48,16 @@ export class AuthStateService {
     this.photoSubject.next(data.photo);
   }
 
+  updateProfile(nickname: string, photo: string) {
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('nickname', nickname || '');
+      localStorage.setItem('photo', photo || '');
+    }
+    this.nicknameSubject.next(nickname || '');
+    this.photoSubject.next(photo || '');
+  }
+
+
   logout() {
     if (isPlatformBrowser(this.platformId)) {
       localStorage.clear();
