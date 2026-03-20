@@ -15,6 +15,8 @@ import { Register } from './pages/Client/register/register';
 
 import { Profile } from './pages/Client/register/profile/profile';
 import { Verify } from './pages/Client/register/verify/verify';
+import { AccessDenied } from './pages/Client/access-denied/access-denied';
+import { verifyGuard } from './pages/Client/register/register-verify.guard';
 
 import { ClientLayout } from './layouts/client-layout/client-layout';
 import { DashboardLayout } from './layouts/dashboard-layout/dashboard-layout';
@@ -46,14 +48,11 @@ export const routes: Routes = [
       { path: 'education', component: Education },
       { path: 'education/:id', component: EducationDetail },
       { path: 'education/:id/quiz', component: DynamicQuiz },
-      {
-        path: 'register',
-        component: Register,
-        children: [
-          { path: 'verify', component: Verify },
-          { path: 'profile', component: Profile }
-        ]
-      },
+      { path: 'register', component: Register },
+      { path: 'register/verify', component: Verify, canActivate: [verifyGuard] },
+      { path: 'register/verify/:token', component: Verify },
+      { path: 'register/profile', component: Profile },
+      { path: 'access-denied', component: AccessDenied },
 
       {
         path: 'foro',
