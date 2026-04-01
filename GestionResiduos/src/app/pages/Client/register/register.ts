@@ -52,8 +52,8 @@ export class Register implements OnInit {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.form = this.fb.group({
-      names:          ['', [Validators.required, Validators.minLength(2)]],
-      lastName:       ['', [Validators.required, Validators.minLength(2)]],
+      names:          ['', [Validators.required, Validators.minLength(4)]],
+      lastName:       ['', [Validators.required, Validators.minLength(4)]],
       documentType:   ['', Validators.required],
       documentNumber: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
       email:          ['', [Validators.required, Validators.email]],
