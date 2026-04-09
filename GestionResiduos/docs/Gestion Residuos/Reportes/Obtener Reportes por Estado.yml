@@ -1,0 +1,18 @@
+info:
+  name: Obtener Reportes por Estado
+  type: http
+  seq: 7
+
+http:
+  method: GET
+  url: http://localhost:8080/api/reports/status/pendiente
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

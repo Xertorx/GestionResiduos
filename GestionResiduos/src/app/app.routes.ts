@@ -30,6 +30,7 @@ import { SeguimientoAdmin } from './pages/Admin/seguimiento/seguimiento';
 import { ForoAdmin } from './pages/Admin/foro/foro';
 import { EducationDetail } from './pages/Client/education/education-detail/education-detail';
 import { DynamicQuiz } from './shared/components/dynamic-quiz/dynamic-quiz';
+import { ResetPassword } from './pages/Client/reset-password/reset-password';
 
 export const routes: Routes = [
 
@@ -40,6 +41,7 @@ export const routes: Routes = [
     children: [
       { path: '', component: Home, pathMatch: 'full' },
       { path: 'login', component: Login },
+      { path: 'reset-password', component: ResetPassword },
       { path: 'calendar', component: Calendar },
       { path: 'about_us', component: About },
       { path: 'reports', component: Reports },

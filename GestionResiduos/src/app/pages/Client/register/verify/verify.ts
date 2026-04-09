@@ -2,10 +2,16 @@ import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AuthStateService } from '../../../../services/auth-state.service';
+import { RegistrationStateService } from '../../../../services/registration-state.service';
 
 interface AuthResponse {
   accessToken: string;
   refreshToken: string;
+  email: string;
+  nickName: string;
+  photo: string;
+  role: string;
 }
 
 @Component({
@@ -26,15 +32,15 @@ export class Verify implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private http: HttpClient,
+    private authState: AuthStateService,
+    private registrationState: RegistrationStateService,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.startCountdown();
 
-    if (isPlatformBrowser(this.platformId)) {
-      this.emailRegister = localStorage.getItem('userEmail') || '';
-    }
+    this.emailRegister = this.registrationState.getPendingEmail();
 
     const tokenQuery = this.route.snapshot.queryParamMap.get('token');
 
@@ -45,7 +51,7 @@ export class Verify implements OnInit, OnDestroy {
     }
 
     if (isPlatformBrowser(this.platformId)) {
-      if (localStorage.getItem('registerCompleted') === '1') {
+      if (this.registrationState.consumeVerifyAccess()) {
         this.message = 'Registro completado. Revisa tu correo para verificar tu cuenta.';
       } else {
         this.message = 'No se encontró token de verificación.';
@@ -100,10 +106,7 @@ export class Verify implements OnInit, OnDestroy {
 
     this.http.get<AuthResponse>(verifyUrl).subscribe({
       next: (res) => {
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('accessToken', res.accessToken);
-          localStorage.setItem('refreshToken', res.refreshToken);
-        }
+        this.registrationState.setPendingEmail(res.email || this.emailRegister);
         this.message = '¡Token válido! Redirigiendo al perfil...';
         setTimeout(() => this.router.navigate(['/register/profile'], { replaceUrl: true }), 800);
       },

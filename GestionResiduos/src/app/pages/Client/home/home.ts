@@ -1,9 +1,10 @@
-import { Component, AfterViewInit, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
-import { IconService } from '../../../services/icon.service';
-import { RouterLink, Router } from '@angular/router';
-import { LucideAngularModule } from 'lucide-angular';
+import { Component, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { IconService } from '../../../services/icon.service';
+import { RouterLink } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
+import { AuthStateService } from '../../../services/auth-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -13,34 +14,34 @@ import { CommonModule } from '@angular/common';
   styleUrl: './home.scss'
 })
 export class Home implements AfterViewInit, OnInit {
+  private readonly authSubscriptions = new Subscription();
 
   isLoggedIn: boolean = false;
   nickname: string = '';
   photo: string = '';
+  authReady = false;
 
   constructor(
     private iconService: IconService,
-    private router: Router,
-    @Inject(PLATFORM_ID) private platformId: Object  // ← inyecta esto
+    private authState: AuthStateService
   ) {}
 
   ngOnInit() {
-    if (isPlatformBrowser(this.platformId)) { 
-      this.isLoggedIn = !!localStorage.getItem('accessToken');
-      this.nickname = localStorage.getItem('nickname') || '';
-      this.photo = localStorage.getItem('photo') || '';
-    }
+    this.authSubscriptions.add(this.authState.isLoggedIn$.subscribe((value) => this.isLoggedIn = value));
+    this.authSubscriptions.add(this.authState.nickname$.subscribe((value) => this.nickname = value));
+    this.authSubscriptions.add(this.authState.photo$.subscribe((value) => this.photo = value));
+    this.authSubscriptions.add(this.authState.initialized$.subscribe((value) => this.authReady = value));
   }
 
   ngAfterViewInit() {
     // tu lógica existente
   }
 
+  ngOnDestroy(): void {
+    this.authSubscriptions.unsubscribe();
+  }
+
   logout() {
-    if (isPlatformBrowser(this.platformId)) {
-      localStorage.clear();
-    }
-    this.isLoggedIn = false;
-    this.router.navigate(['/']);
+    this.authState.logout();
   }
 }

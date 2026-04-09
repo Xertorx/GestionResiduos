@@ -10,26 +10,6 @@
                 </a>
             </p>
         </div>
-        @if (showErrorModal) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-8 relative">
-
-                <div class="flex flex-col items-center mb-6">
-                    <div class="bg-red-100 rounded-full p-4 mb-4">
-                        <lucide-icon name="circle-alert" class="h-10 w-10 text-red-500"></lucide-icon>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-800">Error</h3>
-                    <p class="text-sm text-gray-600 mt-2 text-center">{{ errorMessage }}</p>
-                </div>
-
-                <button (click)="showErrorModal = false" type="button"
-                    class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-emerald-700 transition">
-                    Entendido
-                </button>
-
-            </div>
-        </div>
-        }
 
         <form [formGroup]="form" class="space-y-10 mt-12">
             <div class="grid grid-cols-2 gap-4 w-full">
@@ -261,15 +241,9 @@
                 </div>
             </div>
 
-            <!-- Google -->
-            <div class="mt-6">
-                <button type="button"
-                    class="google-btn w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                    <lucide-icon name="chrome" class="h-5 w-5 text-blue-500 mr-2"></lucide-icon>
-                    Continuar con Google
-                </button>
+            <div class="mt-6 flex justify-center">
+                <div id="google-btn"></div>
             </div>
-
 
             <!-- Botón submit -->
             <div>
@@ -281,7 +255,157 @@
 
         </form>
 
-        <router-outlet></router-outlet>
+        <router-outlet></router-outlet> <!-- ← solo uno aquí dentro -->
+
+    </div><!-- cierre max-w-4xl -->
+</div><!-- cierre min-h-screen -->
+
+<!-- Modales fuera del contenedor principal pero dentro del componente -->
+
+<!-- Modal error -->
+@if (showErrorModal) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-8 relative">
+        <div class="flex flex-col items-center mb-6">
+            <div class="bg-red-100 rounded-full p-4 mb-4">
+                <lucide-icon name="circle-alert" class="h-10 w-10 text-red-500"></lucide-icon>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">Error</h3>
+            <p class="text-sm text-gray-600 mt-2 text-center">{{ errorMessage }}</p>
+        </div>
+        <button (click)="showErrorModal = false" type="button"
+            class="w-full bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-emerald-700 transition">
+            Entendido
+        </button>
     </div>
 </div>
-<router-outlet></router-outlet>
+}
+
+<!-- Modal Google -->
+@if (showCompleteForm && googleUser) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg p-8">
+        <div class="flex items-center gap-4 mb-6">
+            <img [src]="googleUser.photoUrl" (error)="googleUser.photoUrl = 'img/default-avatar.png'"
+                class="h-14 w-14 rounded-full object-cover border-2 border-emerald-500" alt="">
+            <div>
+                <h3 class="text-lg font-bold text-gray-800">¡Hola, {{ googleUser.firstName }}!</h3>
+                <p class="text-sm text-gray-500">Completa tu registro con algunos datos adicionales.</p>
+            </div>
+        </div>
+
+        <form [formGroup]="googleForm" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
+                    <select formControlName="documentType"
+                        class="form-input w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
+                        <option value="">Seleccione</option>
+                        <option value="CC">Cédula de Ciudadanía</option>
+                        <option value="TI">Tarjeta de Identidad</option>
+                        <option value="CE">Cédula de Extranjería</option>
+                        <option value="PA">Pasaporte</option>
+                    </select>
+                    @if (googleForm.get('documentType')?.touched &&
+                    googleForm.get('documentType')?.errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">Obligatorio.</p>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Número de Documento</label>
+                    <input formControlName="documentNumber" type="text"
+                        class="form-input w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Número de documento">
+                    @if (googleForm.get('documentNumber')?.touched &&
+                    googleForm.get('documentNumber')?.errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">Obligatorio.</p>
+                    }
+                    @if (googleForm.get('documentNumber')?.touched &&
+                    googleForm.get('documentNumber')?.errors?.['pattern']) {
+                    <p class="text-red-500 text-xs mt-1">Solo números.</p>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
+                    <input formControlName="birthDate" type="date"
+                        class="form-input w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
+                    @if (googleForm.get('birthDate')?.touched && googleForm.get('birthDate')?.errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">Obligatorio.</p>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input formControlName="phoneNumber" type="text"
+                        class="form-input w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="10 dígitos">
+                    @if (googleForm.get('phoneNumber')?.touched && googleForm.get('phoneNumber')?.errors?.['required'])
+                    {
+                    <p class="text-red-500 text-xs mt-1">Obligatorio.</p>
+                    }
+                    @if (googleForm.get('phoneNumber')?.touched && googleForm.get('phoneNumber')?.errors?.['pattern']) {
+                    <p class="text-red-500 text-xs mt-1">Debe tener 10 dígitos.</p>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Barrio</label>
+                    <select formControlName="neighborhoodId"
+                        class="form-input w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none">
+                        <option value="">Seleccione barrio</option>
+                        <option value="1">Ciudad Bolívar</option>
+                        <option value="2">Usaquén</option>
+                        <option value="3">Chapinero</option>
+                        <option value="4">Santa Fe</option>
+                        <option value="5">San Cristóbal</option>
+                        <option value="6">Usme</option>
+                        <option value="7">Tunjuelito</option>
+                        <option value="8">Bosa</option>
+                        <option value="9">Kennedy</option>
+                        <option value="10">Fontibón</option>
+                        <option value="11">Engativá</option>
+                        <option value="12">Suba</option>
+                        <option value="13">Barrios Unidos</option>
+                        <option value="14">Teusaquillo</option>
+                        <option value="15">Los Mártires</option>
+                        <option value="16">Antonio Nariño</option>
+                        <option value="17">Puente Aranda</option>
+                        <option value="18">La Candelaria</option>
+                        <option value="19">Rafael Uribe Uribe</option>
+                    </select>
+                    @if (googleForm.get('neighborhoodId')?.touched &&
+                    googleForm.get('neighborhoodId')?.errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">Obligatorio.</p>
+                    }
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                    <input formControlName="address" type="text"
+                        class="form-input w-full rounded-lg border px-3 py-2 text-gray-900 focus:outline-none"
+                        placeholder="Dirección completa">
+                    @if (googleForm.get('address')?.touched && googleForm.get('address')?.errors?.['required']) {
+                    <p class="text-red-500 text-xs mt-1">Obligatorio.</p>
+                    }
+                </div>
+
+            </div>
+
+            <div class="flex gap-3 mt-6">
+                <button (click)="showCompleteForm = false" type="button"
+                    class="flex-1 border border-gray-300 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 transition">
+                    Cancelar
+                </button>
+                <button (click)="completeGoogleRegister()" type="button" [disabled]="googleForm.invalid"
+                    class="flex-1 bg-emerald-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-emerald-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    Completar registro
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+}

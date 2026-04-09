@@ -1,0 +1,63 @@
+info:
+  name: Crear nuevo reporte- Punto Critico
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: http://localhost:8080/api/reports
+  headers:
+    - name: Authorization
+      value: Bearer eyJhbGc...
+  body:
+    type: multipart-form
+    data:
+      - name: type
+        type: text
+        value: punto_critico
+      - name: categoryId
+        type: text
+        value: "1"
+      - name: description
+        type: text
+        value: Basura acumulada en la esquina
+      - name: latitude
+        type: text
+        value: "-4.7115"
+      - name: longitude
+        type: text
+        value: "-74.0075"
+      - name: image
+        type: file
+        value:
+          - C:\Users\Juan Loaiza\Pictures\images.jpg
+      - name: device
+        type: text
+        value: mobile
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: "Generated from cURL: curl -X POST http://localhost:8080/api/reports \\\r
+
+  \  -H \"Authorization: Bearer eyJhbGc...\" \\\r
+
+  \  -F \"type=punto_critico\" \\\r
+
+  \  -F \"categoryId=1\" \\\r
+
+  \  -F \"description=Basura acumulada en la esquina\" \\\r
+
+  \  -F \"latitude=-4.7115\" \\\r
+
+  \  -F \"longitude=-74.0075\" \\\r
+
+  \  -F \"image=@foto.jpg\" \\\r
+
+  \  -F \"device=mobile\""

@@ -1,0 +1,4 @@
+name: Token
+variables:
+  - name: JWT
+    value: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFubWEyNTA1MUBnbWFpbC5jb20iLCJpYXQiOjE3NzU2MzUwMzIsImV4cCI6MTc3NTY0MjIzMn0.T1i2G03RWS2hOpGxnv9EzJiyoWJiO4Lpm0gP-VXZmB4

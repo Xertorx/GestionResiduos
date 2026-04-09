@@ -1,0 +1,29 @@
+info:
+  name: Update Profile
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: http://localhost:8080/auth/update-profile
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "email": "juanma25051@gmail.com",
+        "nickName": "JuanMa",
+        "photo": "https://example.com/foto.jpg"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

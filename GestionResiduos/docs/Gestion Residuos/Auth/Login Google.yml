@@ -1,0 +1,26 @@
+info:
+  name: Login Google
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: http://localhost:8080/auth/login/google
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "email": "juanma.google@gmail.com",
+        "googleId": "google-id-123456"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

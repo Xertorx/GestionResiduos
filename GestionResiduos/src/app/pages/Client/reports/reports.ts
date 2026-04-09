@@ -1,85 +1,376 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { AuthStateService } from '../../../services/auth-state.service';
+
+interface ReportCategory {
+  id: number;
+  name: string;
+  description?: string;
+  status?: string;
+}
+
+interface UserReport {
+  id: number;
+  type: string;
+  status: string;
+  description: string;
+  createdAt: string;
+  categoryName: string;
+  locationLabel: string;
+}
 
 @Component({
   selector: 'app-reports',
-  imports: [],
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './reports.html',
   styleUrl: './reports.scss'
 })
-export class Reports {
+export class Reports implements OnInit, OnDestroy {
+  private readonly apiBase = '/api';
+  // Implementacion anterior (filtrado por palabras clave):
+  // private readonly categoryHints: string[] = ['critico', 'acumul', 'basura', 'escombro', 'via', 'calle'];
 
-  previewUrl: string | null = null;
+  reportForm;
+
+  categories: ReportCategory[] = [];
+  myReports: UserReport[] = [];
+  isSubmitting = false;
+  isLoadingReports = false;
+  isLoadingCategories = false;
+  formSuccess = '';
+  formError = '';
+  listError = '';
+  loginRequiredMessage = 'Debes iniciar sesión para crear reportes y consultar tus reportes.';
+  isAuthenticated = false;
+  authReady = false;
+  showConfirmModal = false;
+  showSuccessModal = false;
+
   selectedFile: File | null = null;
-  savedImages: string[] = [];
-  selectionMessage: string = 'No hay imagen seleccionada';
+  previewUrl: string | null = null;
+  private readonly authSubscriptions = new Subscription();
 
-  constructor() {
-    try {
-      const data = localStorage.getItem('reports_images');
-      this.savedImages = data ? JSON.parse(data) : [];
-    } catch (e) {
-      this.savedImages = [];
-    }
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private authState: AuthStateService
+  ) {
+    this.reportForm = this.fb.group({
+      categoryId: ['', [Validators.required]],
+      description: ['', [Validators.required, Validators.minLength(10)]],
+      latitude: ['', [Validators.required]],
+      longitude: ['', [Validators.required]]
+    });
+    this.reportForm.disable({ emitEvent: false });
   }
 
-  onFileSelected(event: Event) {
+  ngOnInit(): void {
+    this.authSubscriptions.add(
+      this.authState.isLoggedIn$.subscribe((isLoggedIn) => {
+        const authChanged = this.isAuthenticated !== isLoggedIn;
+        this.isAuthenticated = isLoggedIn;
+        this.applyFormAuthState();
+
+        if (!this.authReady) {
+          return;
+        }
+
+        if (!this.isAuthenticated) {
+          this.myReports = [];
+          this.listError = '';
+          this.isLoadingReports = false;
+          return;
+        }
+
+        if (authChanged) {
+          this.loadMyReports();
+        }
+      })
+    );
+
+    this.authSubscriptions.add(
+      this.authState.initialized$.subscribe((isReady) => {
+        const becameReady = !this.authReady && isReady;
+        this.authReady = isReady;
+        this.applyFormAuthState();
+
+        if (becameReady) {
+          this.loadMyReports();
+        }
+      })
+    );
+
+    this.loadCategories();
+  }
+
+  ngOnDestroy(): void {
+    this.authSubscriptions.unsubscribe();
+  }
+
+  get filteredCategories(): ReportCategory[] {
+    // Implementacion anterior (filtraba categorias por hints):
+    // if (!this.categories.length) return [];
+    //
+    // const matches = this.categories.filter((category) => {
+    //   const searchableText = `${category.name ?? ''} ${category.description ?? ''}`.toLowerCase();
+    //   return this.categoryHints.some((hint) => searchableText.includes(hint));
+    // });
+    //
+    // return matches.length ? matches : this.categories;
+
+    return this.categories;
+  }
+
+  loadCategories(): void {
+    this.isLoadingCategories = true;
+    this.formError = '';
+
+    this.http.get<unknown>(`${this.apiBase}/report-categories/active`).subscribe({
+      next: (response) => {
+        this.categories = this.extractArray(response)
+          .map((item: any) => ({
+            id: Number(item.id),
+            name: item.name ?? 'Sin nombre',
+            description: item.description ?? '',
+            status: item.status
+          }))
+          .filter((category) => Number.isFinite(category.id));
+
+        this.reportForm.patchValue({ categoryId: '' }, { emitEvent: false });
+
+        this.isLoadingCategories = false;
+      },
+      error: (error) => {
+        console.error('Error cargando categorías activas', error);
+        this.formError = this.toConnectionMessage(error, 'No se pudieron cargar las categorías activas.');
+        this.isLoadingCategories = false;
+      }
+    });
+  }
+
+  loadMyReports(): void {
+    if (!this.isAuthenticated) {
+      this.myReports = [];
+      this.listError = '';
+      this.isLoadingReports = false;
+      return;
+    }
+
+    this.isLoadingReports = true;
+    this.listError = '';
+
+    this.http.get<unknown>(`${this.apiBase}/reports/my-reports`, { headers: this.buildAuthHeaders() }).subscribe({
+      next: (response) => {
+        const reportItems = this.extractArray(response);
+        this.myReports = reportItems.map((item: any, index: number) => this.mapReportItem(item, index));
+        this.isLoadingReports = false;
+      },
+      error: (error) => {
+        console.error('Error al obtener mis reportes', error);
+        this.listError = this.toConnectionMessage(error, 'No se pudieron cargar tus reportes.');
+        this.isLoadingReports = false;
+      }
+    });
+  }
+
+  onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (!input || !input.files || input.files.length === 0) return;
+    if (!input.files?.length) return;
+
     const file = input.files[0];
-    if (!file.type.startsWith('image/')) return;
+    if (!file.type.startsWith('image/')) {
+      this.formError = 'Solo se permiten archivos de imagen.';
+      return;
+    }
+
+    this.formError = '';
     this.selectedFile = file;
     const reader = new FileReader();
     reader.onload = () => {
       this.previewUrl = reader.result as string;
     };
     reader.readAsDataURL(file);
-    // Reset selection message once a file is chosen
-    this.selectionMessage = '';
   }
 
-  saveImage() {
-    if (!this.previewUrl) return;
-    // prepend so latest first
-    this.savedImages = [this.previewUrl, ...this.savedImages];
-    try {
-      localStorage.setItem('reports_images', JSON.stringify(this.savedImages));
-    } catch (e) {
-      console.error('No se pudo guardar la imagen en localStorage', e);
-    }
-    this.previewUrl = null;
+  clearSelectedFile(): void {
     this.selectedFile = null;
+    this.previewUrl = null;
     const input = document.getElementById('report-file') as HTMLInputElement | null;
     if (input) input.value = '';
   }
 
-  cancelSelection() {
-    this.previewUrl = null;
-    this.selectedFile = null;
-    this.selectionMessage = 'Por favor, selecciona una imagen nuevamente';
-    const input = document.getElementById('report-file') as HTMLInputElement | null;
-    if (input) input.value = '';
-  }
+  submitReport(): void {
+    this.formSuccess = '';
+    this.formError = '';
 
-  removeImage(index: number) {
-    if (index < 0 || index >= this.savedImages.length) return;
-    this.savedImages.splice(index, 1);
-    try {
-      localStorage.setItem('reports_images', JSON.stringify(this.savedImages));
-    } catch (e) {
-      console.error('No se pudo actualizar localStorage', e);
+    if (!this.isAuthenticated) {
+      this.formError = this.loginRequiredMessage;
+      return;
     }
+
+    if (this.reportForm.invalid) {
+      this.reportForm.markAllAsTouched();
+      this.formError = 'Completa los campos obligatorios para enviar el reporte.';
+      return;
+    }
+
+    if (!this.selectedFile) {
+      this.formError = 'Para punto crítico debes adjuntar una imagen.';
+      return;
+    }
+
+    this.showConfirmModal = true;
   }
 
-  removeImageBySrc(src: string) {
-    const index = this.savedImages.indexOf(src);
-    if (index === -1) return;
-    this.removeImage(index);
+  cancelReportConfirmation(): void {
+    this.showConfirmModal = false;
   }
 
-  // placeholder para futura subida al backend
-  async uploadToBackend() {
-    // Implementar cuando exista endpoint
-    console.log('Subir al backend:', this.savedImages.length, 'imágenes');
+  confirmReportSubmission(): void {
+    this.showConfirmModal = false;
+    const formData = this.buildReportFormData();
+    this.isSubmitting = true;
+
+    this.http.post(`${this.apiBase}/reports`, formData, { headers: this.buildAuthHeaders() }).subscribe({
+      next: () => {
+        this.formSuccess = 'Reporte de punto crítico enviado correctamente.';
+        this.showSuccessModal = true;
+        this.resetForm();
+        this.loadMyReports();
+        this.isSubmitting = false;
+      },
+      error: (error) => {
+        console.error('Error al enviar reporte', error);
+        this.formError = this.toConnectionMessage(error, error?.error?.message || 'No se pudo enviar el reporte.');
+        this.isSubmitting = false;
+      }
+    });
   }
 
+  closeSuccessModal(): void {
+    this.showSuccessModal = false;
+  }
+
+  private toConnectionMessage(error: any, fallbackMessage: string): string {
+
+    if (error?.status === 401 || error?.status === 403) {
+      return this.loginRequiredMessage;
+    }
+
+    return fallbackMessage;
+  }
+
+  private applyFormAuthState(): void {
+    if (this.authReady && this.isAuthenticated) {
+      this.reportForm.enable({ emitEvent: false });
+      return;
+    }
+
+    this.reportForm.disable({ emitEvent: false });
+  }
+
+  private resetForm(): void {
+    const currentCategory = this.reportForm.get('categoryId')?.value || '';
+    this.clearSelectedFile();
+    this.reportForm.reset({
+      categoryId: currentCategory,
+      description: '',
+      latitude: '',
+      longitude: ''
+    });
+  }
+
+  private buildReportFormData(): FormData {
+    const value = this.reportForm.getRawValue();
+    const formData = new FormData();
+
+    formData.append('type', 'punto_critico');
+    formData.append('categoryId', value.categoryId || '');
+    formData.append('description', value.description || '');
+    formData.append('latitude', value.latitude || '');
+    formData.append('longitude', value.longitude || '');
+
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
+    }
+
+    return formData;
+  }
+
+  private buildAuthHeaders(): HttpHeaders {
+    const token = this.authState.getAccessToken();
+    if (!token) return new HttpHeaders();
+
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
+  }
+
+  private extractArray(payload: unknown): any[] {
+    if (Array.isArray(payload)) return payload;
+
+    const maybeObject = payload as any;
+    if (Array.isArray(maybeObject?.data)) return maybeObject.data;
+    if (Array.isArray(maybeObject?.reports)) return maybeObject.reports;
+    if (Array.isArray(maybeObject?.content)) return maybeObject.content;
+    if (maybeObject && typeof maybeObject === 'object') return [maybeObject];
+
+    return [];
+  }
+
+  private mapReportItem(item: any, index: number): UserReport {
+    const latitude = item.latitude ?? item.lat;
+    const longitude = item.longitude ?? item.lng;
+    const locationLabel =
+      item.address ||
+      item.location ||
+      (latitude && longitude ? `Lat ${latitude}, Lng ${longitude}` : 'Sin ubicación registrada');
+
+    return {
+      id: Number(item.id ?? index + 1),
+      type: item.type ?? 'sin_tipo',
+      status: (item.status ?? 'pendiente').toString(),
+      description: item.description ?? 'Sin descripción',
+      createdAt: item.createdAt ?? item.created_at ?? '',
+      categoryName: item.category?.name ?? item.categoryName ?? 'Sin categoría',
+      locationLabel
+    };
+  }
+
+  formatDate(dateValue: string): string {
+    if (!dateValue) return 'Sin fecha';
+
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) return dateValue;
+
+    return parsed.toLocaleDateString('es-CO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  statusBadgeClasses(status: string): string {
+    const normalized = status.toLowerCase();
+
+    if (normalized.includes('resuelto') || normalized.includes('cerrado')) {
+      return 'bg-green-100 text-green-800';
+    }
+
+    if (normalized.includes('proceso') || normalized.includes('atend')) {
+      return 'bg-blue-100 text-blue-800';
+    }
+
+    return 'bg-yellow-100 text-yellow-800';
+  }
+
+  typeLabel(type: string): string {
+    if (type === 'punto_critico') return 'Punto crítico';
+    return type;
+  }
 }
