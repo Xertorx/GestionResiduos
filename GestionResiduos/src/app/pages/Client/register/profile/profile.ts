@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthStateService } from '../../../../services/auth-state.service';
 import { LoadingService } from '../../../../services/loading.service';
+import { RegistrationStateService } from '../../../../services/registration-state.service';
 
 @Component({
   selector: 'app-profile',
@@ -21,6 +22,7 @@ export class Profile {
     private http: HttpClient,
     private router: Router,
     private authState: AuthStateService,
+    private registrationState: RegistrationStateService,
     private loadingService: LoadingService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
@@ -35,12 +37,10 @@ export class Profile {
   }
 
   onSubmit() {
-    const email = isPlatformBrowser(this.platformId)
-      ? localStorage.getItem('userEmail')
-      : null;
+    const email = this.registrationState.getPendingEmail();
 
     if (!email) {
-      console.error('No se encontró el email en localStorage');
+      console.error('No se encontró el email del registro');
       return;
     }
 
@@ -61,7 +61,7 @@ export class Profile {
 
         // Fuerza recarga del estado completo para que isLoggedIn sea true
         if (isPlatformBrowser(this.platformId)) {
-          this.authState.loadFromStorage();
+          this.authState.refreshFromStorage();
         }
 
         this.router.navigate(['/login'], { replaceUrl: true });

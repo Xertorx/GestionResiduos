@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { LoadingService } from '../../../services/loading.service';
+import { RegistrationStateService } from '../../../services/registration-state.service';
 import { environment } from '../../../../enviroment/enviroment';
 
 declare const google: any;
@@ -48,6 +49,7 @@ export class Register implements OnInit {
     private fb: FormBuilder,
     private authState: AuthStateService,
     private loadingService: LoadingService,
+    private registrationState: RegistrationStateService,
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -207,18 +209,14 @@ export class Register implements OnInit {
         this.loadingService.hide();
         const emailRegister = response?.email ?? this.form.value.email;
 
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('userEmail', emailRegister || '');
-        }
+        this.registrationState.setPendingEmail(emailRegister || '');
 
         if (response?.message === 'PENDIENTE') {
           this.router.navigate(['/register/verify'], { replaceUrl: true });
           return;
         }
 
-        if (isPlatformBrowser(this.platformId)) {
-          localStorage.setItem('registerCompleted', '1');
-        }
+        this.registrationState.markVerifyAccess();
         this.router.navigate(['/register/verify'], { replaceUrl: true });
       },
       error: (error) => {
@@ -229,10 +227,8 @@ export class Register implements OnInit {
           const mensaje = error.error?.message;
 
           if (mensaje === 'PENDIENTE') {
-            if (isPlatformBrowser(this.platformId)) {
-              localStorage.setItem('userEmail', this.form.value.email);
-              localStorage.setItem('registerCompleted', '1');
-            }
+            this.registrationState.setPendingEmail(this.form.value.email);
+            this.registrationState.markVerifyAccess();
             this.router.navigate(['/register/verify'], { replaceUrl: true });
             return;
           }

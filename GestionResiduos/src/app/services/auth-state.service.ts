@@ -1,41 +1,76 @@
-import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
+import { Injectable, Inject, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject } from 'rxjs';
 import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
-export class AuthStateService {
+export class AuthStateService implements OnDestroy {
+  private readonly isBrowser: boolean;
+  private readonly storageListener = () => this.refreshFromStorage();
 
   private isLoggedInSubject = new BehaviorSubject<boolean>(false);
+  private emailSubject = new BehaviorSubject<string>('');
   private nicknameSubject = new BehaviorSubject<string>('');
   private photoSubject = new BehaviorSubject<string>('');
+  private initializedSubject = new BehaviorSubject<boolean>(false);
 
   isLoggedIn$ = this.isLoggedInSubject.asObservable();
+  email$ = this.emailSubject.asObservable();
   nickname$ = this.nicknameSubject.asObservable();
   photo$ = this.photoSubject.asObservable();
+  initialized$ = this.initializedSubject.asObservable();
 
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private router: Router
   ) {
-    // Al iniciar lee el localStorage por si ya había sesión
-    if (isPlatformBrowser(this.platformId)) {
-      this.loadFromStorage();
+    this.isBrowser = isPlatformBrowser(this.platformId);
+
+    if (!this.isBrowser) {
+      return;
+    }
+
+    this.refreshFromStorage();
+    window.addEventListener('storage', this.storageListener);
+    this.initializedSubject.next(true);
+  }
+
+  ngOnDestroy(): void {
+    if (this.isBrowser) {
+      window.removeEventListener('storage', this.storageListener);
     }
   }
 
-  loadFromStorage() {
+  refreshFromStorage(): void {
+    if (!this.isBrowser) {
+      return;
+    }
+
     const token = localStorage.getItem('accessToken');
+    const email = localStorage.getItem('userEmail') || '';
     const nickname = localStorage.getItem('nickname') || '';
     const photo = localStorage.getItem('photo') || '';
 
+    this.applyAuthState(token, email, nickname, photo);
+  }
+
+  getAccessToken(): string | null {
+    if (!this.isBrowser) {
+      return null;
+    }
+
+    return localStorage.getItem('accessToken');
+  }
+
+  private applyAuthState(token: string | null, email: string, nickname: string, photo: string): void {
     this.isLoggedInSubject.next(!!token);
+    this.emailSubject.next(email);
     this.nicknameSubject.next(nickname);
     this.photoSubject.next(photo);
   }
 
   login(data: { accessToken: string, refreshToken: string, email: string, nickName: string, photo: string, role: string }) {
-    if (isPlatformBrowser(this.platformId)) {
+    if (this.isBrowser) {
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('userEmail', data.email);
@@ -43,28 +78,26 @@ export class AuthStateService {
       localStorage.setItem('photo', data.photo);
       localStorage.setItem('role', data.role);
     }
-    this.isLoggedInSubject.next(true);
-    this.nicknameSubject.next(data.nickName);
-    this.photoSubject.next(data.photo);
+
+    this.applyAuthState(data.accessToken, data.email, data.nickName, data.photo);
   }
 
   updateProfile(nickname: string, photo: string) {
-    if (isPlatformBrowser(this.platformId)) {
+    if (this.isBrowser) {
       localStorage.setItem('nickname', nickname || '');
       localStorage.setItem('photo', photo || '');
     }
-    this.nicknameSubject.next(nickname || '');
-    this.photoSubject.next(photo || '');
+
+    this.applyAuthState(this.getAccessToken(), this.emailSubject.getValue(), nickname || '', photo || '');
   }
 
 
   logout() {
-    if (isPlatformBrowser(this.platformId)) {
+    if (this.isBrowser) {
       localStorage.clear();
     }
-    this.isLoggedInSubject.next(false);
-    this.nicknameSubject.next('');
-    this.photoSubject.next('');
+
+    this.applyAuthState(null, '', '', '');
     this.router.navigate(['/']);
   }
 }

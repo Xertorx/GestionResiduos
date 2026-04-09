@@ -1,0 +1,16 @@
+info:
+  name: Obtener Ecopuntos Activos por Tipo Residuo
+  type: http
+  seq: 8
+
+http:
+  method: GET
+  url: http://localhost:8080/api/ecopoints/residue-type/ORGANICO/active
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

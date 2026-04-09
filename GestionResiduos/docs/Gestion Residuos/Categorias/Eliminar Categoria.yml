@@ -1,0 +1,18 @@
+info:
+  name: Eliminar Categoria
+  type: http
+  seq: 7
+
+http:
+  method: DELETE
+  url: http://localhost:8080/api/report-categories/1
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

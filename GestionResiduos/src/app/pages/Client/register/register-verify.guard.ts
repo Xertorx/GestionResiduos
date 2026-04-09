@@ -1,12 +1,12 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { RegistrationStateService } from '../../../services/registration-state.service';
 
 export const verifyGuard: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-  const isBrowser = typeof window !== 'undefined';
-  const isRegistered = isBrowser && window.localStorage.getItem('registerCompleted') === '1';
+  const registrationState = inject(RegistrationStateService);
+  const isRegistered = registrationState.hasVerifyAccess();
 
   if (isRegistered) {
-    window.localStorage.removeItem('registerCompleted');
     return true;
   }
 

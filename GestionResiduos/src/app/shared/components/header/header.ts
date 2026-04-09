@@ -1,7 +1,7 @@
-import { AfterViewInit, Component, ElementRef, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { CommonModule } from '@angular/common'; // ← agrega esto
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthStateService } from '../../../services/auth-state.service';
 
 @Component({
@@ -15,13 +15,24 @@ export class Header implements OnInit {
   isLoggedIn: boolean = false;
   nickname: string = '';
   photo: string = '';
+  authReady: boolean = false;
+  isBrowser: boolean = false;
 
-  constructor(private authState: AuthStateService) {}
+  constructor(
+    private authState: AuthStateService,
+    @Inject(PLATFORM_ID) private platformId: object
+  ) {}
 
   ngOnInit() {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+    if (!this.isBrowser) {
+      return;
+    }
+
     this.authState.isLoggedIn$.subscribe(v => this.isLoggedIn = v);
     this.authState.nickname$.subscribe(v => this.nickname = v);
     this.authState.photo$.subscribe(v => this.photo = v);
+    this.authState.initialized$.subscribe(v => this.authReady = v);
   }
 
   logout() {

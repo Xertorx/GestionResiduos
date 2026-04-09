@@ -12,7 +12,7 @@
             construir una comunidad más sostenible.
           </p>
          <!-- Visualizacion  -->
-          @if (!isLoggedIn) {
+          @if (authReady && !isLoggedIn) {
           <div class="mt-10 flex justify-center space-x-4">
             <a
               href="registro.html"
@@ -219,7 +219,7 @@
               Bolívar más limpio y sostenible.
             </p>
           </div>
-          @if (!isLoggedIn) {
+          @if (authReady && !isLoggedIn) {
           <div class="mt-8 lg:mt-0">
             <div class="inline-flex rounded-md shadow">
               <a [routerLink]="'/register'"

@@ -37,8 +37,8 @@
           <lucide-icon name="user" class="w-6 h-6"></lucide-icon>
         </div>
         <div class="flex-1">
-          <p class="text-sm font-medium text-gray-800">Erica</p>
-          <p class="text-xs text-gray-500">erica@example.com</p>
+          <p class="text-sm font-medium text-gray-800">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
+          <p class="text-xs text-gray-500">{{ authReady && email ? email : 'Sin correo disponible' }}</p>
         </div>
         <button
           class="p-2 rounded-md hover:bg-emerald-50 text-emerald-600"
@@ -95,8 +95,8 @@
                   <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
                 </div>
                 <div>
-                  <p class="font-medium text-gray-800">Erica</p>
-                  <p class="text-sm text-gray-500">erica@example.com</p>
+                  <p class="font-medium text-gray-800">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
+                  <p class="text-sm text-gray-500">{{ authReady && email ? email : 'Sin correo disponible' }}</p>
                 </div>
               </div>
               <a

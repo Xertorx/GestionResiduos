@@ -1,9 +1,10 @@
-import { Component, AfterViewInit, OnInit, Inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
+import { Component, AfterViewInit, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { IconService } from '../../../services/icon.service';
 import { RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { AuthStateService } from '../../../services/auth-state.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-home',
@@ -13,29 +14,34 @@ import { AuthStateService } from '../../../services/auth-state.service';
   styleUrl: './home.scss'
 })
 export class Home implements AfterViewInit, OnInit {
+  private readonly authSubscriptions = new Subscription();
 
   isLoggedIn: boolean = false;
   nickname: string = '';
   photo: string = '';
+  authReady = false;
 
   constructor(
     private iconService: IconService,
-    private authState: AuthStateService, // ← reemplaza el PLATFORM_ID directo
-    @Inject(PLATFORM_ID) private platformId: Object
+    private authState: AuthStateService
   ) {}
 
   ngOnInit() {
-    // ← suscripción al servicio en lugar de leer localStorage directo
-    this.authState.isLoggedIn$.subscribe(v => this.isLoggedIn = v);
-    this.authState.nickname$.subscribe(v => this.nickname = v);
-    this.authState.photo$.subscribe(v => this.photo = v);
+    this.authSubscriptions.add(this.authState.isLoggedIn$.subscribe((value) => this.isLoggedIn = value));
+    this.authSubscriptions.add(this.authState.nickname$.subscribe((value) => this.nickname = value));
+    this.authSubscriptions.add(this.authState.photo$.subscribe((value) => this.photo = value));
+    this.authSubscriptions.add(this.authState.initialized$.subscribe((value) => this.authReady = value));
   }
 
   ngAfterViewInit() {
     // tu lógica existente
   }
 
+  ngOnDestroy(): void {
+    this.authSubscriptions.unsubscribe();
+  }
+
   logout() {
-    this.authState.logout(); // ← usa el servicio
+    this.authState.logout();
   }
 }

@@ -1,0 +1,18 @@
+info:
+  name: Cambiar Estado Categoria
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/report-categories/1/status?status=INACTIVO
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

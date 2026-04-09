@@ -1,0 +1,28 @@
+info:
+  name: Crear Categoria
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://localhost:8080/api/report-categories
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "FeedBack",
+        "description": "FeedBack",
+        "status": "ACTIVO"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

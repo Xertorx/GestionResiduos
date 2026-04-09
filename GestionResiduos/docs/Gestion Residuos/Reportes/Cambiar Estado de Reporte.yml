@@ -1,0 +1,18 @@
+info:
+  name: Cambiar Estado de Reporte
+  type: http
+  seq: 8
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/reports/1/status?newStatus=en_revision
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
