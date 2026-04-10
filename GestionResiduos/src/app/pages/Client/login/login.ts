@@ -141,9 +141,9 @@ export class Login implements OnInit {
         setTimeout(() => {
           this.showModal = false;
           const role = response.role;
-          if (role === 'ADMIN') {
+          if (role === 'ADMINISTRADOR') {
             this.router.navigate(['/dashboard'], { replaceUrl: true });
-          } else {
+          } else if(role === 'CIUDADANO') {
             this.router.navigate(['/'], { replaceUrl: true });
           }
         }, 1500);

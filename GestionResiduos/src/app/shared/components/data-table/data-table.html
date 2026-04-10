@@ -1,0 +1,101 @@
+<!-- Error -->
+@if (error) {
+  <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
+    <lucide-icon name="circle-alert" class="w-4 h-4"></lucide-icon>
+    {{ error }}
+  </div>
+}
+
+<!-- Loading -->
+@if (isLoading) {
+  <div class="text-center py-12 text-gray-500">
+    <lucide-icon name="refresh-cw" class="w-6 h-6 mx-auto mb-2 animate-spin"></lucide-icon>
+    <p class="text-sm">Cargando...</p>
+  </div>
+}
+
+<!-- Tabla -->
+@if (!isLoading && data.length > 0) {
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead class="bg-gray-50 border-b border-gray-100">
+        <tr>
+          @for (col of columns; track col.key) {
+            <th class="px-5 py-3 font-semibold text-gray-600" [ngClass]="[getAlignClass(col), col.headerClass || '']">
+              {{ col.label }}
+            </th>
+          }
+          @if (actionsTemplate) {
+            <th class="px-5 py-3 font-semibold text-gray-600 text-center">Acciones</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-50">
+        @for (row of paginatedData; track trackByFn($index, row)) {
+          <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer" (click)="rowClick.emit(row)">
+            @for (col of columns; track col.key) {
+              <td class="px-5 py-3" [ngClass]="[getAlignClass(col), col.cellClass || '']">
+                @if (cellTemplate) {
+                  <ng-container *ngTemplateOutlet="cellTemplate; context: { $implicit: row, column: col }"></ng-container>
+                } @else {
+                  {{ getCellValue(row, col.key) ?? '—' }}
+                }
+              </td>
+            }
+            @if (actionsTemplate) {
+              <td class="px-5 py-3 text-center">
+                <ng-container *ngTemplateOutlet="actionsTemplate; context: { $implicit: row }"></ng-container>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Paginación -->
+    @if (totalPages > 1) {
+      <div class="flex items-center justify-between px-5 py-3 border-t border-gray-100 bg-gray-50/50">
+        <p class="text-xs text-gray-500">
+          Mostrando {{ rangeStart }}–{{ rangeEnd }} de {{ data.length }} registros
+        </p>
+        <div class="flex items-center gap-1">
+          <button
+            class="px-2.5 py-1 text-xs rounded-md border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1); $event.stopPropagation()"
+          >
+            <lucide-icon name="chevron-left" class="w-3.5 h-3.5"></lucide-icon>
+          </button>
+          @for (p of pages; track $index) {
+            @if (p === -1) {
+              <span class="px-1 text-xs text-gray-400">…</span>
+            } @else {
+              <button
+                class="px-2.5 py-1 text-xs rounded-md border transition-colors"
+                [ngClass]="p === currentPage ? 'bg-emerald-600 text-white border-emerald-600' : 'border-gray-200 text-gray-600 hover:bg-gray-100'"
+                (click)="goToPage(p); $event.stopPropagation()"
+              >
+                {{ p }}
+              </button>
+            }
+          }
+          <button
+            class="px-2.5 py-1 text-xs rounded-md border border-gray-200 text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1); $event.stopPropagation()"
+          >
+            <lucide-icon name="chevron-right" class="w-3.5 h-3.5"></lucide-icon>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Sin resultados -->
+@if (!isLoading && data.length === 0 && !error) {
+  <div class="text-center py-12 text-gray-400">
+    <lucide-icon [name]="emptyIcon" class="w-8 h-8 mx-auto mb-2"></lucide-icon>
+    <p class="text-sm">{{ emptyMessage }}</p>
+  </div>
+}

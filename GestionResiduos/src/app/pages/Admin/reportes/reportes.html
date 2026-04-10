@@ -1,16 +1,190 @@
-<div class="bg-white rounded-lg shadow p-6">
-  <h2 class="text-xl font-semibold mb-4">Reportes</h2>
-  <ul class="space-y-3">
-    @for (r of reportes; track r.id) {
-      <li class="p-3 border rounded flex justify-between items-center">
-        <div>
-          <div class="font-medium">{{ r.titulo }}</div>
-          <div class="text-sm text-gray-500">Estado: {{ r.estado }}</div>
-        </div>
-        <div>
-          <button class="text-emerald-600">Ver</button>
-        </div>
-      </li>
-    }
-  </ul>
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <lucide-icon name="file-text" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        Administración de Reportes
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">Gestiona y revisa los reportes ciudadanos</p>
+    </div>
+  </div>
+
+  <!-- Filtro por estado -->
+  <div class="mb-4 flex items-center gap-3">
+    <label class="text-sm font-medium text-gray-600">Filtrar por estado:</label>
+    <select
+      [(ngModel)]="statusFilter"
+      (ngModelChange)="onFilterChange()"
+      class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+    >
+      <option value="">Todos</option>
+      @for (s of statuses; track s) {
+        <option [value]="s">{{ formatStatus(s) }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Tabla compartida -->
+  <app-data-table
+    [columns]="columns"
+    [data]="reports"
+    [isLoading]="isLoading"
+    [error]="error"
+    [pageSize]="10"
+    emptyMessage="No hay reportes registrados"
+    (rowClick)="openDetail($event)"
+  >
+    <ng-template #cellTemplate let-row let-col="column">
+      @switch (col.key) {
+        @case ('type') {
+          {{ formatType(row.type) }}
+        }
+        @case ('status') {
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            [class]="statusColor(row.status)"
+          >
+            <span class="w-1.5 h-1.5 rounded-full mr-1.5" [class]="statusDot(row.status)"></span>
+            {{ formatStatus(row.status) }}
+          </span>
+        }
+        @case ('createdAt') {
+          {{ formatDate(row.createdAt) }}
+        }
+        @default {
+          {{ row[col.key] ?? '—' }}
+        }
+      }
+    </ng-template>
+
+    <ng-template #actionsTemplate let-row>
+      <button
+        class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 rounded-md hover:bg-emerald-100 transition-colors"
+        (click)="openDetail(row); $event.stopPropagation()"
+      >
+        <lucide-icon name="search" class="w-3.5 h-3.5"></lucide-icon>
+        Ver
+      </button>
+    </ng-template>
+  </app-data-table>
 </div>
+
+<!-- Modal Detalle del Reporte -->
+@if (showDetailModal && selectedReport) {
+  <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="closeDetail()">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Reporte #{{ selectedReport.id }}</h2>
+        <button class="p-1 text-gray-400 hover:text-gray-600" (click)="closeDetail()">
+          <lucide-icon name="x-circle" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-4 space-y-4">
+        <!-- Tipo y categoría -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Tipo</p>
+            <p class="text-sm text-gray-800 mt-0.5">{{ formatType(selectedReport.type) }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Categoría</p>
+            <p class="text-sm text-gray-800 mt-0.5">{{ selectedReport.categoryName || '—' }}</p>
+          </div>
+        </div>
+
+        <!-- Usuario -->
+        <div>
+          <p class="text-xs font-medium text-gray-400 uppercase">Reportado por</p>
+          <p class="text-sm text-gray-800 mt-0.5">{{ selectedReport.userName }}</p>
+        </div>
+
+        <!-- Descripción -->
+        <div>
+          <p class="text-xs font-medium text-gray-400 uppercase">Descripción</p>
+          <p class="text-sm text-gray-700 mt-0.5">{{ selectedReport.description }}</p>
+        </div>
+
+        <!-- Ubicación -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Latitud</p>
+            <p class="text-sm text-gray-800 font-mono mt-0.5">{{ selectedReport.latitude }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Longitud</p>
+            <p class="text-sm text-gray-800 font-mono mt-0.5">{{ selectedReport.longitude }}</p>
+          </div>
+        </div>
+
+        <!-- Fecha -->
+        <div>
+          <p class="text-xs font-medium text-gray-400 uppercase">Fecha de creación</p>
+          <p class="text-sm text-gray-800 mt-0.5">{{ formatDate(selectedReport.createdAt) }}</p>
+        </div>
+
+        <!-- Imagen -->
+        @if (selectedReport.imageUrl) {
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase mb-1">Imagen adjunta</p>
+            <img [src]="selectedReport.imageUrl" alt="Imagen del reporte" class="w-full rounded-lg border border-gray-200 max-h-48 object-cover">
+          </div>
+        }
+
+        <!-- Estado actual + selector -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <p class="text-xs font-medium text-gray-400 uppercase mb-2">Estado del reporte</p>
+          <div class="flex items-center gap-3">
+            <select
+              [(ngModel)]="newStatus"
+              class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+            >
+              @for (s of statuses; track s) {
+                <option [value]="s">{{ formatStatus(s) }}</option>
+              }
+            </select>
+            <button
+              class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50"
+              [disabled]="newStatus === selectedReport.status"
+              (click)="requestStatusChange()"
+            >
+              Cambiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Confirmación -->
+@if (showConfirmModal) {
+  <div class="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4" (click)="confirmNo()">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm" (click)="$event.stopPropagation()">
+      <div class="px-6 py-5 text-center">
+        <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mx-auto mb-3">
+          <lucide-icon name="alert-triangle" class="w-6 h-6 text-amber-500"></lucide-icon>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ confirmTitle }}</h3>
+        <p class="text-sm text-gray-500">{{ confirmMessage }}</p>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-center gap-3">
+        <button
+          class="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          (click)="confirmNo()"
+        >
+          Cancelar
+        </button>
+        <button
+          class="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+          (click)="confirmYes()"
+        >
+          Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+}
