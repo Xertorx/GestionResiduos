@@ -1,16 +1,178 @@
-<div class="bg-white rounded-lg shadow p-6">
-  <h2 class="text-xl font-semibold mb-4">Educación</h2>
-  <div class="space-y-3">
-    @for (c of contenidos; track c.id) {
-      <div class="p-3 border rounded flex justify-between items-center">
-        <div>
-          <div class="font-medium">{{ c.titulo }}</div>
-          <div class="text-sm text-gray-500">Tipo: {{ c.tipo }}</div>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!--  ADMIN EDUCACIÓN — Misma estructura visual que el Client  -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+  <!-- Header (mismo estilo que Client) -->
+  <div class="text-center mb-12">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4 mt-8">
+      Gestión de Contenido Educativo
+    </h1>
+    <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+      Administra los recursos educativos sobre manejo de residuos, reciclaje y sostenibilidad
+    </p>
+  </div>
+
+  <!-- Barra de acciones -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <span class="text-gray-600 text-sm">
+        {{ contenidos.length }} contenido(s) registrado(s) en el servidor
+      </span>
+    </div>
+    <button
+      (click)="toggleForm()"
+      class="flex items-center gap-2 bg-emerald-600 text-white px-5 py-3 rounded-lg
+             font-medium hover:bg-emerald-700 transition-colors shadow-md">
+      <lucide-icon [name]="showForm ? 'x' : 'plus'" class="h-5 w-5"></lucide-icon>
+      {{ showForm ? 'Cancelar' : 'Nuevo Contenido' }}
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!--  FORMULARIO DE CREACIÓN (HU21)                  -->
+  <!-- ════════════════════════════════════════════════ -->
+  @if (showForm) {
+  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">Subir Nuevo Contenido</h2>
+
+    <!-- Título -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+      <input
+        type="text"
+        [(ngModel)]="newTitle"
+        placeholder="Ej: Guía de Separación de Residuos"
+        class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none
+               focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+    </div>
+
+    <!-- Descripción -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+      <textarea
+        [(ngModel)]="newDescription"
+        rows="3"
+        placeholder="Descripción del contenido educativo..."
+        class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none
+               focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+      </textarea>
+    </div>
+
+    <!-- Categoría -->
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+      <select
+        [(ngModel)]="newCategory"
+        class="w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none
+               focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+        @for (cat of categories; track cat.value) {
+          <option [value]="cat.value">{{ cat.label }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Archivo -->
+    <div class="mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-1">Archivo (PDF, JPG, PNG, WEBP, Video) *</label>
+      <div class="flex items-center gap-4">
+        <label
+          class="cursor-pointer flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2
+                 rounded-md border border-gray-300 hover:bg-gray-200 transition-colors">
+          <lucide-icon name="upload" class="h-5 w-5"></lucide-icon>
+          Seleccionar archivo
+          <input
+            type="file"
+            (change)="onFileSelected($event)"
+            accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4,.avi,.mkv"
+            class="hidden" />
+        </label>
+        @if (selectedFileName) {
+          <span class="text-sm text-gray-600">{{ selectedFileName }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- Botón enviar -->
+    <button
+      (click)="submitContent()"
+      [disabled]="isSubmitting"
+      class="w-full bg-emerald-600 text-white py-3 rounded-md font-medium
+             hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+      @if (isSubmitting) {
+        Subiendo...
+      } @else {
+        Subir Contenido
+      }
+    </button>
+  </div>
+  }
+
+  <!-- ════════════════════════════════════════════════ -->
+  <!--  LISTADO — Mismo grid visual que el Client     -->
+  <!-- ════════════════════════════════════════════════ -->
+  <div class="mb-12">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6">Contenidos del Servidor</h2>
+
+    @if (isLoading) {
+      <div class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4
+                    border-emerald-600 border-t-transparent"></div>
+        <p class="mt-4 text-gray-600">Cargando contenidos...</p>
+      </div>
+    }
+
+    @if (!isLoading && contenidos.length === 0) {
+      <div class="text-center py-12 bg-white rounded-lg shadow-md">
+        <lucide-icon name="inbox" class="h-12 w-12 text-gray-400 mx-auto mb-4"></lucide-icon>
+        <p class="text-gray-500">No hay contenidos registrados aún. Sube el primero.</p>
+      </div>
+    }
+
+    @if (!isLoading && contenidos.length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (content of contenidos; track content.id) {
+      <div class="resource-card bg-white rounded-lg shadow-md overflow-hidden
+                  transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl relative">
+        <!-- Imagen placeholder -->
+        <div class="w-full h-48 bg-gradient-to-br from-emerald-100 to-emerald-200
+                    flex items-center justify-center">
+          <lucide-icon [name]="getFileTypeIcon(content.fileType)"
+                       class="h-16 w-16 text-emerald-600 opacity-50"></lucide-icon>
         </div>
-        <div>
-          <button class="text-emerald-600">Editar</button>
+        <div class="p-6">
+          <div class="flex items-center mb-2">
+            <lucide-icon [name]="getFileTypeIcon(content.fileType)"
+                         class="h-5 w-5 text-emerald-600 mr-2"></lucide-icon>
+            <span class="text-sm text-gray-500">{{ content.fileType }}</span>
+            @if (content.category) {
+              <span class="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
+                {{ content.category }}
+              </span>
+            }
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">
+            {{ content.title }}
+          </h3>
+          <p class="text-gray-600 text-sm mb-4">
+            {{ content.description || 'Sin descripción' }}
+          </p>
+          <div class="flex justify-between items-center">
+            <a [href]="content.fileUrl" target="_blank"
+               class="btn-primary px-4 py-2 rounded-md text-sm font-medium
+                      hover:bg-emerald-100 transition-colors text-emerald-600">
+              Ver archivo
+            </a>
+            <button
+              (click)="deleteContent(content)"
+              class="text-red-500 hover:text-red-700 transition-colors p-2">
+              <lucide-icon name="trash-2" class="h-5 w-5"></lucide-icon>
+            </button>
+          </div>
         </div>
       </div>
+      }
+    </div>
     }
   </div>
 </div>
