@@ -130,19 +130,10 @@ export class Reports implements OnInit, OnDestroy {
     this.isLoadingCategories = true;
     this.formError = '';
 
-    this.http.get<unknown>(`${this.apiBase}/report-categories/active`).subscribe({
-      next: (response) => {
-        this.categories = this.extractArray(response)
-          .map((item: any) => ({
-            id: Number(item.id),
-            name: item.name ?? 'Sin nombre',
-            description: item.description ?? '',
-            status: item.status
-          }))
-          .filter((category) => Number.isFinite(category.id));
-
+    this.http.get<ReportCategory[]>(`${this.apiBase}/report-categories/active`).subscribe({
+      next: (categories) => {
+        this.categories = categories;
         this.reportForm.patchValue({ categoryId: '' }, { emitEvent: false });
-
         this.isLoadingCategories = false;
       },
       error: (error) => {
@@ -164,10 +155,9 @@ export class Reports implements OnInit, OnDestroy {
     this.isLoadingReports = true;
     this.listError = '';
 
-    this.http.get<unknown>(`${this.apiBase}/reports/my-reports`, { headers: this.buildAuthHeaders() }).subscribe({
-      next: (response) => {
-        const reportItems = this.extractArray(response);
-        this.myReports = reportItems.map((item: any, index: number) => this.mapReportItem(item, index));
+    this.http.get<UserReport[]>(`${this.apiBase}/reports/my-reports`, { headers: this.buildAuthHeaders() }).subscribe({
+      next: (reports) => {
+        this.myReports = reports;
         this.isLoadingReports = false;
       },
       error: (error) => {
@@ -309,37 +299,6 @@ export class Reports implements OnInit, OnDestroy {
     return new HttpHeaders({
       Authorization: `Bearer ${token}`
     });
-  }
-
-  private extractArray(payload: unknown): any[] {
-    if (Array.isArray(payload)) return payload;
-
-    const maybeObject = payload as any;
-    if (Array.isArray(maybeObject?.data)) return maybeObject.data;
-    if (Array.isArray(maybeObject?.reports)) return maybeObject.reports;
-    if (Array.isArray(maybeObject?.content)) return maybeObject.content;
-    if (maybeObject && typeof maybeObject === 'object') return [maybeObject];
-
-    return [];
-  }
-
-  private mapReportItem(item: any, index: number): UserReport {
-    const latitude = item.latitude ?? item.lat;
-    const longitude = item.longitude ?? item.lng;
-    const locationLabel =
-      item.address ||
-      item.location ||
-      (latitude && longitude ? `Lat ${latitude}, Lng ${longitude}` : 'Sin ubicación registrada');
-
-    return {
-      id: Number(item.id ?? index + 1),
-      type: item.type ?? 'sin_tipo',
-      status: (item.status ?? 'pendiente').toString(),
-      description: item.description ?? 'Sin descripción',
-      createdAt: item.createdAt ?? item.created_at ?? '',
-      categoryName: item.category?.name ?? item.categoryName ?? 'Sin categoría',
-      locationLabel
-    };
   }
 
   formatDate(dateValue: string): string {
