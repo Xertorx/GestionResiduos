@@ -4,6 +4,15 @@
   border-radius: 15px;
 }
 
+::ng-deep .gm-style-iw-c {
+  padding: 4px !important;
+}
+
+::ng-deep .gm-style-iw-d {
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
 
 /* You can add global styles to this file, and also import other style files */
 
@@ -27,7 +36,7 @@ body {
 
 .sidebar {
   width: 100%;
-  padding: 20px;
+  padding: 15px 5px;
   height: 500px;
 
   .places {
@@ -37,14 +46,16 @@ body {
     }
 
     h3 {
-      font-size: 16px;
-      margin-bottom: 10px;
+      font-size: 13px;
+      margin-bottom: 4px;
     }
 
-    padding: 16px;
-    border-radius: 8px;
-    margin-bottom: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
     cursor: pointer;
+    font-size: 12px;
+    line-height: 1.4;
 
     &.active {
       background-color: #d4e9e2;

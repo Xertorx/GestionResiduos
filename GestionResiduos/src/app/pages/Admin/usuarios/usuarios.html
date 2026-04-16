@@ -1,33 +1,130 @@
-<div class="bg-white rounded-lg shadow p-6">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-xl font-semibold">Usuarios</h2>
-    <div class="flex items-center gap-2">
-      <input type="text" placeholder="Buscar usuario..." [(ngModel)]="buscar" class="border px-3 py-2 rounded" />
-      <button class="px-4 py-2 bg-emerald-600 text-white rounded">Nuevo</button>
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <lucide-icon name="users" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        Administración de Usuarios
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">Consulta los usuarios registrados en la plataforma</p>
     </div>
   </div>
 
-  <table class="w-full text-left text-sm">
-    <thead>
-      <tr class="text-gray-600 border-b">
-        <th class="py-2">Nombre</th>
-        <th class="py-2">Correo</th>
-        <th class="py-2">Rol</th>
-        <th class="py-2">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (u of usuarios; track u.id) {
-        <tr class="border-b">
-          <td class="py-2">{{ u.nombre }}</td>
-          <td class="py-2">{{ u.correo }}</td>
-          <td class="py-2">{{ u.rol }}</td>
-          <td class="py-2">
-            <button class="text-emerald-600 mr-2" (click)="editar(u)">Editar</button>
-            <button class="text-red-600" (click)="eliminar(u)">Eliminar</button>
-          </td>
-        </tr>
+  <!-- Tabla compartida -->
+  <app-data-table
+    [columns]="columns"
+    [data]="users"
+    [isLoading]="isLoading"
+    [error]="error"
+    [pageSize]="10"
+    emptyMessage="No hay usuarios registrados"
+    emptyIcon="users"
+    (rowClick)="openDetail($event)"
+  >
+    <ng-template #cellTemplate let-row let-col="column">
+      @switch (col.key) {
+        @case ('role.name') {
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            [class]="roleColor(row.role)"
+          >
+            {{ row.role.name }}
+          </span>
+        }
+        @case ('status') {
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+            [class]="statusColor(row.status)"
+          >
+            <span class="w-1.5 h-1.5 rounded-full mr-1.5" [class]="statusDot(row.status)"></span>
+            {{ row.status }}
+          </span>
+        }
+        @default {
+          {{ row[col.key] ?? '—' }}
+        }
       }
-    </tbody>
-  </table>
+    </ng-template>
+
+    <ng-template #actionsTemplate let-row>
+      <button
+        class="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium text-emerald-600 bg-emerald-50 rounded-md hover:bg-emerald-100 transition-colors"
+        (click)="openDetail(row); $event.stopPropagation()"
+      >
+        <lucide-icon name="search" class="w-3.5 h-3.5"></lucide-icon>
+        Ver
+      </button>
+    </ng-template>
+  </app-data-table>
 </div>
+
+<!-- Modal Detalle del Usuario -->
+@if (showDetailModal && selectedUser) {
+  <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="closeDetail()">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Usuario #{{ selectedUser.documentNumber }}</h2>
+        <button class="p-1 text-gray-400 hover:text-gray-600" (click)="closeDetail()">
+          <lucide-icon name="x-circle" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-4 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Nombres</p>
+            <p class="text-sm text-gray-800 mt-0.5">{{ selectedUser.names }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Apellido</p>
+            <p class="text-sm text-gray-800 mt-0.5">{{ selectedUser.lastName }}</p>
+          </div>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium text-gray-400 uppercase">Correo</p>
+          <p class="text-sm text-gray-800 mt-0.5">{{ selectedUser.email }}</p>
+        </div>
+
+        <div>
+          <p class="text-xs font-medium text-gray-400 uppercase">Teléfono</p>
+          <p class="text-sm text-gray-800 mt-0.5">{{ selectedUser.phoneNumber || '—' }}</p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Rol</p>
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+              [class]="roleColor(selectedUser.role)"
+            >
+              {{ selectedUser.role.name }}
+            </span>
+          </div>
+          <div>
+            <p class="text-xs font-medium text-gray-400 uppercase">Estado</p>
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+              [class]="statusColor(selectedUser.status)"
+            >
+              <span class="w-1.5 h-1.5 rounded-full mr-1.5" [class]="statusDot(selectedUser.status)"></span>
+              {{ selectedUser.status }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-end">
+        <button
+          class="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+          (click)="closeDetail()"
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+}

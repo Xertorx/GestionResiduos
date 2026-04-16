@@ -1,6 +1,6 @@
 import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import Swal from 'sweetalert2';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../services/auth-state.service';
@@ -8,7 +8,7 @@ import { AuthStateService } from '../../services/auth-state.service';
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [RouterOutlet, LucideAngularModule],
+  imports: [RouterOutlet, RouterLink, LucideAngularModule],
   templateUrl: './dashboard-layout.html',
   styleUrl: './dashboard-layout.scss'
 })
@@ -43,16 +43,30 @@ export class DashboardLayout implements OnInit, OnDestroy {
   }
 
   // Definición del menú de la barra lateral
-  menuItems = [
+  menuItems: { label: string; route: string; icon: string; children?: { label: string; route: string; icon: string }[] }[] = [
     { label: 'Inicio', route: '/dashboard', icon: 'home' },
     { label: 'Usuarios', route: '/dashboard/usuarios', icon: 'users' },
     { label: 'Eco-puntos', route: '/dashboard/eco-puntos', icon: 'map-pin' },
     { label: 'Calendario', route: '/dashboard/calendario-recoleccion', icon: 'calendar' },
-    { label: 'Reportes', route: '/dashboard/reportes', icon: 'BarChart2' },
+    {
+      label: 'Reportes', icon: 'BarChart2', route: '',
+      children: [
+        { label: 'Adm. Categorías', route: '/dashboard/reportes/categorias', icon: 'tag' },
+        { label: 'Adm. Reportes', route: '/dashboard/reportes', icon: 'file-text' }
+      ]
+    },
     { label: 'Educación', route: '/dashboard/educacion', icon: 'book-open' },
     { label: 'Seguimiento', route: '/dashboard/seguimiento', icon: 'trending-up' },
     { label: 'Foro', route: '/dashboard/foro', icon: 'message-square' }
   ];
+
+  expandedMenu: string | null = null;
+
+  toggleSubmenu(label: string) {
+    console.log('toggleSubmenu called:', label, 'current:', this.expandedMenu);
+    this.expandedMenu = this.expandedMenu === label ? null : label;
+    console.log('expandedMenu after:', this.expandedMenu);
+  }
 
   toggleSidebar() {
     this.isSidebarOpen = !this.isSidebarOpen;

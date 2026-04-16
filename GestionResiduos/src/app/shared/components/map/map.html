@@ -8,9 +8,8 @@
     </p>
 </div>
 
-<div class="p-6 mb-8 bg-white rounded-lg shadow-md flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-9">
-
-    <section class="container flex-col md:w-[30%] w-full  gap-2 p-4 divide-y">
+<div class="h-[450px] pb-6 pt-6 mb-8 bg-white rounded-lg shadow-md flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-9">
+    <section class="container flex-col md:w-[30%] w-full h-[400px] gap-2 p-4 divide-y">
         <h1 class="text-xl text-center font-bold mb-4">Ecopuntos Disponibles</h1>
         
         <!-- Filtro de búsqueda -->
@@ -22,8 +21,8 @@
                 class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-emerald-600 focus:outline-none text-sm">
         </div>
 
-        <div class="sidebar rounded-lg p-4 h-[500px] overflow-y-auto " id="sidebar">
-            @if (!filteredPlaces() || filteredPlaces()?.length === 0) {
+        <div class="sidebar rounded-lg h-[600px] w-full overflow-y-auto " id="sidebar">
+            @if (filteredPlaces().length === 0) {
             <div class="text-center text-gray-500 py-8">
                 <lucide-icon name="map-pin" class="h-8 w-8 mx-auto mb-2 text-gray-400"></lucide-icon>
                 <p>No se encontraron ecopuntos</p>
@@ -31,36 +30,53 @@
             } @else {
             @for (place of filteredPlaces();
             let index = $index;
-            track place.idPlace) {
+            track place.id) {
             <div 
             #places class="places" 
-            [class.active]="selectedPlace()?.idPlace === place.idPlace" 
+            [class.active]="selectedPlace()?.id === place.id" 
             (click)="changeLocation(place,undefined,index)">
-                <strong>{{ place.place }}</strong><br>
-                {{ place.direccion }}<br>
-                <span class="text-xs text-gray-500">{{ place.barrio }}, {{ place.localidad }}</span><br>
-                Horario: {{ place.openingHours }} - {{ place.closingHours }}
+                <strong class="text-sm text-gray-900">{{ place.name }}</strong>
+                <p class="text-xs text-gray-500 mt-0.5">{{ place.address }}</p>
+                <p class="text-xs text-emerald-600 mt-0.5">{{ place.openingTime }} - {{ place.closingTime }}</p>
             </div>
             }
             }
         </div>
 
     </section>
-    <div class="w-[100%]">
+    <div class="w-[100%] h-[450px] rounded-lg overflow-hidden">
         <google-map [center]="center" [zoom]="zoom" [options]="mapOptions">
-            @for (place of filteredPlaces(); track place.idPlace) {
+            @for (place of filteredPlaces(); track place.id) {
             <map-advanced-marker 
             #marker="mapAdvancedMarker"
             [position]="{
-            lat: place.latitud,
-            lng: place.longitud
+            lat: place.latitude,
+            lng: place.longitude
             }" 
             [options]="markerOptions"
             (mapClick)="changeLocation(place, marker)"
             [content]="getMarkerContent(place)"
             />
             }
-             <map-info-window>Info Window content</map-info-window>
+             <map-info-window>
+                @if (selectedPlace(); as place) {
+                <div class="p-1.5 max-w-[auto]qq">
+                    <p class="font-semibold text-xs text-gray-900">{{ place.name }}</p>
+                    <p class="text-[11px] text-gray-500 mt-0.5">{{ place.address }}</p>
+                    <p class="text-[11px] text-gray-400 mt-0.5">{{ place.description }}</p>
+                    <p class="text-[11px] text-emerald-600 mt-0.5 font-medium">
+                        {{ place.openingTime }} - {{ place.closingTime }}
+                    </p>
+                    @if (place.residueTypes.length > 0) {
+                    <div class="flex flex-wrap gap-0.5 mt-1">
+                        @for (type of place.residueTypes; track type) {
+                        <span class="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-px rounded-full">{{ type }}</span>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+             </map-info-window>
         </google-map>
     </div>
 </div>

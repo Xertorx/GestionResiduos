@@ -7,7 +7,6 @@ import { LucideAngularModule, Users, MapPin } from 'lucide-angular';
 @Component({
   selector: 'app-root',
   standalone: true,
-  // 🔹 Solo debes importar RouterOutlet, LucideAngularModule se registra globalmente (no aquí)
   imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss'
