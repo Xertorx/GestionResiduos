@@ -31,9 +31,14 @@ export class EducationService {
     if (isPlatformBrowser(this.platformId)) {
       token = localStorage.getItem('accessToken') || '';
     }
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+    // Solo enviar si el token es realmente válido
+    if (token && token !== 'null' && token !== 'undefined') {
+      return new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      });
+    } else {
+      return new HttpHeaders();
+    }
   }
 
   // ── HU20: GET todos los contenidos educativos ──
@@ -65,11 +70,12 @@ export class EducationService {
     if (isPlatformBrowser(this.platformId)) {
       token = localStorage.getItem('accessToken') || '';
     }
-
+    let headers = new HttpHeaders();
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
     return this.http.post<EducationContent>(this.baseUrl, formData, {
-      headers: new HttpHeaders({
-        Authorization: `Bearer ${token}`
-      })
+      headers
     });
   }
 

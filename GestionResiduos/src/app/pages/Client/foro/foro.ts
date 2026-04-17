@@ -56,7 +56,7 @@ export class Foro implements OnInit, OnDestroy {
     this.error = '';
     this.api.getActiveTopics().subscribe({
       next: (data) => { this.temas = data; this.isLoading = false; },
-      error: () => { this.error = 'No se pudieron cargar los temas.'; this.isLoading = false; }
+      error: () => { this.isLoading = false; }
     });
   }
 

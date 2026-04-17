@@ -26,7 +26,7 @@ export class ForoAdmin implements OnInit {
     this.error = '';
     this.api.getAllTopics().subscribe({
       next: (data) => { this.temas = data; this.isLoading = false; },
-      error: () => { this.error = 'No se pudieron cargar los temas.'; this.isLoading = false; }
+      error: () => { this.isLoading = false; }
     });
   }
 

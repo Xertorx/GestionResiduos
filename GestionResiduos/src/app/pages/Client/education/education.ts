@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
+
 import { EducationService, EducationContent } from '../../../services/education.service';
+import { AuthStateService } from '../../../services/auth-state.service';
 
 @Component({
   selector: 'app-education',
@@ -22,10 +24,18 @@ export class Education implements OnInit {
   // ── Datos combinados para la vista (backend + fallback local) ──
   guides: any[] = [];
 
-  constructor(private educationService: EducationService) {}
+  isLoggedIn = false;
+
+  constructor(
+    private educationService: EducationService,
+    private authState: AuthStateService
+  ) {}
 
   ngOnInit(): void {
     this.loadContents();
+    this.authState.isLoggedIn$.subscribe((logged) => {
+      this.isLoggedIn = logged;
+    });
   }
 
   loadContents(): void {

@@ -19,6 +19,8 @@ export class Calendar implements OnInit {
   calendarOptions: CalendarOptions | null = null;
   selectedDistrictId = 1;
   isLoadingSchedules = false;
+  showPreviewModal = false;
+  selectedEvent: any = null;
 
   districts = [
     { id: 1, name: 'Ciudad Bolívar' },
@@ -81,6 +83,7 @@ export class Calendar implements OnInit {
   }
 
   private initCalendar(events: EventInput[]): void {
+    const today = new Date();
     this.calendarOptions = {
       plugins: [this.dayGridPlugin, this.interactionPlugin],
       initialView: 'dayGridMonth',
@@ -93,9 +96,21 @@ export class Calendar implements OnInit {
       },
       events,
       eventClick: (info) => {
-        console.log('Evento:', info.event);
-      }
+        this.onEventClick(info.event);
+      },
+      initialDate: today,
+      nowIndicator: true
     };
+  }
+
+  onEventClick(event: any) {
+    this.selectedEvent = event;
+    this.showPreviewModal = true;
+  }
+
+  closePreviewModal() {
+    this.showPreviewModal = false;
+    this.selectedEvent = null;
   }
 
   private schedulesToEvents(schedules: any[]): EventInput[] {
@@ -103,11 +118,12 @@ export class Calendar implements OnInit {
       DOMINGO: 0, LUNES: 1, MARTES: 2, MIERCOLES: 3,
       JUEVES: 4, VIERNES: 5, SABADO: 6
     };
+    // Verde institucional y variantes
     const colorMap: Record<string, string> = {
-      ORGANICO: '#059669',
-      RECICLABLE: '#2563eb',
-      ESPECIAL: '#6366f1',
-      RCD: '#d97706'
+      ORGANICO: '#059669', // verde principal
+      RECICLABLE: '#10b981', // verde claro
+      ESPECIAL: '#047857', // verde oscuro
+      RCD: '#059669' // igual a orgánico, sin amarillo
     };
 
     const events: EventInput[] = [];
@@ -127,8 +143,16 @@ export class Calendar implements OnInit {
           events.push({
             title: `${s.residueType} (${s.startTime} - ${s.endTime})`,
             date: dateStr,
-            color: colorMap[s.residueType] || '#6b7280',
-            extendedProps: { schedule: s }
+            backgroundColor: colorMap[s.residueType] || '#059669',
+            borderColor: '#047857',
+            textColor: '#fff',
+            extendedProps: {
+              ...s,
+              startTime: s.startTime,
+              endTime: s.endTime,
+              residueType: s.residueType,
+              description: s.description
+            }
           });
         }
         current.setDate(current.getDate() + 1);

@@ -226,7 +226,11 @@ export class ApiService {
   }
 
   changeScheduleStatus(id: number, status: string): Observable<any> {
-    return this.http.patch(`/api/schedules/${id}/status?status=${status}`, null, { headers: this.authHeaders() });
+    return this.http.patch(
+      `/api/schedules/${id}/status?status=${status}`,
+      null,
+      { headers: this.authHeaders().set('Content-Type', 'application/json') }
+    );
   }
 
   deleteSchedule(id: number): Observable<any> {
