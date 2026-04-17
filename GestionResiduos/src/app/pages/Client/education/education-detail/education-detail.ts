@@ -1,20 +1,19 @@
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { CarouselComponent } from '../../../../shared/components/carousel/carousel'; 
-
+import { CarouselComponent } from '../../../../shared/components/carousel/carousel';
+import { EducationService, EducationContent } from '../../../../services/education.service';
 
 export interface Resource {
   id: number;
   title: string;
   description: string;
-  type?: string;      
-  time?: string;      
+  type?: string;
+  time?: string;
   author?: string;
-  date?: string;      
-  images?: string[];  
+  date?: string;
+  images?: string[];
   pdfs?: { name: string; url: string }[];
   sections?: {
     title: string;
@@ -29,8 +28,8 @@ export interface Resource {
 
 @Component({
   selector: 'app-education-detail',
-  standalone: true, 
-  imports: [CommonModule, RouterModule, LucideAngularModule,CarouselComponent],
+  standalone: true,
+  imports: [CommonModule, RouterModule, LucideAngularModule, CarouselComponent],
   templateUrl: './education-detail.html',
   styleUrls: ['./education-detail.scss']
 })
@@ -38,23 +37,30 @@ export class EducationDetail implements OnInit {
   resource: Resource | null = null;
   selectedSection: any = null;
   completedSections: Set<string> = new Set();
-  resourceCompleted: boolean = false;               
+  resourceCompleted: boolean = false;
+
+  // ── Flag para saber si el contenido viene del backend ──
+  isFromBackend = false;
+  backendContent: EducationContent | null = null;
+  isLoading = true;
+
+  // ── Datos locales (los que ya tenías) ──
   private resources: Resource[] = [
     {
       id: 1,
       title: 'Guía de Separación de Residuos',
       description: 'Aprende a separar correctamente los residuos orgánicos, reciclables y especiales.',
-      type: 'Guía PDF', //Datos que se pueden eliminar 
-      time: '15 min', //Datos que se pueden eliminar
-      author: 'Juan Pérez', //Datos que se pueden eliminar
-      date: '01/11/2025', //Datos que se pueden eliminar
+      type: 'Guía PDF',
+      time: '15 min',
+      author: 'Juan Pérez',
+      date: '01/11/2025',
       images: [
         '/img/icons/Reciclaje.png',
         'https://picsum.photos/id/1015/800/400',
-			'https://picsum.photos/id/1020/800/400',
-			'https://picsum.photos/id/1035/800/400'
+        'https://picsum.photos/id/1020/800/400',
+        'https://picsum.photos/id/1035/800/400'
       ],
-      pdfs:   [
+      pdfs: [
         { name: 'Guía de Separación de Residuos', url: 'https://www.uaesp.gov.co/images/Guia-UAESP_SR.pdf' },
         { name: 'Manual de Clasificación UAESP', url: 'https://www.uaesp.gov.co/content/subdireccion-aprovechamiento' }
       ],
@@ -62,7 +68,7 @@ export class EducationDetail implements OnInit {
         {
           title: 'Residuos Orgánicos',
           content: 'Incluye restos de comida, cáscaras, café, etc. Los residuos orgánicos son biodegradables y pueden ser aprovechados mediante compostaje. Según la UAESP, el 60% de los residuos sólidos domiciliarios en Bogotá son materia orgánica.',
-          icon: 'leaf', 
+          icon: 'leaf',
           summary: 'Aprende a identificar residuos orgánicos',
           images: [
             'https://picsum.photos/id/1015/800/400',
@@ -96,7 +102,7 @@ export class EducationDetail implements OnInit {
         {
           title: 'Residuos Especiales',
           content: 'Baterías, pilas, electrónicos y químicos requieren tratamiento especial. Estos residuos no deben mezclarse con basura común ya que contienen sustancias peligrosas. Bogotá cuenta con puntos de recolección especializados en diferentes localidades.',
-          icon: 'alert-triangle', 
+          icon: 'alert-triangle',
           summary: 'Cómo manejar residuos peligrosos',
           images: [
             'https://picsum.photos/id/1045/800/400',
@@ -214,13 +220,73 @@ export class EducationDetail implements OnInit {
     }
   ];
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private educationService: EducationService
+  ) {}
 
   ngOnInit(): void {
     const idParam = this.route.snapshot.paramMap.get('id');
     const id = idParam ? Number(idParam) : null;
+
     if (id) {
-      this.resource = this.resources.find(r => r.id === id) ?? null;
+      // Buscar en el backend
+      this.isFromBackend = true;
+      this.educationService.getById(id).subscribe({
+        next: (content) => {
+          this.backendContent = content;
+          this.resource = this.mapBackendToResource(content);
+          this.isLoading = false;
+        },
+        error: (err) => {
+          console.error('Error cargando contenido del backend:', err);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Convierte un EducationContent del backend al formato Resource
+   * para que el HTML existente lo pueda mostrar sin cambios.
+   */
+  private mapBackendToResource(content: EducationContent): Resource {
+    const isImage = content.fileType === 'IMAGE';
+    const isPdf = content.fileType === 'PDF';
+
+    return {
+      id: content.id,
+      title: content.title,
+      description: content.description || 'Contenido educativo sobre gestión de residuos.',
+      type: content.fileType,
+      time: '',
+      author: 'Administrador',
+      date: content.createdAt ? new Date(content.createdAt).toLocaleDateString() : '',
+      images: isImage ? [content.fileUrl] : [],
+      pdfs: isPdf ? [{ name: content.title, url: content.fileUrl }] : [],
+      sections: [
+        {
+          title: content.title,
+          content: content.description || 'Contenido educativo subido por el administrador.',
+          icon: this.getIconByFileType(content.fileType),
+          summary: content.description || 'Haz clic para ver más...',
+          images: isImage ? [content.fileUrl] : [],
+          pdfs: isPdf ? [{ name: content.title, url: content.fileUrl }] : [],
+          topics: []
+        }
+      ]
+    };
+  }
+
+  private getIconByFileType(fileType: string): string {
+    switch (fileType) {
+      case 'PDF': return 'book-open';
+      case 'IMAGE': return 'image';
+      case 'VIDEO': return 'video';
+      default: return 'file';
     }
   }
 
@@ -261,12 +327,10 @@ export class EducationDetail implements OnInit {
   toggleResourceCompleted(): void {
     this.resourceCompleted = !this.resourceCompleted;
     if (this.resourceCompleted && this.resource?.sections) {
-      // Marcar todas las secciones como completadas
       this.resource.sections.forEach(section => {
         this.completedSections.add(section.title);
       });
     } else {
-      // Desmarcar todas las secciones
       this.completedSections.clear();
     }
   }
