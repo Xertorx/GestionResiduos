@@ -1,0 +1,20 @@
+info:
+  name: Calendario por Localidad y Dia
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: http://localhost:8080/api/schedules/district/1/day/LUNES
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Obtiene el calendario por localidad y día de la semana.
+  No requiere JWT (público).
+  Días válidos: LUNES, MARTES, MIERCOLES, JUEVES, VIERNES, SABADO, DOMINGO.
+

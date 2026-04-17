@@ -1,0 +1,32 @@
+info:
+  name: Cambiar Estado Tema (Admin)
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/forum/topics/1/status
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "estado": "INACTIVO"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Cambia el estado de un tema (ACTIVO o INACTIVO). Solo ADMINISTRADOR.
+  Reemplazar 1 con el ID del tema.
+
+

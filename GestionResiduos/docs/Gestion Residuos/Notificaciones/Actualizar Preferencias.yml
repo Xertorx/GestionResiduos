@@ -1,0 +1,53 @@
+info:
+  name: Actualizar Preferencias
+  type: http
+  seq: 2
+
+http:
+  method: PUT
+  url: http://localhost:8080/api/notifications/preferences
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "collectionAlerts": true,
+        "campaignAlerts": true,
+        "residueTypesFilter": "ORGANICO,RECICLABLE",
+        "preferredTime": "18:00",
+        "enabled": true,
+        "emailEnabled": true,
+        "whatsappEnabled": false,
+        "whatsappNumber": "3001234567",
+        "telegramEnabled": false,
+        "telegramChatId": ""
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Actualiza las preferencias de notificación del usuario autenticado.
+  - collectionAlerts: recibir alertas de recolección
+  - campaignAlerts: recibir alertas de campañas
+  - residueTypesFilter: CSV de tipos (ORGANICO,RECICLABLE,ESPECIAL,RCD) o null para todos
+  - preferredTime: hora preferida (HH:mm)
+  - enabled: activar/desactivar todas las notificaciones
+  
+  Canales:
+  - emailEnabled: recibir por email (default true)
+  - whatsappEnabled: recibir por WhatsApp (requiere whatsappNumber)
+  - whatsappNumber: número de WhatsApp (si es diferente al del perfil)
+  - telegramEnabled: recibir por Telegram (requiere telegramChatId)
+  - telegramChatId: Chat ID obtenido al iniciar conversación con el bot
+  
+  Fallback: si un canal falla, se intenta el siguiente (WhatsApp → Telegram → Email).
+

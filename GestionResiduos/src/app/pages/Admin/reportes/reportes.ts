@@ -2,9 +2,8 @@ import { Component, Inject, OnInit, PLATFORM_ID, ViewChild } from '@angular/core
 import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
-import { AuthStateService } from '../../../services/auth-state.service';
+import { ApiService } from '../../../services/api.service';
 import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table';
 
 export interface Report {
@@ -35,8 +34,6 @@ export interface Report {
 export class ReportesAdmin implements OnInit {
   @ViewChild(DataTableComponent) dataTable!: DataTableComponent;
 
-  private readonly apiBase = '/api/reports';
-
   reports: Report[] = [];
   isLoading = false;
   error = '';
@@ -51,9 +48,14 @@ export class ReportesAdmin implements OnInit {
     { key: 'status', label: 'Estado', align: 'center' },
   ];
 
-  // Filtro
+  // Filtros
   statusFilter = '';
+  typeFilter = '';
   statuses = ['pendiente', 'en_revision', 'resuelto', 'rechazado'];
+  types = ['punto_critico', 'incumplimiento_calendario'];
+
+  // Estadísticas
+  stats: any = null;
 
   // Modal detalle
   showDetailModal = false;
@@ -67,14 +69,14 @@ export class ReportesAdmin implements OnInit {
   confirmAction: (() => void) | null = null;
 
   constructor(
-    private http: HttpClient,
-    private authState: AuthStateService,
+    private api: ApiService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
       this.loadReports();
+      this.loadStatistics();
     }
   }
 
@@ -82,20 +84,26 @@ export class ReportesAdmin implements OnInit {
     this.isLoading = true;
     this.error = '';
 
-    const url = this.statusFilter
-      ? `${this.apiBase}/status/${this.statusFilter}`
-      : this.apiBase;
+    if (this.statusFilter || this.typeFilter) {
+      this.api.searchReports({ status: this.statusFilter || undefined, type: this.typeFilter || undefined }).subscribe({
+        next: (data: any) => {
+          this.reports = Array.isArray(data) ? data : (data.content || []);
+          this.isLoading = false;
+        },
+        error: () => { this.error = 'No se pudieron cargar los reportes.'; this.isLoading = false; }
+      });
+    } else {
+      this.api.getAllReports().subscribe({
+        next: (data) => { this.reports = data; this.isLoading = false; },
+        error: () => { this.error = 'No se pudieron cargar los reportes.'; this.isLoading = false; }
+      });
+    }
+  }
 
-    this.http.get<Report[]>(url, { headers: this.authHeaders() }).subscribe({
-      next: (data) => {
-        this.reports = data;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Error cargando reportes', err);
-        this.error = 'No se pudieron cargar los reportes.';
-        this.isLoading = false;
-      }
+  loadStatistics(): void {
+    this.api.getReportStatistics().subscribe({
+      next: (data) => this.stats = data,
+      error: () => {}
     });
   }
 
@@ -124,17 +132,13 @@ export class ReportesAdmin implements OnInit {
       'Cambiar estado',
       `¿Cambiar el estado del reporte #${this.selectedReport.id} de "${this.formatStatus(this.selectedReport.status)}" a "${this.formatStatus(this.newStatus)}"?`,
       () => {
-        this.http.patch(
-          `${this.apiBase}/${this.selectedReport!.id}/status?newStatus=${this.newStatus}`,
-          null,
-          { headers: this.authHeaders() }
-        ).subscribe({
+        this.api.changeReportStatus(this.selectedReport!.id, this.newStatus).subscribe({
           next: () => {
             this.selectedReport!.status = this.newStatus;
             this.loadReports();
+            this.loadStatistics();
           },
-          error: (err) => {
-            console.error('Error al cambiar estado', err);
+          error: () => {
             this.error = 'No se pudo cambiar el estado del reporte.';
           }
         });
@@ -202,11 +206,5 @@ export class ReportesAdmin implements OnInit {
     if (type === 'punto_critico') return 'Punto crítico';
     if (type === 'incumplimiento_calendario') return 'Incumplimiento';
     return type;
-  }
-
-  private authHeaders(): HttpHeaders {
-    const token = this.authState.getAccessToken();
-    if (!token) return new HttpHeaders();
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 }

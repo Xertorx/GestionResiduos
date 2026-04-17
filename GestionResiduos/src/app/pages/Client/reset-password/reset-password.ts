@@ -2,9 +2,9 @@ import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router, RouterLink, ActivatedRoute } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
 import { LoadingService } from '../../../services/loading.service';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-reset-password',
@@ -29,10 +29,10 @@ export class ResetPassword implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute,
     private loadingService: LoadingService,
+    private api: ApiService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     this.requestForm = this.fb.group({
@@ -72,9 +72,7 @@ export class ResetPassword implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/forgot-password', {
-      email: this.requestForm.value.email
-    }).subscribe({
+    this.api.forgotPassword(this.requestForm.value.email).subscribe({
       next: () => {
         this.loadingService.hide();
         this.step = 'success'; // ← muestra mensaje de éxito
@@ -99,10 +97,7 @@ export class ResetPassword implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/reset-password', {
-      token:       this.token,
-      newPassword: this.resetForm.value.newPassword
-    }).subscribe({
+    this.api.resetPassword(this.token, this.resetForm.value.newPassword).subscribe({
       next: () => {
         this.loadingService.hide();
         setTimeout(() => {

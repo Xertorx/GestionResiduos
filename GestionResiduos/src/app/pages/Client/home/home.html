@@ -39,37 +39,53 @@
               <div
               class="text-emerald-600 mx-auto h-12 w-12 flex items-center justify-center"
             >
-              <lucide-icon name="users" class="h-8 w-8"></lucide-icon>
-            </div>
-            <h3 class="mt-4 text-3xl font-bold text-gray-900">1,250+</h3>
-            <p class="mt-2 text-gray-600">Ciudadanos participando</p>
-          </div>
-          <div class="bg-emerald-50 p-6 rounded-lg text-center">
-            <div
-              class="text-emerald-600 mx-auto h-12 w-12 flex items-center justify-center"
-            >
               <lucide-icon name="map-pin" class="h-8 w-8"></lucide-icon>
             </div>
-            <h3 class="mt-4 text-3xl font-bold text-gray-900">48</h3>
+            @if (!statsLoaded) {
+              <div class="mt-4 flex justify-center"><div class="h-8 w-16 bg-emerald-100 animate-pulse rounded"></div></div>
+            } @else {
+              <h3 class="mt-4 text-3xl font-bold text-gray-900">{{ ecopointsCount }}</h3>
+            }
             <p class="mt-2 text-gray-600">Eco-puntos activos</p>
           </div>
           <div class="bg-emerald-50 p-6 rounded-lg text-center">
             <div
               class="text-emerald-600 mx-auto h-12 w-12 flex items-center justify-center"
             >
-              <lucide-icon name="clock" class="h-8 w-8"></lucide-icon>
+              <lucide-icon name="alert-triangle" class="h-8 w-8"></lucide-icon>
             </div>
-            <h3 class="mt-4 text-3xl font-bold text-gray-900">3.2T</h3>
-            <p class="mt-2 text-gray-600">Residuos gestionados</p>
+            @if (!statsLoaded) {
+              <div class="mt-4 flex justify-center"><div class="h-8 w-16 bg-emerald-100 animate-pulse rounded"></div></div>
+            } @else {
+              <h3 class="mt-4 text-3xl font-bold text-gray-900">{{ totalReports }}</h3>
+            }
+            <p class="mt-2 text-gray-600">Reportes generados</p>
           </div>
           <div class="bg-emerald-50 p-6 rounded-lg text-center">
             <div
               class="text-emerald-600 mx-auto h-12 w-12 flex items-center justify-center"
             >
-              <lucide-icon name="award" class="h-8 w-8"></lucide-icon>
+              <lucide-icon name="check-circle" class="h-8 w-8"></lucide-icon>
             </div>
-            <h3 class="mt-4 text-3xl font-bold text-gray-900">85%</h3>
-            <p class="mt-2 text-gray-600">Satisfacción usuarios</p>
+            @if (!statsLoaded) {
+              <div class="mt-4 flex justify-center"><div class="h-8 w-16 bg-emerald-100 animate-pulse rounded"></div></div>
+            } @else {
+              <h3 class="mt-4 text-3xl font-bold text-gray-900">{{ resolvedReports }}</h3>
+            }
+            <p class="mt-2 text-gray-600">Reportes resueltos</p>
+          </div>
+          <div class="bg-emerald-50 p-6 rounded-lg text-center">
+            <div
+              class="text-emerald-600 mx-auto h-12 w-12 flex items-center justify-center"
+            >
+              <lucide-icon name="message-square" class="h-8 w-8"></lucide-icon>
+            </div>
+            @if (!statsLoaded) {
+              <div class="mt-4 flex justify-center"><div class="h-8 w-16 bg-emerald-100 animate-pulse rounded"></div></div>
+            } @else {
+              <h3 class="mt-4 text-3xl font-bold text-gray-900">{{ foroTopics }}</h3>
+            }
+            <p class="mt-2 text-gray-600">Temas en el foro</p>
           </div>
         </div>
       </div>

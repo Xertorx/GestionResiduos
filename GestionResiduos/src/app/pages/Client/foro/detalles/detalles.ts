@@ -1,21 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
-interface Respuesta {
-  usuario: string;
-  texto: string;
-  fecha: string;
-}
-
-interface Comentario {
-  usuario: string;
-  texto: string;
-  fecha: string;
-  respuestas?: Respuesta[];
-}
-
+import { Subscription } from 'rxjs';
+import { AuthStateService } from '../../../../services/auth-state.service';
+import { ApiService } from '../../../../services/api.service';
 
 @Component({
   selector: 'app-detalles',
@@ -24,40 +13,64 @@ interface Comentario {
   templateUrl: './detalles.html',
   styleUrls: ['./detalles.scss']
 })
-export class Detalles implements OnInit {
-  tema: any;
-  comentarios: Comentario[] = [
-    {
-      usuario: 'María',
-      texto: 'Me encanta este tema, aprendí mucho.',
-      fecha: '16/10/2025',
-      respuestas: []
-    },
-    {
-      usuario: 'Carlos',
-      texto: 'Yo uso bolsas separadas para plásticos y vidrios.',
-      fecha: '17/10/2025',
-      respuestas: []
-    }
-  ];
+export class Detalles implements OnInit, OnDestroy {
+  tema: any = null;
+  isAuthenticated = false;
+  authReady = false;
+  isLoadingTema = false;
+  isLoadingComments = false;
+  private subs = new Subscription();
+
+  comentarios: any[] = [];
 
   mostrarModal = false;
   comentarioSeleccionado: any = null;
-  textoRespuesta: string = '';
-  textoComentario: string = '';
+  textoRespuesta = '';
+  textoComentario = '';
+  isSendingComment = false;
+  isSendingReply = false;
   mensajeExito: string | null = null;
+  mensajeError: string | null = null;
 
-  constructor(private route: ActivatedRoute, private router: Router) { }
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private authState: AuthStateService,
+    private api: ApiService
+  ) {}
 
   ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    this.tema = {
-      id,
-      titulo: 'Cómo separar los residuos correctamente',
-      descripcion: 'Comparte tus consejos sobre separación de residuos en casa.',
-      autor: 'Admin',
-      fecha: '15/10/2025'
-    };
+    this.subs.add(this.authState.initialized$.subscribe(v => {
+      this.authReady = v;
+      if (v) {
+        const id = Number(this.route.snapshot.paramMap.get('id'));
+        if (id) {
+          this.loadTopic(id);
+          this.loadComments(id);
+        }
+      }
+    }));
+    this.subs.add(this.authState.isLoggedIn$.subscribe(v => this.isAuthenticated = v));
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+  }
+
+  private loadTopic(id: number): void {
+    this.isLoadingTema = true;
+    this.api.getTopicById(id).subscribe({
+      next: (data) => { this.tema = data; this.isLoadingTema = false; },
+      error: () => { this.isLoadingTema = false; this.mensajeError = 'No se pudo cargar el tema.'; }
+    });
+  }
+
+  private loadComments(topicId: number): void {
+    this.isLoadingComments = true;
+    this.api.getTopicComments(topicId).subscribe({
+      next: (data) => { this.comentarios = data; this.isLoadingComments = false; },
+      error: () => { this.isLoadingComments = false; }
+    });
   }
 
   abrirModal(comentario: any) {
@@ -71,49 +84,44 @@ export class Detalles implements OnInit {
   }
 
   enviarRespuesta() {
-    if (this.textoRespuesta.trim()) {
-      const nuevaRespuesta = {
-        usuario: 'Tú', // En un caso real, se obtendría del usuario autenticado
-        texto: this.textoRespuesta,
-        fecha: new Date().toLocaleDateString()
-      };
+    if (!this.textoRespuesta.trim() || !this.comentarioSeleccionado) return;
+    this.isSendingReply = true;
 
-      // Agregar la respuesta al comentario seleccionado
-      this.comentarioSeleccionado.respuestas =
-        this.comentarioSeleccionado.respuestas || [];
-      this.comentarioSeleccionado.respuestas.push(nuevaRespuesta); // Cuando se tenga el back, se le asocia esta respuesta al Id del comentario
-
-      // Mostrar mensaje de éxito
-      this.mensajeExito = 'Tu respuesta se ha guardado correctamente.';
-
-      // Ocultar el mensaje luego de 3 segundos
-      setTimeout(() => (this.mensajeExito = null), 3000);
-
-      // Cerrar el modal
-      this.cerrarModal();
-    }
+    this.api.addReply(this.comentarioSeleccionado.id, this.textoRespuesta.trim()).subscribe({
+      next: () => {
+        this.isSendingReply = false;
+        this.mensajeExito = 'Tu respuesta se ha guardado correctamente.';
+        setTimeout(() => (this.mensajeExito = null), 3000);
+        this.cerrarModal();
+        this.loadComments(this.tema.id);
+      },
+      error: () => {
+        this.isSendingReply = false;
+        this.mensajeError = 'No se pudo enviar la respuesta.';
+        setTimeout(() => (this.mensajeError = null), 4000);
+      }
+    });
   }
-  
+
   enviarComentario() {
-    if (this.textoComentario.trim()) {
-      const nuevoComentario: Comentario = {
-        usuario: 'Tú', // En un caso real, se obtendría del usuario autenticado
-        texto: this.textoComentario,
-        fecha: new Date().toLocaleDateString(),
-        respuestas: []
-      };
-      this.comentarios.push(nuevoComentario);
-      this.textoComentario = '';
-      this.mensajeExito = 'Tu comentario se ha guardado correctamente.';
-      setTimeout(() => (this.mensajeExito = null), 3000);
-    }
-  }
+    if (!this.textoComentario.trim() || !this.tema) return;
+    this.isSendingComment = true;
 
-  crearNuevoTema() {
-    // Método placeholder para nuevos temas si es necesario
+    this.api.addComment(this.tema.id, this.textoComentario.trim()).subscribe({
+      next: () => {
+        this.textoComentario = '';
+        this.isSendingComment = false;
+        this.mensajeExito = 'Tu comentario se ha guardado correctamente.';
+        setTimeout(() => (this.mensajeExito = null), 3000);
+        this.loadComments(this.tema.id);
+      },
+      error: () => {
+        this.isSendingComment = false;
+        this.mensajeError = 'No se pudo enviar el comentario.';
+        setTimeout(() => (this.mensajeError = null), 4000);
+      }
+    });
   }
-
-  // feedback modal removed per request; success messages used instead
 
   volverAlForo() {
     this.router.navigate(['/foro']).then(() => {

@@ -1,12 +1,11 @@
 import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { IconService } from '../../../services/icon.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { LoadingService } from '../../../services/loading.service';
+import { ApiService } from '../../../services/api.service';
 import { environment } from '../../../../enviroment/enviroment';
 
 declare const google: any;
@@ -26,12 +25,11 @@ export class Login implements OnInit {
   showModal: boolean = false;
 
   constructor(
-    private iconService: IconService,
     private router: Router,
-    private http: HttpClient,
     private authState: AuthStateService,
     private fb: FormBuilder,
     private loadingService: LoadingService,
+    private api: ApiService,
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -82,10 +80,7 @@ export class Login implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/login/google', {
-      email:    payload.email,
-      googleId: payload.sub
-    }).subscribe({
+    this.api.loginGoogle(payload.email, payload.sub).subscribe({
       next: (res: any) => {
         this.loadingService.hide();
         this.authState.login(res);
@@ -132,7 +127,7 @@ export class Login implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/login', this.form.value).subscribe({
+    this.api.login(this.form.value.email, this.form.value.password).subscribe({
       next: (response: any) => {
         this.loadingService.hide();
         this.authState.login(response);

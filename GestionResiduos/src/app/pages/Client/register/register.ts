@@ -2,11 +2,11 @@ import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
-import { HttpClient } from '@angular/common/http';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { LoadingService } from '../../../services/loading.service';
 import { RegistrationStateService } from '../../../services/registration-state.service';
+import { ApiService } from '../../../services/api.service';
 import { environment } from '../../../../enviroment/enviroment';
 
 declare const google: any;
@@ -45,11 +45,11 @@ export class Register implements OnInit {
 
   constructor(
     private router: Router,
-    private http: HttpClient,
     private fb: FormBuilder,
     private authState: AuthStateService,
     private loadingService: LoadingService,
     private registrationState: RegistrationStateService,
+    private api: ApiService,
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -169,7 +169,7 @@ export class Register implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/register/google', payload).subscribe({
+    this.api.registerGoogle(payload).subscribe({
       next: (response: any) => {
         this.loadingService.hide();
         this.authState.login(response);
@@ -204,7 +204,7 @@ export class Register implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/register/user', payload).subscribe({
+    this.api.registerUser(payload).subscribe({
       next: (response: any) => {
         this.loadingService.hide();
         const emailRegister = response?.email ?? this.form.value.email;

@@ -18,6 +18,8 @@ import { Verify } from './pages/Client/register/verify/verify';
 import { AccessDenied } from './pages/Client/access-denied/access-denied';
 import { verifyGuard } from './pages/Client/register/register-verify.guard';
 import { adminGuard } from './guards/admin.guard';
+import { UserProfileEdit } from './pages/Client/user-profile-edit/user-profile-edit';
+import { UserProfile } from './pages/Client/profile/profile';
 
 import { ClientLayout } from './layouts/client-layout/client-layout';
 import { DashboardLayout } from './layouts/dashboard-layout/dashboard-layout';
@@ -33,6 +35,7 @@ import { CategoriasAdmin } from './pages/Admin/categorias/categorias';
 import { EducationDetail } from './pages/Client/education/education-detail/education-detail';
 import { DynamicQuiz } from './shared/components/dynamic-quiz/dynamic-quiz';
 import { ResetPassword } from './pages/Client/reset-password/reset-password';
+import { EmailPreviewComponent } from './pages/email-preview/email-preview';
 
 export const routes: Routes = [
 
@@ -56,7 +59,10 @@ export const routes: Routes = [
       { path: 'register/verify', component: Verify, canActivate: [verifyGuard] },
       { path: 'register/verify/:token', component: Verify },
       { path: 'register/profile', component: Profile },
+      { path: 'profile', component: UserProfile },
+      { path: 'profile/edit', component: UserProfileEdit },
       { path: 'access-denied', component: AccessDenied },
+      { path: 'email-preview', component: EmailPreviewComponent },
 
       {
         path: 'foro',

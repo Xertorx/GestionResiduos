@@ -1,0 +1,17 @@
+.email-preview-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: #f4f6f8;
+}
+.email-preview {
+  width: 100%;
+  max-width: 520px;
+  margin: 40px 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 0;
+  overflow: hidden;
+}

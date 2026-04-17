@@ -1,0 +1,27 @@
+info:
+  name: Cambiar Estado Campana (Admin)
+  type: http
+  seq: 7
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/notifications/campaigns/1/status?status=INACTIVO
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+params:
+  query:
+    - name: status
+      value: INACTIVO
+      enabled: true
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Cambia el estado de una campaña (ACTIVO, INACTIVO, FINALIZADA). Solo ADMINISTRADOR.
+

@@ -13,7 +13,7 @@ http:
     type: json
     data: |-
       {
-        "name": "Residuos Peligrosos Actualizado",
+        "name": "Residuos Peligrosos",
         "description": "Descripción actualizada de la categoría",
         "status": "ACTIVO"
       }
@@ -26,4 +26,3 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
-

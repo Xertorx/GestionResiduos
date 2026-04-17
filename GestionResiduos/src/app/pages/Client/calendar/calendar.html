@@ -22,17 +22,24 @@
             Para ver el calendario específico de tu zona
           </p>
         </div>
-        <div class="flex-1 sm:max-w-xs">
-          <select
-            id="localidad-select"
-            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-          >
-            <option value="ciudad-bolivar">Ciudad Bolívar</option>
-            <option value="usme">Usme</option>
-            <option value="bosa">Bosa</option>
-            <option value="kennedy">Kennedy</option>
-            <option value="suba">Suba</option>
-          </select>
+        <div class="flex items-center gap-3">
+          <div class="flex-1 sm:max-w-xs">
+            <select
+              [(ngModel)]="selectedDistrictId"
+              (ngModelChange)="onDistrictChange()"
+              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            >
+              @for (d of districts; track d.id) {
+                <option [ngValue]="d.id">{{ d.name }}</option>
+              }
+            </select>
+          </div>
+          @if (isLoadingSchedules) {
+            <svg class="animate-spin h-5 w-5 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+          }
         </div>
       </div>
     </div>
@@ -53,24 +60,30 @@
     <!-- Legend -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
       <h3 class="text-lg font-medium text-gray-900 mb-4">Leyenda</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="flex items-center">
           <div
             class="w-4 h-4 bg-emerald-100 border-2 border-emerald-500 rounded mr-3"
           ></div>
-          <span class="text-sm">Recolección Orgánica</span>
+          <span class="text-sm">Orgánico</span>
         </div>
         <div class="flex items-center">
           <div
             class="w-4 h-4 bg-blue-100 border-2 border-blue-500 rounded mr-3"
           ></div>
-          <span class="text-sm">Recolección Reciclable</span>
+          <span class="text-sm">Reciclable</span>
         </div>
         <div class="flex items-center">
           <div
             class="w-4 h-4 bg-indigo-100 border-2 border-indigo-500 rounded mr-3"
           ></div>
-          <span class="text-sm">Recolección Especial</span>
+          <span class="text-sm">Especial</span>
+        </div>
+        <div class="flex items-center">
+          <div
+            class="w-4 h-4 bg-amber-100 border-2 border-amber-500 rounded mr-3"
+          ></div>
+          <span class="text-sm">RCD</span>
         </div>
       </div>
     </div>
