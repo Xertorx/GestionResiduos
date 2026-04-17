@@ -1,1 +1,4 @@
-.education-list button { outline: none }
+// Reutiliza los mismos estilos que el client (están en Tailwind, así que
+// todo sale de las clases utilitarias). Este archivo queda mínimo.
+
+.education-list button { outline: none; }
