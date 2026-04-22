@@ -66,6 +66,10 @@ export class ReportesAdmin implements OnInit {
   confirmMessage = '';
   confirmAction: (() => void) | null = null;
 
+  // HU27: Modal de confirmación de notificación enviada al ciudadano
+  showNotificationSentModal = false;
+  notificationMessage = '';
+
   constructor(
     private http: HttpClient,
     private authState: AuthStateService,
@@ -124,14 +128,21 @@ export class ReportesAdmin implements OnInit {
       'Cambiar estado',
       `¿Cambiar el estado del reporte #${this.selectedReport.id} de "${this.formatStatus(this.selectedReport.status)}" a "${this.formatStatus(this.newStatus)}"?`,
       () => {
+        const targetStatus = this.newStatus;
+        const ciudadano = this.selectedReport!.userName || 'el ciudadano';
         this.http.patch(
-          `${this.apiBase}/${this.selectedReport!.id}/status?newStatus=${this.newStatus}`,
+          `${this.apiBase}/${this.selectedReport!.id}/status?newStatus=${targetStatus}`,
           null,
           { headers: this.authHeaders() }
         ).subscribe({
           next: () => {
-            this.selectedReport!.status = this.newStatus;
+            this.selectedReport!.status = targetStatus;
             this.loadReports();
+
+            // HU27: Mostrar modal confirmando que se envió la notificación
+            this.notificationMessage = `Se envió un correo a ${ciudadano} notificando el nuevo estado: "${this.formatStatus(targetStatus)}".`;
+            this.showNotificationSentModal = true;
+            this.closeDetail();
           },
           error: (err) => {
             console.error('Error al cambiar estado', err);
@@ -140,6 +151,12 @@ export class ReportesAdmin implements OnInit {
         });
       }
     );
+  }
+
+  // HU27: Cerrar modal de notificación enviada
+  closeNotificationSentModal(): void {
+    this.showNotificationSentModal = false;
+    this.notificationMessage = '';
   }
 
   // — Modal confirmación —
