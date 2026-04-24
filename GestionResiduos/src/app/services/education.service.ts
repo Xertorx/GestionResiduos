@@ -4,15 +4,27 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../enviroment/enviroment';
 
+// ── Cada archivo adjunto ──
+export interface EducationFile {
+  fileUrl: string;
+  fileType: string; // "PDF", "IMAGE", "VIDEO", "OTRO"
+}
+
 // ── Interfaz que mapea lo que devuelve el backend ──
 export interface EducationContent {
   id: number;
   title: string;
   description: string;
-  fileType: string;   // "PDF", "IMAGE", "VIDEO", "OTRO"
-  fileUrl: string;
   category: string;
+  files: EducationFile[];
   createdAt: string;
+}
+
+// ── DTO para editar (solo metadata) ──
+export interface EducationUpdateDTO {
+  title: string;
+  description: string;
+  category: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,7 +37,6 @@ export class EducationService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
-  // ── Obtener el token JWT guardado en localStorage ──
   private getAuthHeaders(): HttpHeaders {
     let token = '';
     if (isPlatformBrowser(this.platformId)) {
@@ -41,31 +52,29 @@ export class EducationService {
     }
   }
 
-  // ── HU20: GET todos los contenidos educativos ──
+  // ── GET todos ──
   getAll(): Observable<EducationContent[]> {
     return this.http.get<EducationContent[]>(this.baseUrl, {
       headers: this.getAuthHeaders()
     });
   }
 
-  // ── HU20: GET un contenido por ID ──
+  // ── GET por id ──
   getById(id: number): Observable<EducationContent> {
     return this.http.get<EducationContent>(`${this.baseUrl}/${id}`, {
       headers: this.getAuthHeaders()
     });
   }
 
-  // ── HU21: POST subir nuevo contenido (multipart/form-data) ──
-  create(title: string, description: string, category: string, file: File): Observable<EducationContent> {
+  // ── HU21 mejorada: POST múltiples archivos ──
+  create(title: string, description: string, category: string, files: File[]): Observable<EducationContent> {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('category', category);
-    formData.append('file', file);
+    // Todos los archivos comparten la misma clave 'files' (array en backend)
+    files.forEach(file => formData.append('files', file));
 
-    // IMPORTANTE: No pongas Content-Type manualmente.
-    // Angular + el navegador lo ponen automáticamente como
-    // multipart/form-data con el boundary correcto.
     let token = '';
     if (isPlatformBrowser(this.platformId)) {
       token = localStorage.getItem('accessToken') || '';
@@ -79,7 +88,14 @@ export class EducationService {
     });
   }
 
-  // ── Eliminar contenido por ID ──
+  // ── NUEVO: PUT editar metadata ──
+  update(id: number, dto: EducationUpdateDTO): Observable<EducationContent> {
+    return this.http.put<EducationContent>(`${this.baseUrl}/${id}`, dto, {
+      headers: this.getAuthHeaders().append('Content-Type', 'application/json')
+    });
+  }
+
+  // ── DELETE ──
   delete(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${id}`, {
       headers: this.getAuthHeaders(),

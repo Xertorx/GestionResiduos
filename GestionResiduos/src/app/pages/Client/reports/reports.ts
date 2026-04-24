@@ -19,6 +19,7 @@ interface UserReport {
   status: string;
   description: string;
   createdAt: string;
+  updatedAt: string;     // HU27: fecha de última actualización (viene del backend)
   categoryName: string;
   locationLabel: string;
 }
@@ -31,7 +32,23 @@ interface UserReport {
   styleUrl: './reports.scss'
 })
 export class Reports implements OnInit, OnDestroy {
+<<<<<<< HEAD
   private readonly loginRequiredMessage = 'Debes iniciar sesión para crear reportes y consultar tus reportes.';
+=======
+  private readonly apiBase = '/api';
+
+  reportForm;
+
+  categories: ReportCategory[] = [];
+  myReports: UserReport[] = [];
+  isSubmitting = false;
+  isLoadingReports = false;
+  isLoadingCategories = false;
+  formSuccess = '';
+  formError = '';
+  listError = '';
+  loginRequiredMessage = 'Debes iniciar sesión para crear reportes y consultar tus reportes.';
+>>>>>>> 59c2fef5dade223be4b88c0ef45292bcb6ba7c3d
   isAuthenticated = false;
   authReady = false;
   showConfirmModal = false;
@@ -109,16 +126,6 @@ export class Reports implements OnInit, OnDestroy {
   }
 
   get filteredCategories(): ReportCategory[] {
-    // Implementacion anterior (filtraba categorias por hints):
-    // if (!this.categories.length) return [];
-    //
-    // const matches = this.categories.filter((category) => {
-    //   const searchableText = `${category.name ?? ''} ${category.description ?? ''}`.toLowerCase();
-    //   return this.categoryHints.some((hint) => searchableText.includes(hint));
-    // });
-    //
-    // return matches.length ? matches : this.categories;
-
     return this.categories;
   }
 
@@ -301,6 +308,31 @@ export class Reports implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * HU27: Indica si el reporte tuvo una actualización de estado posterior a la creación.
+   * Se usa para mostrar la notita "Actualizado el..." en la tarjeta.
+   */
+  wasUpdated(report: UserReport): boolean {
+    if (!report.updatedAt || !report.createdAt) return false;
+    const created = new Date(report.createdAt).getTime();
+    const updated = new Date(report.updatedAt).getTime();
+    return updated - created > 1000;
+  }
+
+  /**
+   * HU27: Formatear fecha con formato legible (para la fecha de actualización)
+   */
+  formatDateTime(dateValue: string): string {
+    if (!dateValue) return 'Sin fecha';
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) return dateValue;
+    return parsed.toLocaleDateString('es-CO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
   statusBadgeClasses(status: string): string {
     const normalized = status.toLowerCase();
 
@@ -308,8 +340,12 @@ export class Reports implements OnInit, OnDestroy {
       return 'bg-green-100 text-green-800';
     }
 
-    if (normalized.includes('proceso') || normalized.includes('atend')) {
+    if (normalized.includes('proceso') || normalized.includes('atend') || normalized.includes('revision')) {
       return 'bg-blue-100 text-blue-800';
+    }
+
+    if (normalized.includes('rechazado')) {
+      return 'bg-red-100 text-red-800';
     }
 
     return 'bg-yellow-100 text-yellow-800';
