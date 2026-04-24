@@ -1,0 +1,32 @@
+info:
+  name: Crear Tema
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://localhost:8080/api/forum/topics
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "titulo": "¿Cómo reciclar correctamente el plástico?",
+        "descripcion": "Quiero saber cuáles son las mejores prácticas para separar y reciclar plástico en casa."
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Crea un nuevo tema en el foro. Requiere JWT.
+
+

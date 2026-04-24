@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../../services/auth-state.service';
+import { ApiService } from '../../../services/api.service';
 
 interface ReportCategory {
   id: number;
@@ -19,6 +19,7 @@ interface UserReport {
   status: string;
   description: string;
   createdAt: string;
+  updatedAt: string;     // HU27: fecha de última actualización (viene del backend)
   categoryName: string;
   locationLabel: string;
 }
@@ -31,21 +32,7 @@ interface UserReport {
   styleUrl: './reports.scss'
 })
 export class Reports implements OnInit, OnDestroy {
-  private readonly apiBase = '/api';
-  // Implementacion anterior (filtrado por palabras clave):
-  // private readonly categoryHints: string[] = ['critico', 'acumul', 'basura', 'escombro', 'via', 'calle'];
-
-  reportForm;
-
-  categories: ReportCategory[] = [];
-  myReports: UserReport[] = [];
-  isSubmitting = false;
-  isLoadingReports = false;
-  isLoadingCategories = false;
-  formSuccess = '';
-  formError = '';
-  listError = '';
-  loginRequiredMessage = 'Debes iniciar sesión para crear reportes y consultar tus reportes.';
+  private readonly loginRequiredMessage = 'Debes iniciar sesión para crear reportes y consultar tus reportes.';
   isAuthenticated = false;
   authReady = false;
   showConfirmModal = false;
@@ -55,10 +42,20 @@ export class Reports implements OnInit, OnDestroy {
   previewUrl: string | null = null;
   private readonly authSubscriptions = new Subscription();
 
+  reportForm: any;
+  formError = '';
+  formSuccess = '';
+  isSubmitting = false;
+  isLoadingCategories = false;
+  isLoadingReports = false;
+  categories: ReportCategory[] = [];
+  myReports: UserReport[] = [];
+  listError = '';
+
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
-    private authState: AuthStateService
+    private authState: AuthStateService,
+    private api: ApiService
   ) {
     this.reportForm = this.fb.group({
       categoryId: ['', [Validators.required]],
@@ -113,16 +110,6 @@ export class Reports implements OnInit, OnDestroy {
   }
 
   get filteredCategories(): ReportCategory[] {
-    // Implementacion anterior (filtraba categorias por hints):
-    // if (!this.categories.length) return [];
-    //
-    // const matches = this.categories.filter((category) => {
-    //   const searchableText = `${category.name ?? ''} ${category.description ?? ''}`.toLowerCase();
-    //   return this.categoryHints.some((hint) => searchableText.includes(hint));
-    // });
-    //
-    // return matches.length ? matches : this.categories;
-
     return this.categories;
   }
 
@@ -130,7 +117,7 @@ export class Reports implements OnInit, OnDestroy {
     this.isLoadingCategories = true;
     this.formError = '';
 
-    this.http.get<ReportCategory[]>(`${this.apiBase}/report-categories/active`).subscribe({
+    this.api.getActiveReportCategories().subscribe({
       next: (categories) => {
         this.categories = categories;
         this.reportForm.patchValue({ categoryId: '' }, { emitEvent: false });
@@ -155,7 +142,7 @@ export class Reports implements OnInit, OnDestroy {
     this.isLoadingReports = true;
     this.listError = '';
 
-    this.http.get<UserReport[]>(`${this.apiBase}/reports/my-reports`, { headers: this.buildAuthHeaders() }).subscribe({
+    this.api.getMyReports().subscribe({
       next: (reports) => {
         this.myReports = reports;
         this.isLoadingReports = false;
@@ -226,7 +213,7 @@ export class Reports implements OnInit, OnDestroy {
     const formData = this.buildReportFormData();
     this.isSubmitting = true;
 
-    this.http.post(`${this.apiBase}/reports`, formData, { headers: this.buildAuthHeaders() }).subscribe({
+    this.api.createReport(formData).subscribe({
       next: () => {
         this.formSuccess = 'Reporte de punto crítico enviado correctamente.';
         this.showSuccessModal = true;
@@ -292,21 +279,37 @@ export class Reports implements OnInit, OnDestroy {
     return formData;
   }
 
-  private buildAuthHeaders(): HttpHeaders {
-    const token = this.authState.getAccessToken();
-    if (!token) return new HttpHeaders();
-
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-  }
-
   formatDate(dateValue: string): string {
     if (!dateValue) return 'Sin fecha';
 
     const parsed = new Date(dateValue);
     if (Number.isNaN(parsed.getTime())) return dateValue;
 
+    return parsed.toLocaleDateString('es-CO', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  /**
+   * HU27: Indica si el reporte tuvo una actualización de estado posterior a la creación.
+   * Se usa para mostrar la notita "Actualizado el..." en la tarjeta.
+   */
+  wasUpdated(report: UserReport): boolean {
+    if (!report.updatedAt || !report.createdAt) return false;
+    const created = new Date(report.createdAt).getTime();
+    const updated = new Date(report.updatedAt).getTime();
+    return updated - created > 1000;
+  }
+
+  /**
+   * HU27: Formatear fecha con formato legible (para la fecha de actualización)
+   */
+  formatDateTime(dateValue: string): string {
+    if (!dateValue) return 'Sin fecha';
+    const parsed = new Date(dateValue);
+    if (Number.isNaN(parsed.getTime())) return dateValue;
     return parsed.toLocaleDateString('es-CO', {
       day: '2-digit',
       month: '2-digit',
@@ -321,8 +324,12 @@ export class Reports implements OnInit, OnDestroy {
       return 'bg-green-100 text-green-800';
     }
 
-    if (normalized.includes('proceso') || normalized.includes('atend')) {
+    if (normalized.includes('proceso') || normalized.includes('atend') || normalized.includes('revision')) {
       return 'bg-blue-100 text-blue-800';
+    }
+
+    if (normalized.includes('rechazado')) {
+      return 'bg-red-100 text-red-800';
     }
 
     return 'bg-yellow-100 text-yellow-800';

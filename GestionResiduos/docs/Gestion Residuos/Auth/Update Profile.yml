@@ -6,17 +6,18 @@ info:
 http:
   method: PUT
   url: http://localhost:8080/auth/update-profile
-  headers:
-    - name: Content-Type
-      value: application/json
   body:
-    type: json
-    data: |-
-      {
-        "email": "juanma25051@gmail.com",
-        "nickName": "JuanMa",
-        "photo": "https://example.com/foto.jpg"
-      }
+    type: multipart-form
+    data:
+      - name: email
+        type: text
+        value: juanma25051@gmail.com
+      - name: nickName
+        type: text
+        value: JuanMa
+      - name: photo
+        type: file
+        value: []
   auth:
     type: bearer
     token: "{{JWT}}"
@@ -26,4 +27,10 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  Actualiza apodo y foto de perfil.
+  La foto se sube como archivo (ya no como base64).
+  Se guarda en uploads/photo_profile/ y se retorna la URL relativa.
+  El campo photo es opcional.
 

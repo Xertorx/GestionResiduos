@@ -1,0 +1,53 @@
+info:
+  name: Actualizar Perfil
+  type: http
+  seq: 3
+
+http:
+  method: PUT
+  url: http://localhost:8080/api/users/profile
+  body:
+    type: multipart-form
+    data:
+      - name: names
+        type: text
+        value: Juan Manuel
+      - name: lastName
+        type: text
+        value: Loaiza
+      - name: email
+        type: text
+        value: juanma25051@gmail.com
+      - name: neighborhoodId
+        type: text
+        value: "1"
+      - name: address
+        type: text
+        value: Calle 123 #45-67
+      - name: phoneNumber
+        type: text
+        value: "3001234567"
+      - name: nickName
+        type: text
+        value: JuanMa
+      - name: photo
+        type: file
+        value: []
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Actualiza el perfil del usuario autenticado.
+  Restricción: solo se puede actualizar 1 vez por mes.
+  Campos: names, lastName, email, neighborhoodId, address, phoneNumber, nickName.
+  El campo "photo" es opcional y acepta un archivo de imagen.
+  Requiere JWT en el header Authorization.
+  Si ya se actualizó este mes, retorna HTTP 429 con la fecha de próxima actualización.
+

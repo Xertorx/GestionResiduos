@@ -1,0 +1,23 @@
+info:
+  name: Dar retroalimentacion Contenido Educativo
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: http://localhost:8080/api/v1/education/1/feedback
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: '{"useful": true}'
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

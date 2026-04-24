@@ -46,10 +46,12 @@ export class AuthStateService implements OnDestroy {
       return;
     }
 
+    const clean = (v: string | null) => (!v || v === 'null' || v === 'undefined') ? '' : v;
+
     const token = localStorage.getItem('accessToken');
-    const email = localStorage.getItem('userEmail') || '';
-    const nickname = localStorage.getItem('nickname') || '';
-    const photo = localStorage.getItem('photo') || '';
+    const email = clean(localStorage.getItem('userEmail'));
+    const nickname = clean(localStorage.getItem('nickname'));
+    const photo = clean(localStorage.getItem('photo'));
 
     this.applyAuthState(token, email, nickname, photo);
   }
@@ -69,17 +71,24 @@ export class AuthStateService implements OnDestroy {
     this.photoSubject.next(photo);
   }
 
-  login(data: { accessToken: string, refreshToken: string, email: string, nickName: string, photo: string, role: string }) {
+  login(data: any) {
+    const token = data.accessToken;
+    const refresh = data.refreshToken;
+    const email = data.email || '';
+    const nickname = data.nickName ?? data.nickname ?? '';
+    const photo = data.photo ?? '';
+    const role = data.role ?? '';
+
     if (this.isBrowser) {
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('userEmail', data.email);
-      localStorage.setItem('nickname', data.nickName);
-      localStorage.setItem('photo', data.photo);
-      localStorage.setItem('role', data.role);
+      localStorage.setItem('accessToken', token);
+      localStorage.setItem('refreshToken', refresh);
+      localStorage.setItem('userEmail', email);
+      localStorage.setItem('nickname', nickname);
+      localStorage.setItem('photo', photo);
+      localStorage.setItem('role', role);
     }
 
-    this.applyAuthState(data.accessToken, data.email, data.nickName, data.photo);
+    this.applyAuthState(token, email, nickname, photo);
   }
 
   updateProfile(nickname: string, photo: string) {

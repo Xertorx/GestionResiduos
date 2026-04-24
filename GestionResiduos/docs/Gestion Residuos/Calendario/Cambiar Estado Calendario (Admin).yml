@@ -1,0 +1,27 @@
+info:
+  name: Cambiar Estado Calendario (Admin)
+  type: http
+  seq: 5
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/schedules/1/status?status=INACTIVO
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+params:
+  query:
+    - name: status
+      value: INACTIVO
+      enabled: true
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Cambia el estado de un calendario (ACTIVO o INACTIVO). Solo ADMINISTRADOR.
+

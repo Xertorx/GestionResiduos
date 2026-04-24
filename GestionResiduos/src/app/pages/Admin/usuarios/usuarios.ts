@@ -1,10 +1,8 @@
 import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
-import { AuthStateService } from '../../../services/auth-state.service';
-import { DataTableComponent, TableColumn } from '../../../shared/components/data-table/data-table';
+import { ApiService } from '../../../services/api.service';
 
 export interface User {
   documentNumber: number;
@@ -12,6 +10,7 @@ export interface User {
   lastName: string;
   email: string;
   phoneNumber: string;
+  photo: string;
   role: { idRole: number; name: string; description: string };
   status: string;
 }
@@ -19,34 +18,24 @@ export interface User {
 @Component({
   selector: 'app-admin-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DataTableComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule],
   templateUrl: './usuarios.html',
   styleUrls: ['./usuarios.scss']
 })
 export class UsuariosAdmin implements OnInit {
-  private readonly apiBase = '/user/all';
 
   users: User[] = [];
   isLoading = false;
   error = '';
 
-  columns: TableColumn[] = [
-    { key: 'documentNumber', label: 'Número de Documento', cellClass: 'text-gray-500 font-mono text-xs' },
-    { key: 'names', label: 'Nombre' },
-    { key: 'lastName', label: 'Apellido' },
-    { key: 'email', label: 'Correo', cellClass: 'text-xs' },
-    { key: 'phoneNumber', label: 'Teléfono', cellClass: 'text-xs' },
-    { key: 'role.name', label: 'Rol', align: 'center' },
-    { key: 'status', label: 'Estado', align: 'center' },
-  ];
-
-  // Detalle
   showDetailModal = false;
-  selectedUser: User | null = null;
+  selectedUser: any = null;
+  selectedUserDetail: any = null;
+  isLoadingDetail = false;
+  isChangingStatus = false;
 
   constructor(
-    private http: HttpClient,
-    private authState: AuthStateService,
+    private api: ApiService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
@@ -59,7 +48,7 @@ export class UsuariosAdmin implements OnInit {
   loadUsers(): void {
     this.isLoading = true;
     this.error = '';
-    this.http.get<User[]>(this.apiBase, { headers: this.authHeaders() }).subscribe({
+    this.api.adminListUsers().subscribe({
       next: (data) => {
         this.users = Array.isArray(data) ? data : [];
         this.isLoading = false;
@@ -75,11 +64,44 @@ export class UsuariosAdmin implements OnInit {
   openDetail(user: User): void {
     this.selectedUser = user;
     this.showDetailModal = true;
+    this.isLoadingDetail = true;
+    this.selectedUserDetail = null;
+
+    this.api.adminGetUser(user.documentNumber).subscribe({
+      next: (detail) => {
+        this.selectedUserDetail = detail;
+        this.isLoadingDetail = false;
+      },
+      error: (err) => {
+        console.error('Error cargando detalle de usuario', err);
+        this.isLoadingDetail = false;
+      }
+    });
   }
 
   closeDetail(): void {
     this.showDetailModal = false;
     this.selectedUser = null;
+    this.selectedUserDetail = null;
+  }
+
+  changeUserStatus(newStatus: string): void {
+    if (!this.selectedUser) return;
+    this.isChangingStatus = true;
+
+    this.api.adminChangeUserStatus(this.selectedUser.documentNumber, newStatus).subscribe({
+      next: () => {
+        this.isChangingStatus = false;
+        if (this.selectedUser) this.selectedUser.status = newStatus;
+        if (this.selectedUserDetail) this.selectedUserDetail.status = newStatus;
+        const idx = this.users.findIndex(u => u.documentNumber === this.selectedUser?.documentNumber);
+        if (idx >= 0) this.users[idx].status = newStatus;
+      },
+      error: (err) => {
+        console.error('Error cambiando estado', err);
+        this.isChangingStatus = false;
+      }
+    });
   }
 
   roleColor(role: any): string {
@@ -96,11 +118,5 @@ export class UsuariosAdmin implements OnInit {
   statusDot(status: string): string {
     if (status === 'ACTIVO' || status === 'activo') return 'bg-emerald-500';
     return 'bg-red-500';
-  }
-
-  private authHeaders(): HttpHeaders {
-    const token = this.authState.getAccessToken();
-    if (!token) return new HttpHeaders();
-    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 }

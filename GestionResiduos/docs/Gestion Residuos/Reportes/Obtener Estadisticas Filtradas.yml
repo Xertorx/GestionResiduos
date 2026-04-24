@@ -1,0 +1,42 @@
+info:
+  name: Obtener Estadísticas Filtradas de Reportes
+  type: http
+  seq: 100
+
+http:
+  method: GET
+  url: >-
+    http://localhost:8080/api/reports/stats?startDate={{startDate}}&endDate={{endDate}}&status={{status}}&barrioId={{barrioId}}
+  headers:
+    - name: Accept
+      value: application/json
+    - name: Authorization
+      value: Bearer {{JWT_ADMIN}}
+  description: |
+    Endpoint para obtener estadísticas agregadas de reportes filtradas por rango de fechas
+    obligatorio (startDate, endDate) y filtros opcionales status y barrioId.
+    - startDate, endDate: formato YYYY-MM-DD (ej: 2026-01-01)
+    - status: pendiente, en_revision, resuelto, rechazado (opcional)
+    - barrioId: id numérico del barrio (opcional)
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+examples:
+  - name: Estadísticas generales (sin filtros opcionales)
+    request:
+      url: http://localhost:8080/api/reports/stats?startDate=2026-01-01&endDate=2026-04-24
+      headers:
+        - name: Authorization
+          value: Bearer {{JWT_ADMIN}}
+
+  - name: Estadísticas filtradas por estado y barrio
+    request:
+      url: http://localhost:8080/api/reports/stats?startDate=2026-01-01&endDate=2026-04-24&status=pendiente&barrioId=3
+      headers:
+        - name: Authorization
+          value: Bearer {{JWT_ADMIN}}
+

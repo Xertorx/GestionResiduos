@@ -1,37 +1,62 @@
-import { Component, OnInit } from '@angular/core';
-import { Router, RouterOutlet, ActivatedRoute } from '@angular/router';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router, RouterOutlet, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { signal } from '@angular/core';
-
-interface Tema {
-  id: number;
-  titulo: string;
-  descripcion: string;
-  comentarios: number | null;
-}
+import { Subscription } from 'rxjs';
+import { AuthStateService } from '../../../services/auth-state.service';
+import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-foro',
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, RouterLink, FormsModule],
   templateUrl: './foro.html',
   styleUrl: './foro.scss'
 })
-export class Foro implements OnInit {
+export class Foro implements OnInit, OnDestroy {
   mostrandoDetalles = signal(false);
-  temas = [
-    { id: 1, titulo: 'Cómo separar los residuos correctamente', descripcion: 'Comparte tus consejos sobre separación de residuos.', comentarios: 3  },
-    { id: 2, titulo: 'Ideas para reciclar en casa', descripcion: 'Discute formas creativas de reciclar materiales comunes.', comentarios: 5 }
-  ];
+  isAuthenticated = false;
+  authReady = false;
+  private subs = new Subscription();
 
-  constructor(private router: Router, private route: ActivatedRoute) { }
+  temas: any[] = [];
+  isLoading = false;
+  error = '';
 
-  nuevoTema: string = '';
-  tituloTema: string = '';
+  nuevoTema = '';
+  tituloTema = '';
+  isCreating = false;
   mensajeExito: string | null = null;
+  mensajeError: string | null = null;
+
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+    private authState: AuthStateService,
+    private api: ApiService
+  ) {}
 
   ngOnInit() {
+    this.subs.add(this.authState.initialized$.subscribe(v => {
+      this.authReady = v;
+      if (v) this.loadTopics();
+    }));
+    this.subs.add(this.authState.isLoggedIn$.subscribe(v => this.isAuthenticated = v));
     this.route.firstChild?.params.subscribe(() => {
       this.mostrandoDetalles.set(true);
+    });
+  }
+
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+  }
+
+  loadTopics(): void {
+    this.isLoading = true;
+    this.error = '';
+    this.api.getActiveTopics().subscribe({
+      next: (data) => { this.temas = data; this.isLoading = false; },
+      error: () => { this.isLoading = false; }
     });
   }
 
@@ -41,19 +66,24 @@ export class Foro implements OnInit {
   }
 
   crearNuevoTema() {
-    if (this.nuevoTema.trim() && this.tituloTema.trim()) {
-      const nuevoId = this.temas.length + 1;
-      this.temas.push({
-        id: nuevoId,
-        titulo: this.tituloTema,
-        descripcion: this.nuevoTema,
-        comentarios: 0
-      });
-      this.nuevoTema = '';
-      this.tituloTema = '';
-    
-      this.mensajeExito = 'Tu nuevo tema se ha creado correctamente.';
-      setTimeout(() => (this.mensajeExito = null), 3000);
-    }
+    if (!this.tituloTema.trim() || !this.nuevoTema.trim()) return;
+    this.isCreating = true;
+    this.mensajeError = null;
+
+    this.api.createTopic({ titulo: this.tituloTema.trim(), descripcion: this.nuevoTema.trim() }).subscribe({
+      next: () => {
+        this.tituloTema = '';
+        this.nuevoTema = '';
+        this.isCreating = false;
+        this.mensajeExito = 'Tu nuevo tema se ha creado correctamente.';
+        setTimeout(() => (this.mensajeExito = null), 3000);
+        this.loadTopics();
+      },
+      error: (err) => {
+        this.isCreating = false;
+        this.mensajeError = err?.error?.message || 'No se pudo crear el tema.';
+        setTimeout(() => (this.mensajeError = null), 4000);
+      }
+    });
   }
 }

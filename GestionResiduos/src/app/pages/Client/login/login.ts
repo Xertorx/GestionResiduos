@@ -1,12 +1,12 @@
+// ...existing imports and decorators...
 import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { IconService } from '../../../services/icon.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { LoadingService } from '../../../services/loading.service';
+import { ApiService } from '../../../services/api.service';
 import { environment } from '../../../../enviroment/enviroment';
 
 declare const google: any;
@@ -18,6 +18,7 @@ declare const google: any;
   styleUrl: './login.scss'
 })
 export class Login implements OnInit {
+  showPassword = false;
 
   form: FormGroup;
   errorMessage: string = '';
@@ -26,12 +27,11 @@ export class Login implements OnInit {
   showModal: boolean = false;
 
   constructor(
-    private iconService: IconService,
     private router: Router,
-    private http: HttpClient,
     private authState: AuthStateService,
     private fb: FormBuilder,
     private loadingService: LoadingService,
+    private api: ApiService,
     private ngZone: NgZone,
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
@@ -54,14 +54,17 @@ export class Login implements OnInit {
       if (typeof (window as any).google !== 'undefined') {
         clearInterval(waitForGoogle);
 
-        google.accounts.id.initialize({
+            if (!(window as any).__gsi_initialized) {
+              google.accounts.id.initialize({
           client_id: environment.googleClientId,
           callback: (response: any) => {
             this.ngZone.run(() => {
               this.handleGoogleLogin(response); // ← nombre correcto
             });
           }
-        });
+              });
+              (window as any).__gsi_initialized = true;
+            }
 
         google.accounts.id.renderButton(
           document.getElementById('google-login-btn'),
@@ -82,10 +85,7 @@ export class Login implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/login/google', {
-      email:    payload.email,
-      googleId: payload.sub
-    }).subscribe({
+    this.api.loginGoogle(payload.email, payload.sub).subscribe({
       next: (res: any) => {
         this.loadingService.hide();
         this.authState.login(res);
@@ -132,7 +132,7 @@ export class Login implements OnInit {
 
     this.loadingService.show();
 
-    this.http.post('http://localhost:8080/auth/login', this.form.value).subscribe({
+    this.api.login(this.form.value.email, this.form.value.password).subscribe({
       next: (response: any) => {
         this.loadingService.hide();
         this.authState.login(response);

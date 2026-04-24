@@ -1,0 +1,32 @@
+info:
+  name: Agregar Respuesta a Comentario
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: http://localhost:8080/api/forum/comments/1/replies
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "texto": "Totalmente de acuerdo, además es importante lavar los envases antes."
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Agrega una respuesta a un comentario específico. Requiere JWT.
+  Reemplazar 1 con el ID del comentario.
+
+

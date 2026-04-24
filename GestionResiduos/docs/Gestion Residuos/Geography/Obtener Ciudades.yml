@@ -1,0 +1,21 @@
+info:
+  name: Obtener Ciudades
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: http://localhost:8080/api/geography/cities
+  headers:
+    - name: Accept
+      value: application/json
+  description: |
+    Lista todas las ciudades disponibles.
+    Si tu backend expone un endpoint distinto, actualiza la URL.
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

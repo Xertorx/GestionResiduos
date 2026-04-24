@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthStateService } from '../../../services/auth-state.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -13,21 +14,25 @@ import Swal from 'sweetalert2';
   styleUrls: ['./educacion.scss']
 })
 export class EducacionAdmin implements OnInit {
+  isAuthenticated = false;
 
   // ── Lista de contenidos del backend ──
   contenidos: EducationContent[] = [];
   isLoading = true;
 
-  // ── Estado del formulario de creación ──
+  // ── Estado del formulario ──
   showForm = false;
   isSubmitting = false;
+  isEditMode = false;
+  editingId: number | null = null;
+
   newTitle = '';
   newDescription = '';
   newCategory = 'reciclaje';
-  selectedFile: File | null = null;
-  selectedFileName = '';
 
-  // ── Categorías disponibles ──
+  // Múltiples archivos (solo aplica en modo crear)
+  selectedFiles: File[] = [];
+
   categories = [
     { value: 'reciclaje', label: 'Reciclaje' },
     { value: 'compostaje', label: 'Compostaje' },
@@ -37,10 +42,13 @@ export class EducacionAdmin implements OnInit {
     { value: 'otro', label: 'Otro' }
   ];
 
-  constructor(private educationService: EducationService) {}
+  constructor(private educationService: EducationService, private authState: AuthStateService) {}
 
   ngOnInit(): void {
     this.loadContents();
+    this.authState.isLoggedIn$.subscribe((isLoggedIn) => {
+      this.isAuthenticated = isLoggedIn;
+    });
   }
 
   loadContents(): void {
@@ -58,60 +66,129 @@ export class EducacionAdmin implements OnInit {
     });
   }
 
+  // ── Mostrar/ocultar formulario ──
   toggleForm(): void {
     this.showForm = !this.showForm;
     if (!this.showForm) {
       this.resetForm();
+    } else {
+      this.isEditMode = false;
+      this.editingId = null;
     }
   }
 
-  onFileSelected(event: Event): void {
+  cancelEdit(): void {
+    this.resetForm();
+    this.showForm = false;
+  }
+
+  // ── Selección MÚLTIPLE (acumulativa) ──
+  onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      this.selectedFileName = this.selectedFile.name;
+      const incoming = Array.from(input.files);
+      this.selectedFiles = [...this.selectedFiles, ...incoming];
+      // Limpia el input para poder re-seleccionar el mismo archivo si hace falta
+      input.value = '';
     }
   }
 
+  removeSelectedFile(index: number): void {
+    this.selectedFiles.splice(index, 1);
+  }
+
+  // ── Abrir en modo EDITAR (prellenado) ──
+  openEditForm(content: EducationContent): void {
+    this.isEditMode = true;
+    this.editingId = content.id;
+    this.newTitle = content.title;
+    this.newDescription = content.description || '';
+    this.newCategory = content.category || 'reciclaje';
+    this.selectedFiles = [];
+    this.showForm = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ── Submit: decide crear o editar ──
   submitContent(): void {
-    // ── Validaciones ──
+    if (this.isEditMode) {
+      this.submitEdit();
+    } else {
+      this.submitCreate();
+    }
+  }
+
+  private submitCreate(): void {
     if (!this.newTitle.trim()) {
       Swal.fire('Atención', 'El título es obligatorio.', 'warning');
       return;
     }
-    if (!this.selectedFile) {
-      Swal.fire('Atención', 'Debes seleccionar un archivo (PDF, JPG, PNG o WEBP).', 'warning');
+    if (this.selectedFiles.length === 0) {
+      Swal.fire('Atención', 'Debes seleccionar al menos un archivo.', 'warning');
       return;
     }
 
-    // Validar extensión
     const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp', '.mp4', '.avi', '.mkv'];
-    const fileName = this.selectedFile.name.toLowerCase();
-    const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
-    if (!hasValidExtension) {
-      Swal.fire('Error', 'Tipo de archivo no permitido. Usa: PDF, JPG, PNG, WEBP o videos.', 'error');
+    const invalidFile = this.selectedFiles.find(f => {
+      const name = f.name.toLowerCase();
+      return !allowedExtensions.some(ext => name.endsWith(ext));
+    });
+    if (invalidFile) {
+      Swal.fire('Error', `El archivo "${invalidFile.name}" tiene una extensión no permitida.`, 'error');
       return;
     }
 
     this.isSubmitting = true;
-
     this.educationService.create(
       this.newTitle.trim(),
       this.newDescription.trim(),
       this.newCategory,
-      this.selectedFile
+      this.selectedFiles
     ).subscribe({
       next: (saved) => {
         this.isSubmitting = false;
-        Swal.fire('¡Listo!', `El contenido "${saved.title}" se subió correctamente.`, 'success');
-        this.contenidos.unshift(saved); // Lo agrega al inicio de la lista
+        Swal.fire(
+          '¡Listo!',
+          `El contenido "${saved.title}" se subió con ${saved.files?.length ?? 0} archivo(s).`,
+          'success'
+        );
+        this.contenidos.unshift(saved);
         this.resetForm();
         this.showForm = false;
       },
       error: (err) => {
         this.isSubmitting = false;
         console.error('Error subiendo contenido:', err);
-        Swal.fire('Error', 'No se pudo subir el contenido. Revisa la consola para más detalles.', 'error');
+        Swal.fire('Error', 'No se pudo subir el contenido.', 'error');
+      }
+    });
+  }
+
+  private submitEdit(): void {
+    if (!this.editingId) return;
+    if (!this.newTitle.trim()) {
+      Swal.fire('Atención', 'El título es obligatorio.', 'warning');
+      return;
+    }
+
+    this.isSubmitting = true;
+    this.educationService.update(this.editingId, {
+      title: this.newTitle.trim(),
+      description: this.newDescription.trim(),
+      category: this.newCategory
+    }).subscribe({
+      next: (updated) => {
+        this.isSubmitting = false;
+        Swal.fire('¡Actualizado!', `Se guardaron los cambios de "${updated.title}".`, 'success');
+        const idx = this.contenidos.findIndex(c => c.id === updated.id);
+        if (idx !== -1) this.contenidos[idx] = updated;
+        this.resetForm();
+        this.showForm = false;
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        console.error('Error actualizando:', err);
+        Swal.fire('Error', 'No se pudieron guardar los cambios.', 'error');
       }
     });
   }
@@ -146,8 +223,15 @@ export class EducacionAdmin implements OnInit {
     this.newTitle = '';
     this.newDescription = '';
     this.newCategory = 'reciclaje';
-    this.selectedFile = null;
-    this.selectedFileName = '';
+    this.selectedFiles = [];
+    this.isEditMode = false;
+    this.editingId = null;
+    this.isSubmitting = false;
+  }
+
+  // ── Helpers para la vista ──
+  getPrimaryFileType(content: EducationContent): string {
+    return content.files?.[0]?.fileType ?? 'OTRO';
   }
 
   getFileTypeIcon(fileType: string): string {

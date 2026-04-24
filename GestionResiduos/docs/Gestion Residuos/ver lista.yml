@@ -1,14 +1,14 @@
 info:
-  name: Obtener todos los usuarios
+  name: ver lista
   type: http
-  seq: 1
+  seq: 9
 
 http:
   method: GET
-  url: http://localhost:8080/user/all
+  url: http://localhost:8080/api/v1/education
   auth:
     type: bearer
-    token: "{{JWT}}"
+    token: ""
 
 settings:
   encodeUrl: true

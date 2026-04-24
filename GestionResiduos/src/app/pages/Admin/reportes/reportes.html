@@ -10,19 +10,56 @@
     </div>
   </div>
 
-  <!-- Filtro por estado -->
-  <div class="mb-4 flex items-center gap-3">
-    <label class="text-sm font-medium text-gray-600">Filtrar por estado:</label>
-    <select
-      [(ngModel)]="statusFilter"
-      (ngModelChange)="onFilterChange()"
-      class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
-    >
-      <option value="">Todos</option>
-      @for (s of statuses; track s) {
-        <option [value]="s">{{ formatStatus(s) }}</option>
-      }
-    </select>
+  <!-- Estadísticas -->
+  @if (stats) {
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
+        <p class="text-xs font-medium text-gray-400 uppercase">Total</p>
+        <p class="text-2xl font-bold text-gray-900 mt-1">{{ stats.total || 0 }}</p>
+      </div>
+      <div class="bg-white rounded-xl border border-yellow-100 p-4 shadow-sm">
+        <p class="text-xs font-medium text-yellow-500 uppercase">Pendientes</p>
+        <p class="text-2xl font-bold text-yellow-700 mt-1">{{ stats.pendiente || 0 }}</p>
+      </div>
+      <div class="bg-white rounded-xl border border-blue-100 p-4 shadow-sm">
+        <p class="text-xs font-medium text-blue-500 uppercase">En revisión</p>
+        <p class="text-2xl font-bold text-blue-700 mt-1">{{ stats.en_revision || 0 }}</p>
+      </div>
+      <div class="bg-white rounded-xl border border-emerald-100 p-4 shadow-sm">
+        <p class="text-xs font-medium text-emerald-500 uppercase">Resueltos</p>
+        <p class="text-2xl font-bold text-emerald-700 mt-1">{{ stats.resuelto || 0 }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Filtros -->
+  <div class="mb-4 flex flex-wrap items-center gap-3">
+    <div class="flex items-center gap-2">
+      <label class="text-sm font-medium text-gray-600">Estado:</label>
+      <select
+        [(ngModel)]="statusFilter"
+        (ngModelChange)="onFilterChange()"
+        class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+      >
+        <option value="">Todos</option>
+        @for (s of statuses; track s) {
+          <option [value]="s">{{ formatStatus(s) }}</option>
+        }
+      </select>
+    </div>
+    <div class="flex items-center gap-2">
+      <label class="text-sm font-medium text-gray-600">Tipo:</label>
+      <select
+        [(ngModel)]="typeFilter"
+        (ngModelChange)="onFilterChange()"
+        class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
+      >
+        <option value="">Todos</option>
+        @for (t of types; track t) {
+          <option [value]="t">{{ formatType(t) }}</option>
+        }
+      </select>
+    </div>
   </div>
 
   <!-- Tabla compartida -->
@@ -183,6 +220,29 @@
           (click)="confirmYes()"
         >
           Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- HU27: Modal de notificación enviada al ciudadano -->
+@if (showNotificationSentModal) {
+  <div class="fixed inset-0 bg-black/40 z-[70] flex items-center justify-center p-4" (click)="closeNotificationSentModal()">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm" (click)="$event.stopPropagation()">
+      <div class="px-6 py-5 text-center">
+        <div class="w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
+          <lucide-icon name="mail-check" class="w-7 h-7 text-emerald-600"></lucide-icon>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-1">Notificación enviada</h3>
+        <p class="text-sm text-gray-600">{{ notificationMessage }}</p>
+      </div>
+      <div class="px-6 py-4 border-t border-gray-100 flex justify-center">
+        <button
+          class="px-6 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+          (click)="closeNotificationSentModal()"
+        >
+          Entendido
         </button>
       </div>
     </div>

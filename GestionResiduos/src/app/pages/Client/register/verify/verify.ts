@@ -1,9 +1,9 @@
 import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthStateService } from '../../../../services/auth-state.service';
 import { RegistrationStateService } from '../../../../services/registration-state.service';
+import { ApiService } from '../../../../services/api.service';
 
 interface AuthResponse {
   accessToken: string;
@@ -31,9 +31,9 @@ export class Verify implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private http: HttpClient,
     private authState: AuthStateService,
     private registrationState: RegistrationStateService,
+    private api: ApiService,
     @Inject(PLATFORM_ID) private platformId: Object
   ) { }
 
@@ -87,8 +87,8 @@ export class Verify implements OnInit, OnDestroy {
       return;
     }
 
-    const verifyUrl = `http://localhost:8080/auth/resend-verification?email=${encodeURIComponent(this.emailRegister)}`;
-    this.http.post(verifyUrl, {}).subscribe({
+    const verifyUrl = this.emailRegister;
+    this.api.resendVerification(this.emailRegister).subscribe({
       next: () => {
         this.message = 'Nuevo correo de verificación enviado. Revisa tu bandeja de entrada.';
         this.totalSeconds = 15 * 60;
@@ -102,9 +102,7 @@ export class Verify implements OnInit, OnDestroy {
   }
 
   verifyToken(token: string) {
-    const verifyUrl = `http://localhost:8080/auth/verify?token=${encodeURIComponent(token)}`;
-
-    this.http.get<AuthResponse>(verifyUrl).subscribe({
+    this.api.verifyEmail(token).subscribe({
       next: (res) => {
         this.registrationState.setPendingEmail(res.email || this.emailRegister);
         this.message = '¡Token válido! Redirigiendo al perfil...';

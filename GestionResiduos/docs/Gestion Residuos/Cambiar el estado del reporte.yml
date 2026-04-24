@@ -1,0 +1,19 @@
+info:
+  name: Cambiar el estado del reporte
+  type: http
+  seq: 12
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/reports/1/status?newStatus=en_revision
+  params:
+    - name: newStatus
+      value: en_revision
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

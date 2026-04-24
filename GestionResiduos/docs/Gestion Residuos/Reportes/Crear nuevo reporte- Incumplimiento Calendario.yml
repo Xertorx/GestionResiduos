@@ -14,13 +14,13 @@ http:
         value: incumplimiento_calendario
       - name: categoryId
         type: text
-        value: "1"
+        value: "{{categoryId}}"
       - name: description
         type: text
-        value: No pasaron a recoger la basura en la fecha programada
+        value: "{{description}}"
       - name: calendarId
         type: text
-        value: "1"
+        value: "{{calendarId}}"
   auth:
     type: bearer
     token: "{{JWT}}"

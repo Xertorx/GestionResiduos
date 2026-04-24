@@ -1,16 +1,47 @@
 <div class="bg-white rounded-lg shadow p-6">
   <h2 class="text-xl font-semibold mb-4">Foro Comunitario (Admin)</h2>
+
+  @if (error) {
+    <!-- Mensaje de error removido -->
+  }
+
+  @if (isLoading) {
+    <div class="flex justify-center py-12">
+      <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+    </div>
+  } @else if (temas.length === 0) {
+    <p class="text-gray-500 text-center py-8">No hay temas en el foro.</p>
+  } @else {
   <div class="space-y-3">
     @for (t of temas; track t.id) {
-      <div class="p-3 border rounded flex justify-between items-center">
+      <div class="p-4 border rounded-lg flex justify-between items-center">
         <div>
-          <div class="font-medium">{{ t.titulo }}</div>
-          <div class="text-sm text-gray-500">{{ t.comentarios }} comentarios</div>
+          <div class="font-medium text-gray-900">{{ t.titulo }}</div>
+          <div class="text-sm text-gray-500">
+            {{ t.comentariosCount ?? t.comentarios ?? 0 }} comentarios
+            · Por {{ t.autorNombre ?? 'Anónimo' }}
+          </div>
+          <span class="inline-block mt-1 text-xs font-semibold px-2 py-0.5 rounded-full"
+                [class]="t.estado === 'ACTIVO' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+            {{ t.estado }}
+          </span>
         </div>
-        <div>
-          <button class="text-emerald-600">Ver</button>
+        <div class="flex gap-2">
+          <button class="px-3 py-1.5 text-sm rounded-md font-medium transition"
+                  [class]="t.estado === 'ACTIVO' ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-green-100 text-green-700 hover:bg-green-200'"
+                  (click)="toggleEstado(t)">
+            {{ t.estado === 'ACTIVO' ? 'Desactivar' : 'Activar' }}
+          </button>
+          <button class="px-3 py-1.5 text-sm rounded-md font-medium bg-red-100 text-red-700 hover:bg-red-200 transition"
+                  (click)="eliminarTema(t.id)">
+            Eliminar
+          </button>
         </div>
       </div>
     }
   </div>
+  }
 </div>

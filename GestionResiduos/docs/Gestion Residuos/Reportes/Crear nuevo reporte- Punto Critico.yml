@@ -31,9 +31,6 @@ http:
         type: file
         value:
           - C:\Users\Juan Loaiza\Pictures\images.jpg
-      - name: device
-        type: text
-        value: mobile
   auth:
     type: bearer
     token: "{{JWT}}"

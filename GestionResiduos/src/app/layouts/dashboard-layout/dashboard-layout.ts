@@ -52,7 +52,8 @@ export class DashboardLayout implements OnInit, OnDestroy {
       label: 'Reportes', icon: 'BarChart2', route: '',
       children: [
         { label: 'Adm. Categorías', route: '/dashboard/reportes/categorias', icon: 'tag' },
-        { label: 'Adm. Reportes', route: '/dashboard/reportes', icon: 'file-text' }
+        { label: 'Adm. Reportes', route: '/dashboard/reportes', icon: 'file-text' },
+        { label: 'Estadísticas de Reportes', route: '/dashboard/report-stats', icon: 'pie-chart' }
       ]
     },
     { label: 'Educación', route: '/dashboard/educacion', icon: 'book-open' },
