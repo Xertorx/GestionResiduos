@@ -1,0 +1,91 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-2xl font-semibold">Estadísticas de reportes</h2>
+    <div class="flex gap-2">
+      <button (click)="exportCSV()" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">Exportar CSV</button>
+      <button (click)="refresh()" class="bg-gray-200 text-gray-800 px-3 py-1 rounded hover:bg-gray-300">Refrescar</button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="grid grid-cols-4 gap-4">
+    <div *ngFor="let i of [1,2,3,4]" class="animate-pulse bg-gray-100 h-24 rounded"></div>
+  </div>
+
+  <div *ngIf="error" class="text-red-600">{{ error }}</div>
+
+  <div *ngIf="!loading && !error && stats" class="space-y-6">
+    <!-- KPI cards -->
+    <div class="grid grid-cols-4 gap-4">
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-sm text-gray-500">Total reportes</div>
+        <div class="text-2xl font-bold">{{ stats.total }}</div>
+      </div>
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-sm text-gray-500">Pendientes</div>
+        <div class="text-2xl font-bold text-yellow-600">{{ stats.pending ?? 0 }}</div>
+      </div>
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-sm text-gray-500">En revisión</div>
+        <div class="text-2xl font-bold text-indigo-600">{{ stats.inReview ?? 0 }}</div>
+      </div>
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-sm text-gray-500">Resueltos</div>
+        <div class="text-2xl font-bold text-green-600">{{ stats.resolved ?? 0 }}</div>
+      </div>
+    </div>
+
+    <!-- Secondary KPIs -->
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-sm text-gray-500">Rechazados</div>
+        <div class="text-xl font-semibold text-red-600">{{ stats.rejected ?? 0 }}</div>
+      </div>
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-sm text-gray-500">Puntos críticos</div>
+        <div class="text-xl font-semibold">{{ stats.criticalPoints ?? 0 }}</div>
+      </div>
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-sm text-gray-500">Incumplimiento calendario</div>
+        <div class="text-xl font-semibold">{{ stats.calendarNonCompliance ?? 0 }}</div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="grid grid-cols-3 gap-4">
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-lg font-medium mb-2">Distribución por estado</div>
+        <div class="h-56">
+          <canvas baseChart
+            [data]="pieChartData"
+            [options]="pieChartOptions"
+            [type]="'pie'">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="bg-white shadow rounded p-4 col-span-1">
+        <div class="text-lg font-medium mb-2">Tendencia (últimos días)</div>
+        <div class="h-56">
+          <canvas baseChart
+            [data]="lineChartData"
+            [options]="lineChartOptions"
+            [type]="'line'">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="bg-white shadow rounded p-4">
+        <div class="text-lg font-medium mb-2">Comparativa</div>
+        <div class="h-56">
+          <canvas baseChart
+            [data]="barChartData"
+            [options]="barChartOptions"
+            [type]="'bar'">
+          </canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && !error && !stats" class="text-gray-600">Sin datos</div>
+</div>

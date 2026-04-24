@@ -1,3 +1,4 @@
+// ...existing imports and decorators...
 import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
@@ -17,6 +18,7 @@ declare const google: any;
   styleUrl: './login.scss'
 })
 export class Login implements OnInit {
+  showPassword = false;
 
   form: FormGroup;
   errorMessage: string = '';
@@ -52,14 +54,17 @@ export class Login implements OnInit {
       if (typeof (window as any).google !== 'undefined') {
         clearInterval(waitForGoogle);
 
-        google.accounts.id.initialize({
+            if (!(window as any).__gsi_initialized) {
+              google.accounts.id.initialize({
           client_id: environment.googleClientId,
           callback: (response: any) => {
             this.ngZone.run(() => {
               this.handleGoogleLogin(response); // ← nombre correcto
             });
           }
-        });
+              });
+              (window as any).__gsi_initialized = true;
+            }
 
         google.accounts.id.renderButton(
           document.getElementById('google-login-btn'),

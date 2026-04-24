@@ -89,14 +89,17 @@ export class Register implements OnInit {
       if (typeof (window as any).google !== 'undefined') {
         clearInterval(waitForGoogle);
 
-        google.accounts.id.initialize({
-          client_id: environment.googleClientId,
-          callback: (response: any) => {
-            this.ngZone.run(async () => {
-              await this.handleGoogleCallback(response);
-            });
-          }
-        });
+        if (!(window as any).__gsi_initialized) {
+          google.accounts.id.initialize({
+            client_id: environment.googleClientId,
+            callback: (response: any) => {
+              this.ngZone.run(async () => {
+                await this.handleGoogleCallback(response);
+              });
+            }
+          });
+          (window as any).__gsi_initialized = true;
+        }
 
         google.accounts.id.renderButton(
           document.getElementById('google-btn'),

@@ -1,14 +1,15 @@
 import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID, HostListener } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RecyclingChatComponent } from '../recycling-chat/recycling-chat.component';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AuthStateService } from '../../../services/auth-state.service';
-import { Subscription } from 'rxjs';
+import { Subscription, filter } from 'rxjs';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterModule, LucideAngularModule, CommonModule], 
+  imports: [RouterModule, LucideAngularModule, CommonModule, RecyclingChatComponent],
   templateUrl: './header.html',
   styleUrl: './header.scss'
 })
@@ -22,10 +23,15 @@ export class Header implements OnInit, OnDestroy {
   isProfileMenuOpen = false;
   isMobileMenuOpen = false;
   private subs = new Subscription();
+  showChatbot = false;
+  toggleChatbot() {
+    this.showChatbot = !this.showChatbot;
+  }
 
   constructor(
     private authState: AuthStateService,
-    @Inject(PLATFORM_ID) private platformId: object
+    @Inject(PLATFORM_ID) private platformId: object,
+    private router: Router
   ) {}
 
   ngOnInit() {
@@ -37,6 +43,17 @@ export class Header implements OnInit, OnDestroy {
     this.subs.add(this.authState.email$.subscribe(v => this.email = v));
     this.subs.add(this.authState.photo$.subscribe(v => this.photo = v));
     this.subs.add(this.authState.initialized$.subscribe(v => this.authReady = v));
+
+    // Cerrar el modal del chatbot si navega a /login
+    this.subs.add(
+      this.router.events
+        .pipe(filter(event => event instanceof NavigationEnd))
+        .subscribe((event: any) => {
+          if (event.urlAfterRedirects === '/login' || event.url === '/login') {
+            this.showChatbot = false;
+          }
+        })
+    );
   }
 
   ngOnDestroy() {

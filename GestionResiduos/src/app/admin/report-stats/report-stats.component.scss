@@ -1,0 +1,15 @@
+.dashboard-container { max-width: 1200px; margin: auto; padding: 2rem; }
+.filters { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.kpi-cards { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 2rem; }
+.kpi-card { background: linear-gradient(180deg,#ffffff,#f7fdf6); border-radius: 8px; box-shadow: 0 6px 18px rgba(2,6,23,0.06); padding: 1.5rem; flex: 1 1 200px; min-width: 180px; }
+.kpi-title { color: #4b5563; font-size: 1rem; margin-bottom: 0.5rem; }
+.kpi-value { font-size: 2rem; font-weight: 700; color: #059669; }
+.charts { display: flex; flex-wrap: wrap; gap: 2rem; }
+canvas { background: #fff; border-radius: 8px; box-shadow: 0 6px 18px rgba(2,6,23,0.06); padding: 1rem; max-width: 480px; width:100%; height:320px; }
+.chart-card { flex: 1 1 320px; min-width: 280px; }
+.skeletons { display: flex; gap: 1rem; }
+.skeleton-card { background: linear-gradient(90deg,#f3f4f6,#e5e7eb); height: 160px; flex: 1 1 200px; border-radius: 8px; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+.error { color: #b91c1c; background: #fee2e2; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+.no-data { color: #6b7280; text-align: center; padding: 2rem; }
+@media (max-width: 900px) { .kpi-cards, .charts { flex-direction: column; } }

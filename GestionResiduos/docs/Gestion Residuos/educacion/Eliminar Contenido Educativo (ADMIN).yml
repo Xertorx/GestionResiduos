@@ -1,0 +1,19 @@
+info:
+  name: Eliminar Contenido Educativo (ADMIN)
+  type: http
+  seq: 4
+
+http:
+  method: DELETE
+  url: http://localhost:8080/api/v1/education/{{id}}
+  auth:
+    type: bearer
+    token: {{JWT}}
+
+docs: Elimina un contenido educativo por ID. Requiere autenticación como ADMIN.
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

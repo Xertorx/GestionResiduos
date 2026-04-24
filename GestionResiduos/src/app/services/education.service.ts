@@ -30,7 +30,13 @@ export interface EducationUpdateDTO {
 @Injectable({ providedIn: 'root' })
 export class EducationService {
 
-  private baseUrl = `${environment.apiUrl}/education`;
+  // Feedback: ¿Fue útil este contenido?
+  public sendFeedback(contentId: number, useful: boolean): Observable<any> {
+    const url = `${this.baseUrl}/${contentId}/feedback`;
+    return this.http.post(url, { useful }, { headers: this.getAuthHeaders() });
+  }
+
+  private baseUrl = `${environment.apiV1}/education`;
 
   constructor(
     private http: HttpClient,
@@ -54,16 +60,12 @@ export class EducationService {
 
   // ── GET todos ──
   getAll(): Observable<EducationContent[]> {
-    return this.http.get<EducationContent[]>(this.baseUrl, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<EducationContent[]>(this.baseUrl);
   }
 
   // ── GET por id ──
   getById(id: number): Observable<EducationContent> {
-    return this.http.get<EducationContent>(`${this.baseUrl}/${id}`, {
-      headers: this.getAuthHeaders()
-    });
+    return this.http.get<EducationContent>(`${this.baseUrl}/${id}`);
   }
 
   // ── HU21 mejorada: POST múltiples archivos ──

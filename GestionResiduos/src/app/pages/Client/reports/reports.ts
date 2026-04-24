@@ -32,23 +32,7 @@ interface UserReport {
   styleUrl: './reports.scss'
 })
 export class Reports implements OnInit, OnDestroy {
-<<<<<<< HEAD
   private readonly loginRequiredMessage = 'Debes iniciar sesión para crear reportes y consultar tus reportes.';
-=======
-  private readonly apiBase = '/api';
-
-  reportForm;
-
-  categories: ReportCategory[] = [];
-  myReports: UserReport[] = [];
-  isSubmitting = false;
-  isLoadingReports = false;
-  isLoadingCategories = false;
-  formSuccess = '';
-  formError = '';
-  listError = '';
-  loginRequiredMessage = 'Debes iniciar sesión para crear reportes y consultar tus reportes.';
->>>>>>> 59c2fef5dade223be4b88c0ef45292bcb6ba7c3d
   isAuthenticated = false;
   authReady = false;
   showConfirmModal = false;

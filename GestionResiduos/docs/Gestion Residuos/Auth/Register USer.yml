@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: http://localhost:8080/auth/register/user
+  url: http://localhost:8080/auth/register
   headers:
     - name: Content-Type
       value: application/json
@@ -34,7 +34,7 @@ settings:
   followRedirects: true
   maxRedirects: 5
 
-docs: "Generated from cURL:   curl -X POST http://localhost:8080/auth/register/user \\\r
+docs: "Generated from cURL:   curl -X POST http://localhost:8080/auth/register \\\r
 
   \  -H \"Content-Type: application/json\" \\\r
 

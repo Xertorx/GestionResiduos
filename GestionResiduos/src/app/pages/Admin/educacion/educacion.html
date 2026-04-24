@@ -183,7 +183,7 @@
                     flex items-center justify-center">
           <lucide-icon [name]="getFileTypeIcon(getPrimaryFileType(content))"
                        class="h-16 w-16 text-emerald-600 opacity-50"></lucide-icon>
-          @if ((content.files?.length ?? 0) > 1) {
+          @if (content.files.length > 1) {
             <span class="absolute top-2 right-2 bg-emerald-700 text-white text-xs
                          px-2 py-1 rounded-full font-semibold">
               +{{ content.files.length }} archivos
@@ -224,8 +224,9 @@
             </div>
           }
 
+
           <!-- Botones: editar (morado) + eliminar (rojo) -->
-          <div class="flex justify-end items-center gap-2">
+          <div class="flex justify-end items-center gap-2 mt-2">
             <button
               (click)="openEditForm(content)"
               title="Editar contenido"

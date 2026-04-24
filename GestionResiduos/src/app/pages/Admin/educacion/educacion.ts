@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthStateService } from '../../../services/auth-state.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -13,6 +14,7 @@ import Swal from 'sweetalert2';
   styleUrls: ['./educacion.scss']
 })
 export class EducacionAdmin implements OnInit {
+  isAuthenticated = false;
 
   // ── Lista de contenidos del backend ──
   contenidos: EducationContent[] = [];
@@ -40,10 +42,13 @@ export class EducacionAdmin implements OnInit {
     { value: 'otro', label: 'Otro' }
   ];
 
-  constructor(private educationService: EducationService) {}
+  constructor(private educationService: EducationService, private authState: AuthStateService) {}
 
   ngOnInit(): void {
     this.loadContents();
+    this.authState.isLoggedIn$.subscribe((isLoggedIn) => {
+      this.isAuthenticated = isLoggedIn;
+    });
   }
 
   loadContents(): void {

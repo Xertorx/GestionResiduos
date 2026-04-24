@@ -36,6 +36,7 @@ import { EducationDetail } from './pages/Client/education/education-detail/educa
 import { DynamicQuiz } from './shared/components/dynamic-quiz/dynamic-quiz';
 import { ResetPassword } from './pages/Client/reset-password/reset-password';
 import { EmailPreviewComponent } from './pages/email-preview/email-preview';
+// ReportStats will be lazy-loaded
 
 export const routes: Routes = [
 
@@ -87,6 +88,7 @@ export const routes: Routes = [
      ,{ path: 'educacion', component: EducacionAdmin }
      ,{ path: 'seguimiento', component: SeguimientoAdmin }
      ,{ path: 'foro', component: ForoAdmin }
+    ,{ path: 'report-stats', loadComponent: () => import('./admin/report-stats/report-stats.component').then(m => m.ReportStatsComponent), canActivate: [adminGuard] },
     ],
   },
 

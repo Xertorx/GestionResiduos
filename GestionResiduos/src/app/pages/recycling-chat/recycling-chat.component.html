@@ -1,0 +1,12 @@
+<div class="chat-wrapper">
+  <div #chatContainer class="chat-container">
+    <div *ngFor="let msg of messages" [ngClass]="{'msg-user': msg.sender==='user', 'msg-bot': msg.sender==='bot'}" class="chat-bubble">
+      <span>{{ msg.text }}</span>
+    </div>
+    <div *ngIf="typing" class="typing-indicator">Escribiendo...</div>
+  </div>
+  <form [formGroup]="chatForm" (ngSubmit)="send()" class="chat-input-row">
+    <input formControlName="message" type="text" placeholder="Pregunta sobre reciclaje..." autocomplete="off" />
+    <button type="submit" [disabled]="loading || !chatForm.value.message?.trim()">Enviar</button>
+  </form>
+</div>
