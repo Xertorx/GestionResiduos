@@ -57,19 +57,28 @@ export class Education implements OnInit {
 
   /**
    * Combina los contenidos del backend con las tarjetas locales de ejemplo.
-   * Si el backend devuelve datos, se muestran PRIMERO.
+   * Usa el primer archivo de tipo IMAGE como portada de la tarjeta;
+   * si no hay imagen, cae a un placeholder de picsum.
    */
   private buildGuides(): void {
-    this.guides = this.backendContents.map((c) => ({
-      id: c.id,
-      icon: this.getIconByFileType(c.fileType),
-      type: c.fileType,
-      title: c.title,
-      description: c.description || 'Contenido educativo sobre gestión de residuos.',
-      image: c.fileType === 'IMAGE' ? c.fileUrl : `https://picsum.photos/seed/edu${c.id}/640/360`,
-      time: '',
-      button: this.getButtonByFileType(c.fileType),
-    }));
+    this.guides = this.backendContents.map((c) => {
+      const primaryType = c.files?.[0]?.fileType ?? 'OTRO';
+      const firstImage = c.files?.find(f => f.fileType === 'IMAGE');
+      const cover = firstImage
+        ? firstImage.fileUrl
+        : `https://picsum.photos/seed/edu${c.id}/640/360`;
+
+      return {
+        id: c.id,
+        icon: this.getIconByFileType(primaryType),
+        type: primaryType,
+        title: c.title,
+        description: c.description || 'Contenido educativo sobre gestión de residuos.',
+        image: cover,
+        time: '',
+        button: this.getButtonByFileType(primaryType),
+      };
+    });
   }
 
   private getIconByFileType(fileType: string): string {

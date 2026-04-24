@@ -1,9 +1,6 @@
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!--  ADMIN EDUCACIÓN — Misma estructura visual que el Client  -->
-<!-- ═══════════════════════════════════════════════════════════ -->
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
-  <!-- Header (mismo estilo que Client) -->
+  <!-- Header -->
   <div class="text-center mb-12">
     <h1 class="text-3xl font-bold text-gray-900 mb-4 mt-8">
       Gestión de Contenido Educativo
@@ -29,12 +26,12 @@
     </button>
   </div>
 
-  <!-- ════════════════════════════════════════════════ -->
-  <!--  FORMULARIO DE CREACIÓN (HU21)                  -->
-  <!-- ════════════════════════════════════════════════ -->
+  <!-- ═══════════════════ FORMULARIO (Crear / Editar) ═══════════════════ -->
   @if (showForm) {
   <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <h2 class="text-xl font-semibold text-gray-900 mb-6">Subir Nuevo Contenido</h2>
+    <h2 class="text-xl font-semibold text-gray-900 mb-6">
+      @if (isEditMode) { Editar Contenido } @else { Subir Nuevo Contenido }
+    </h2>
 
     <!-- Título -->
     <div class="mb-4">
@@ -72,45 +69,91 @@
       </select>
     </div>
 
-    <!-- Archivo -->
+    <!-- Archivos (solo en modo CREAR) -->
+    @if (!isEditMode) {
     <div class="mb-6">
-      <label class="block text-sm font-medium text-gray-700 mb-1">Archivo (PDF, JPG, PNG, WEBP, Video) *</label>
-      <div class="flex items-center gap-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1">
+        Archivos (PDF, JPG, PNG, WEBP, Video) *
+      </label>
+      <div class="flex items-center gap-4 mb-3">
         <label
           class="cursor-pointer flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2
                  rounded-md border border-gray-300 hover:bg-gray-200 transition-colors">
           <lucide-icon name="upload" class="h-5 w-5"></lucide-icon>
-          Seleccionar archivo
+          Seleccionar archivos
           <input
             type="file"
-            (change)="onFileSelected($event)"
+            multiple
+            (change)="onFilesSelected($event)"
             accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4,.avi,.mkv"
             class="hidden" />
         </label>
-        @if (selectedFileName) {
-          <span class="text-sm text-gray-600">{{ selectedFileName }}</span>
-        }
+        <span class="text-sm text-gray-600">
+          {{ selectedFiles.length }} archivo(s) seleccionado(s)
+        </span>
       </div>
-    </div>
 
-    <!-- Botón enviar -->
-    <button
-      (click)="submitContent()"
-      [disabled]="isSubmitting"
-      class="w-full bg-emerald-600 text-white py-3 rounded-md font-medium
-             hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-      @if (isSubmitting) {
-        Subiendo...
-      } @else {
-        Subir Contenido
+      <!-- Chips de archivos seleccionados con botón X para quitar -->
+      @if (selectedFiles.length > 0) {
+        <div class="flex flex-wrap gap-2">
+          @for (f of selectedFiles; track $index) {
+            <div class="flex items-center gap-2 bg-emerald-50 border border-emerald-200
+                        text-emerald-800 text-xs px-3 py-1 rounded-full">
+              <lucide-icon name="file" class="h-4 w-4"></lucide-icon>
+              <span class="truncate max-w-[180px]">{{ f.name }}</span>
+              <button type="button" (click)="removeSelectedFile($index)"
+                      class="text-emerald-700 hover:text-red-600">
+                <lucide-icon name="x" class="h-3 w-3"></lucide-icon>
+              </button>
+            </div>
+          }
+        </div>
       }
-    </button>
+    </div>
+    }
+
+    <!-- Nota en modo EDITAR -->
+    @if (isEditMode) {
+    <div class="mb-6 bg-purple-50 border border-purple-200 text-purple-800 text-sm rounded-md p-3">
+      <lucide-icon name="info" class="h-4 w-4 inline mr-1"></lucide-icon>
+      La edición solo modifica título, descripción y categoría. Los archivos adjuntos no cambian.
+    </div>
+    }
+
+    <!-- Botones de acción del formulario -->
+    <div class="flex gap-3">
+      <button
+        (click)="submitContent()"
+        [disabled]="isSubmitting"
+        class="flex-1 text-white py-3 rounded-md font-medium transition-colors
+               disabled:opacity-50 disabled:cursor-not-allowed"
+        [class.bg-emerald-600]="!isEditMode"
+        [class.hover:bg-emerald-700]="!isEditMode"
+        [class.bg-purple-600]="isEditMode"
+        [class.hover:bg-purple-700]="isEditMode">
+        @if (isSubmitting) {
+          Guardando...
+        } @else if (isEditMode) {
+          Guardar Cambios
+        } @else {
+          Subir Contenido
+        }
+      </button>
+
+      @if (isEditMode) {
+        <button
+          (click)="cancelEdit()"
+          [disabled]="isSubmitting"
+          class="px-6 py-3 rounded-md font-medium border border-gray-300
+                 text-gray-700 hover:bg-gray-50 transition-colors">
+          Cancelar
+        </button>
+      }
+    </div>
   </div>
   }
 
-  <!-- ════════════════════════════════════════════════ -->
-  <!--  LISTADO — Mismo grid visual que el Client     -->
-  <!-- ════════════════════════════════════════════════ -->
+  <!-- ═══════════════════ LISTADO DE TARJETAS ═══════════════════ -->
   <div class="mb-12">
     <h2 class="text-2xl font-bold text-gray-900 mb-6">Contenidos del Servidor</h2>
 
@@ -134,39 +177,68 @@
       @for (content of contenidos; track content.id) {
       <div class="resource-card bg-white rounded-lg shadow-md overflow-hidden
                   transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl relative">
-        <!-- Imagen placeholder -->
-        <div class="w-full h-48 bg-gradient-to-br from-emerald-100 to-emerald-200
+
+        <!-- Cabecera visual con icono + contador -->
+        <div class="relative w-full h-48 bg-gradient-to-br from-emerald-100 to-emerald-200
                     flex items-center justify-center">
-          <lucide-icon [name]="getFileTypeIcon(content.fileType)"
+          <lucide-icon [name]="getFileTypeIcon(getPrimaryFileType(content))"
                        class="h-16 w-16 text-emerald-600 opacity-50"></lucide-icon>
+          @if ((content.files?.length ?? 0) > 1) {
+            <span class="absolute top-2 right-2 bg-emerald-700 text-white text-xs
+                         px-2 py-1 rounded-full font-semibold">
+              +{{ content.files.length }} archivos
+            </span>
+          }
         </div>
+
         <div class="p-6">
           <div class="flex items-center mb-2">
-            <lucide-icon [name]="getFileTypeIcon(content.fileType)"
+            <lucide-icon [name]="getFileTypeIcon(getPrimaryFileType(content))"
                          class="h-5 w-5 text-emerald-600 mr-2"></lucide-icon>
-            <span class="text-sm text-gray-500">{{ content.fileType }}</span>
+            <span class="text-sm text-gray-500">{{ getPrimaryFileType(content) }}</span>
             @if (content.category) {
               <span class="ml-auto text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
                 {{ content.category }}
               </span>
             }
           </div>
+
           <h3 class="text-lg font-semibold text-gray-900 mb-2">
             {{ content.title }}
           </h3>
           <p class="text-gray-600 text-sm mb-4">
             {{ content.description || 'Sin descripción' }}
           </p>
-          <div class="flex justify-between items-center">
-            <a [href]="content.fileUrl" target="_blank"
-               class="btn-primary px-4 py-2 rounded-md text-sm font-medium
-                      hover:bg-emerald-100 transition-colors text-emerald-600">
-              Ver archivo
-            </a>
+
+          <!-- Lista de archivos adjuntos -->
+          @if (content.files && content.files.length > 0) {
+            <div class="mb-4 flex flex-wrap gap-2">
+              @for (f of content.files; track $index) {
+                <a [href]="f.fileUrl" target="_blank"
+                   class="flex items-center gap-1 bg-gray-100 hover:bg-emerald-50
+                          text-gray-700 text-xs px-2 py-1 rounded transition-colors">
+                  <lucide-icon [name]="getFileTypeIcon(f.fileType)" class="h-3 w-3"></lucide-icon>
+                  Archivo {{ $index + 1 }}
+                </a>
+              }
+            </div>
+          }
+
+          <!-- Botones: editar (morado) + eliminar (rojo) -->
+          <div class="flex justify-end items-center gap-2">
+            <button
+              (click)="openEditForm(content)"
+              title="Editar contenido"
+              class="flex items-center justify-center text-white bg-purple-600 hover:bg-purple-700
+                     transition-colors p-2 rounded-md">
+              <lucide-icon name="pencil" class="h-4 w-4"></lucide-icon>
+            </button>
             <button
               (click)="deleteContent(content)"
-              class="text-red-500 hover:text-red-700 transition-colors p-2">
-              <lucide-icon name="trash-2" class="h-5 w-5"></lucide-icon>
+              title="Eliminar contenido"
+              class="flex items-center justify-center text-white bg-red-500 hover:bg-red-600
+                     transition-colors p-2 rounded-md">
+              <lucide-icon name="trash-2" class="h-4 w-4"></lucide-icon>
             </button>
           </div>
         </div>

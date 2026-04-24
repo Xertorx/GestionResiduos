@@ -250,31 +250,39 @@ export class EducationDetail implements OnInit {
   }
 
   /**
-   * Convierte un EducationContent del backend al formato Resource
-   * para que el HTML existente lo pueda mostrar sin cambios.
+   * Convierte un EducationContent del backend al formato Resource.
+   * Ahora soporta MÚLTIPLES archivos: arma arrays con todas las imágenes
+   * y todos los PDFs, para que el carrusel las rote automáticamente.
    */
   private mapBackendToResource(content: EducationContent): Resource {
-    const isImage = content.fileType === 'IMAGE';
-    const isPdf = content.fileType === 'PDF';
+    const images = (content.files ?? [])
+      .filter(f => f.fileType === 'IMAGE')
+      .map(f => f.fileUrl);
+
+    const pdfs = (content.files ?? [])
+      .filter(f => f.fileType === 'PDF')
+      .map(f => ({ name: content.title, url: f.fileUrl }));
+
+    const primaryType = content.files?.[0]?.fileType ?? 'OTRO';
 
     return {
       id: content.id,
       title: content.title,
       description: content.description || 'Contenido educativo sobre gestión de residuos.',
-      type: content.fileType,
+      type: primaryType,
       time: '',
       author: 'Administrador',
       date: content.createdAt ? new Date(content.createdAt).toLocaleDateString() : '',
-      images: isImage ? [content.fileUrl] : [],
-      pdfs: isPdf ? [{ name: content.title, url: content.fileUrl }] : [],
+      images: images,
+      pdfs: pdfs,
       sections: [
         {
           title: content.title,
           content: content.description || 'Contenido educativo subido por el administrador.',
-          icon: this.getIconByFileType(content.fileType),
+          icon: this.getIconByFileType(primaryType),
           summary: content.description || 'Haz clic para ver más...',
-          images: isImage ? [content.fileUrl] : [],
-          pdfs: isPdf ? [{ name: content.title, url: content.fileUrl }] : [],
+          images: images,
+          pdfs: pdfs,
           topics: []
         }
       ]
