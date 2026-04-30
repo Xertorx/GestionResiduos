@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 
 import { EducationService, EducationContent } from '../../../services/education.service';
 import { AuthStateService } from '../../../services/auth-state.service';
+import { QuizService, UserQuizStats } from '../../../services/quiz.service';
 
 @Component({
   selector: 'app-education',
@@ -16,22 +17,37 @@ import { AuthStateService } from '../../../services/auth-state.service';
 })
 export class Education implements OnInit {
 
-  // ── Datos que vienen del backend ──
   backendContents: EducationContent[] = [];
   isLoading = true;
   errorMsg = '';
 
-  // ── Datos combinados para la vista (backend + fallback local) ──
   guides: any[] = [];
-
   isLoggedIn = false;
+
+  // ── HU22: estadísticas del usuario ──
+  stats: UserQuizStats = {
+    totalContents: 0,
+    quizzesAnswered: 0,
+    points: 0,
+    progress: 0
+  };
+  loadingStats = false;
+
+  public feedbackState: { [contentId: number]: boolean } = {};
 
   constructor(
     private educationService: EducationService,
-    private authState: AuthStateService
+    private authState: AuthStateService,
+    private quizService: QuizService
   ) {}
 
-
+  ngOnInit(): void {
+    this.loadContents();
+    this.authState.isLoggedIn$.subscribe((logged) => {
+      this.isLoggedIn = logged;
+      if (logged) this.loadStats();
+    });
+  }
 
   loadContents(): void {
     this.isLoading = true;
@@ -50,11 +66,19 @@ export class Education implements OnInit {
     });
   }
 
-  /**
-   * Combina los contenidos del backend con las tarjetas locales de ejemplo.
-   * Usa el primer archivo de tipo IMAGE como portada de la tarjeta;
-   * si no hay imagen, cae a un placeholder de picsum.
-   */
+  loadStats(): void {
+    this.loadingStats = true;
+    this.quizService.getMyStats().subscribe({
+      next: (data) => {
+        this.stats = data;
+        this.loadingStats = false;
+      },
+      error: () => {
+        this.loadingStats = false;
+      }
+    });
+  }
+
   private buildGuides(): void {
     this.guides = this.backendContents.map((c) => {
       const primaryType = c.files?.[0]?.fileType ?? 'OTRO';
@@ -81,7 +105,7 @@ export class Education implements OnInit {
       case 'PDF': return 'book-open';
       case 'IMAGE': return 'image';
       case 'VIDEO': return 'video';
-      default: return 'file-text'; // Lucide sí provee 'file-text', no 'file'
+      default: return 'file-text';
     }
   }
 
@@ -94,17 +118,6 @@ export class Education implements OnInit {
     }
   }
 
-  // --- Feedback: ¿Fue útil este contenido? ---
-  // Estado de feedback por contenido
-  public feedbackState: { [contentId: number]: boolean } = {};
-
-  ngOnInit(): void {
-    this.loadContents();
-    this.authState.isLoggedIn$.subscribe((logged) => {
-      this.isLoggedIn = logged;
-    });
-  }
-
   public hasVoted(contentId: number): boolean {
     return !!this.feedbackState[contentId];
   }
@@ -113,7 +126,6 @@ export class Education implements OnInit {
     if (this.hasVoted(contentId)) return;
     this.educationService.sendFeedback(contentId, useful).subscribe({
       next: (res) => {
-        // Detectar mensaje de feedback ya registrado
         if (
           (res && (res.alreadyVoted || res.useful !== undefined || res.notUseful !== undefined)) ||
           (res && typeof res.message === 'string' && res.message.includes('Ya se registró el feedback'))

@@ -11,6 +11,13 @@ export interface QuizQuestionPlay {
   options: string[];
 }
 
+export interface UserQuizStats {
+  totalContents: number;
+  quizzesAnswered: number;
+  points: number;
+  progress: number;
+}
+
 export interface QuizPlay {
   id: number;
   title: string;
@@ -98,6 +105,12 @@ export class QuizService {
       { answers },
       { headers: this.authHeaders().set('Content-Type', 'application/json') }
     );
+  }
+
+  getMyStats(): Observable<UserQuizStats> {
+    return this.http.get<UserQuizStats>(`${this.baseUrl}/me/stats`, {
+      headers: this.authHeaders()
+    });
   }
 
   // ─── Admin ───

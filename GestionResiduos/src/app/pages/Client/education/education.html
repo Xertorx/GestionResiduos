@@ -12,22 +12,23 @@
   <div *ngIf="isLoggedIn" class="bg-white rounded-lg shadow-md p-6 mb-8">
     <div class="flex items-center justify-between mb-4">
       <h2 class="text-xl font-semibold text-gray-900">Tu progreso de aprendizaje</h2>
-      <span class="text-emerald-600 font-medium">65% completado</span>
+      <span class="text-emerald-600 font-medium">{{ stats.progress }}% completado</span>
     </div>
     <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
-      <div class="progress-bar bg-emerald-600 h-3 rounded-full" style="width: 65%"></div>
+      <div class="progress-bar bg-emerald-600 h-3 rounded-full transition-all duration-500"
+           [style.width.%]="stats.progress"></div>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="text-center">
-        <div class="text-2xl font-bold text-emerald-600">8</div>
-        <div class="text-sm text-gray-600">Guías completadas</div>
+        <div class="text-2xl font-bold text-emerald-600">{{ stats.totalContents }}</div>
+        <div class="text-sm text-gray-600">Contenidos disponibles</div>
       </div>
       <div class="text-center">
-        <div class="text-2xl font-bold text-emerald-600">5</div>
-        <div class="text-sm text-gray-600">Quizzes aprobados</div>
+        <div class="text-2xl font-bold text-emerald-600">{{ stats.quizzesAnswered }}</div>
+        <div class="text-sm text-gray-600">Quizzes respondidos</div>
       </div>
       <div class="text-center">
-        <div class="text-2xl font-bold text-emerald-600">350</div>
+        <div class="text-2xl font-bold text-emerald-600">{{ stats.points }}</div>
         <div class="text-sm text-gray-600">Puntos ganados</div>
       </div>
     </div>
