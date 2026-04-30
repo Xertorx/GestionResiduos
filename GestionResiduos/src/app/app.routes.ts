@@ -33,7 +33,7 @@ import { SeguimientoAdmin } from './pages/Admin/seguimiento/seguimiento';
 import { ForoAdmin } from './pages/Admin/foro/foro';
 import { CategoriasAdmin } from './pages/Admin/categorias/categorias';
 import { EducationDetail } from './pages/Client/education/education-detail/education-detail';
-import { DynamicQuiz } from './shared/components/dynamic-quiz/dynamic-quiz';
+import { QuizPlay } from './pages/Client/education/quiz-play/quiz-play';
 import { ResetPassword } from './pages/Client/reset-password/reset-password';
 import { EmailPreviewComponent } from './pages/email-preview/email-preview';
 // ReportStats will be lazy-loaded
@@ -55,7 +55,7 @@ export const routes: Routes = [
       { path: 'calendar', component: Calendar },
       { path: 'education', component: Education },
       { path: 'education/:id', component: EducationDetail },
-      { path: 'education/:id/quiz', component: DynamicQuiz },
+      { path: 'education/:id/quiz', component: QuizPlay },
       { path: 'register', component: Register },
       { path: 'register/verify', component: Verify, canActivate: [verifyGuard] },
       { path: 'register/verify/:token', component: Verify },

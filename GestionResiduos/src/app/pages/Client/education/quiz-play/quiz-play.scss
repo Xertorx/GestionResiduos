@@ -1,0 +1,8 @@
+.quiz-option {
+  font-weight: 500;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: default;
+  }
+}
