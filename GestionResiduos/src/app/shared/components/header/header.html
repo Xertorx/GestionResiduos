@@ -17,6 +17,7 @@
         <a [routerLink]="'/calendar'" class="text-gray-500 hover:text-emerald-600 transition">Calendario</a>
         <a [routerLink]="'/education'" class="text-gray-500 hover:text-emerald-600 transition">Educación</a>
         <a [routerLink]="'/foro'" class="text-gray-500 hover:text-emerald-600 transition">Foro</a>
+        <a [routerLink]="'/ranking'" class="text-gray-500 hover:text-emerald-600 transition">Ranking</a>
         <button (click)="toggleChatbot()" class="ml-4 flex items-center px-3 py-2 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-medium transition shadow-sm border border-emerald-100">
           <lucide-icon name="message-circle" class="w-5 h-5 mr-2"></lucide-icon>
           Chat Reciclaje
@@ -144,6 +145,7 @@
         <a routerLink="/calendar" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Calendario</a>
         <a routerLink="/education" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Educación</a>
         <a routerLink="/foro" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Foro</a>
+        <a routerLink="/ranking" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Ranking</a>
       </div>
 
       @if (isBrowser && authReady) {

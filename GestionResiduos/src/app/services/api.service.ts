@@ -274,4 +274,11 @@ export class ApiService {
   addReply(commentId: number, texto: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/forum/comments/${commentId}/replies`, { texto }, { headers: this.authHeaders().set('Content-Type', 'application/json') });
   }
+
+   // ─── HU31: Ranking ───
+  getRanking(limit: number = 50): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/ranking`, {
+      params: { limit: limit.toString() }
+    });
+  }
 }

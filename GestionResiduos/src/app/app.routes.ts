@@ -36,6 +36,9 @@ import { EducationDetail } from './pages/Client/education/education-detail/educa
 import { QuizPlay } from './pages/Client/education/quiz-play/quiz-play';
 import { ResetPassword } from './pages/Client/reset-password/reset-password';
 import { EmailPreviewComponent } from './pages/email-preview/email-preview';
+import { Ranking } from './pages/Client/ranking/ranking';
+
+
 // ReportStats will be lazy-loaded
 
 export const routes: Routes = [
@@ -64,6 +67,7 @@ export const routes: Routes = [
       { path: 'profile/edit', component: UserProfileEdit },
       { path: 'access-denied', component: AccessDenied },
       { path: 'email-preview', component: EmailPreviewComponent },
+      { path: 'ranking', component: Ranking },
 
       {
         path: 'foro',
