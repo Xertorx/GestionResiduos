@@ -7,7 +7,8 @@ import {
   Send, Home, Folder, Settings, BarChart2, Leaf, RefreshCw,
   CircleCheckBig, CircleAlert, XCircle, Key, UserCheck, UserX, Edit, Trash, Plus, Minus, Search, Lock, X, Upload, Inbox, CheckCircle,
   Eye, EyeOff, Tag, PieChart, Pencil,
-  Trophy, Crown, Medal, Star, Hash, Flame
+  Trophy, Crown, Medal, Star, Hash, Flame,
+  Target, Sparkles, Gift
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS = { 
@@ -20,7 +21,8 @@ export const LUCIDE_ICONS = {
   CircleCheckBig, CircleAlert, XCircle, Key, UserCheck, UserX, Edit, Trash, Plus, Minus, Search, Lock, X, Upload, Inbox, CheckCircle,
   Eye, EyeOff,
   MessageCircle, Pencil,
-  Trophy, Crown, Medal, Star, Hash, Flame
+  Trophy, Crown, Medal, Star, Hash, Flame,
+  Target, Sparkles, Gift
 };
 
 // also expose kebab-case keys used in templates

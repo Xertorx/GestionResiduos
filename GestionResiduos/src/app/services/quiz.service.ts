@@ -68,6 +68,13 @@ export interface QuizResult {
     correctIndex: number;
     wasCorrect: boolean;
   }[];
+  newAchievements?: {
+    id: number;
+    nombre: string;
+    descripcion: string;
+    puntosOtorgados: number;
+    icono: string;
+  }[];
 }
 
 @Injectable({ providedIn: 'root' })

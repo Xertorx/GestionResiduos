@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
-import { RouterLink } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 
 interface RankingUser {
@@ -17,7 +16,7 @@ interface RankingUser {
 @Component({
   selector: 'app-ranking',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, RouterLink],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './ranking.html',
   styleUrl: './ranking.scss'
 })

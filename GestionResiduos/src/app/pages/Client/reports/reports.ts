@@ -5,6 +5,8 @@ import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { ApiService } from '../../../services/api.service';
+import Swal from 'sweetalert2';
+
 
 interface ReportCategory {
   id: number;
@@ -214,12 +216,31 @@ export class Reports implements OnInit, OnDestroy {
     this.isSubmitting = true;
 
     this.api.createReport(formData).subscribe({
-      next: () => {
+      next: (response: any) => {
         this.formSuccess = 'Reporte de punto crítico enviado correctamente.';
         this.showSuccessModal = true;
         this.resetForm();
         this.loadMyReports();
         this.isSubmitting = false;
+        // ── Sistema de Logros: mostrar alerta si se desbloqueó un logro ──
+        if (response.newAchievements && response.newAchievements.length > 0) {
+          const a = response.newAchievements[0];
+          setTimeout(() => {
+            Swal.fire({
+              icon: 'success',
+              title: '🏆 ¡Nuevo Logro Desbloqueado!',
+              html: `
+                <div style="text-align:center;">
+                  <p style="font-size:1.2em;font-weight:700;color:#059669;margin-bottom:4px;">${a.nombre}</p>
+                  <p style="color:#6b7280;">${a.descripcion}</p>
+                  <p style="margin-top:8px;font-weight:600;color:#d97706;">+${a.puntosOtorgados} puntos bonus</p>
+                </div>
+              `,
+              confirmButtonColor: '#059669',
+              confirmButtonText: '¡Genial!'
+            });
+          }, 1000);
+        }
       },
       error: (error) => {
         console.error('Error al enviar reporte', error);

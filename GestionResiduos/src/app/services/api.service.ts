@@ -281,4 +281,13 @@ export class ApiService {
       params: { limit: limit.toString() }
     });
   }
+
+  // ─── Logros (Achievements) ───
+  getMyAchievements(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/achievements/me`, { headers: this.authHeaders() });
+  }
+
+  getMyUnlockedAchievements(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/achievements/me/unlocked`, { headers: this.authHeaders() });
+  }
 }

@@ -122,7 +122,83 @@
             </div>
           </div>
         </div>
+<!-- ══════════════════════════════════════════ -->
+        <!-- SISTEMA DE LOGROS                         -->
+        <!-- ══════════════════════════════════════════ -->
+        @if (!isLoadingAchievements && achievements.length > 0) {
+          <div class="mt-10 border-t border-gray-100 pt-8">
+            <!-- Header -->
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2">
+                <lucide-icon name="trophy" class="w-5 h-5 text-yellow-500"></lucide-icon>
+                <h3 class="text-lg font-bold text-gray-800">Mis Logros</h3>
+              </div>
+              <span class="text-sm text-gray-500">{{ unlockedCount }}/{{ totalCount }} desbloqueados</span>
+            </div>
 
+            <!-- Barra de progreso -->
+            <div class="w-full bg-gray-100 rounded-full h-2.5 mb-6">
+              <div class="bg-emerald-500 h-2.5 rounded-full transition-all duration-500"
+                   [style.width.%]="progressPercent"></div>
+            </div>
+
+            <!-- Grid de logros -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              @for (achievement of achievements; track achievement.id) {
+                <div class="relative rounded-xl border p-4 transition-all"
+                     [ngClass]="achievement.unlocked
+                       ? 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 shadow-sm'
+                       : 'bg-gray-50 border-gray-200 opacity-50'">
+
+                  <!-- Icono -->
+                  <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center"
+                         [ngClass]="achievement.unlocked ? 'bg-emerald-100' : 'bg-gray-200'">
+                      <lucide-icon [name]="achievement.icono || 'award'"
+                                   class="w-5 h-5"
+                                   [ngClass]="achievement.unlocked ? 'text-emerald-600' : 'text-gray-400'">
+                      </lucide-icon>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm font-bold truncate"
+                         [ngClass]="achievement.unlocked ? 'text-gray-800' : 'text-gray-500'">
+                        {{ achievement.nombre }}
+                      </p>
+                      <p class="text-xs text-gray-400 truncate">{{ achievement.descripcion }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Footer: puntos y fecha -->
+                  <div class="flex items-center justify-between mt-2">
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full"
+                          [ngClass]="achievement.unlocked
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-gray-200 text-gray-500'">
+                      +{{ achievement.puntosOtorgados }} pts
+                    </span>
+                    @if (achievement.unlocked && achievement.fechaObtenido) {
+                      <span class="text-xs text-emerald-600">
+                        {{ formatAchievementDate(achievement.fechaObtenido) }}
+                      </span>
+                    }
+                    @if (!achievement.unlocked) {
+                      <lucide-icon name="lock" class="w-3.5 h-3.5 text-gray-400"></lucide-icon>
+                    }
+                  </div>
+
+                  <!-- Badge desbloqueado -->
+                  @if (achievement.unlocked) {
+                    <div class="absolute -top-1.5 -right-1.5">
+                      <div class="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center shadow-sm">
+                        <lucide-icon name="check-circle" class="w-4 h-4 text-white"></lucide-icon>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
         <!-- Actions -->
         <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
           <a routerLink="/profile/edit"
