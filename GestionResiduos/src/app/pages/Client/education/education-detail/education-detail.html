@@ -13,7 +13,7 @@
   @else if (resource) {
 
     <!-- HERO -->
-    <section class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl shadow-lg p-8 mb-8">
+    <section data-aos="fade-down" class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl shadow-lg p-8 mb-8">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div class="flex-1">
           <div class="flex items-center gap-3 mb-2">
@@ -30,10 +30,16 @@
 
         <div class="flex flex-col gap-3 md:items-end">
           <button (click)="toggleResourceCompleted()"
+                  [disabled]="!canMarkCompleted"
                   [class.bg-white]="isResourceCompleted()"
                   [class.text-emerald-700]="isResourceCompleted()"
-                  [class.bg-emerald-800]="!isResourceCompleted()"
-                  [class.text-white]="!isResourceCompleted()"
+                  [class.bg-emerald-800]="!isResourceCompleted() && canMarkCompleted"
+                  [class.text-white]="!isResourceCompleted() && canMarkCompleted"
+                  [class.bg-gray-300]="!canMarkCompleted"
+                  [class.text-gray-500]="!canMarkCompleted"
+                  [class.cursor-not-allowed]="!canMarkCompleted"
+                  [class.opacity-60]="!canMarkCompleted"
+                  [title]="!canMarkCompleted ? 'Debes ver todas las secciones' + (hasQuiz ? ' y completar el quiz' : '') + ' para marcar como completado' : ''"
                   class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-medium hover:shadow-lg transition whitespace-nowrap">
             <lucide-icon name="award" class="h-4 w-4 mr-2"></lucide-icon>
             {{ isResourceCompleted() ? 'Completado' : 'Marcar como completado' }}
@@ -55,7 +61,7 @@
     <div class="flex flex-col lg:flex-row gap-8">
 
       <!-- Sidebar -->
-      <aside class="lg:w-72 flex-shrink-0 bg-white border border-gray-200 rounded-xl shadow-sm p-6 h-fit lg:sticky lg:top-4">
+      <aside data-aos="fade-right" class="lg:w-72 flex-shrink-0 bg-white border border-gray-200 rounded-xl shadow-sm p-6 h-fit lg:sticky lg:top-4">
         <h2 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
           <lucide-icon name="book-open" class="w-4 h-4 text-emerald-600"></lucide-icon>
           Contenido del módulo
@@ -91,11 +97,11 @@
 
       <!-- Área principal -->
       <main class="flex-1 min-w-0">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Secciones</h2>
+        <h2 data-aos="fade-up" class="text-xl font-bold text-gray-900 mb-4">Secciones</h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-10">
           @for (section of resource.sections ?? []; track section) {
-            <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow p-6 cursor-pointer border border-gray-100"
+            <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow p-6 cursor-pointer border border-gray-100"
                  (click)="openModal(section)">
               <div class="flex items-center gap-3 mb-3">
                 @if (section.icon && !section.icon.includes('/')) {
@@ -128,7 +134,7 @@
 
         <!-- Galería -->
         @if ((resource.images ?? []).length > 0) {
-          <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-10">
+          <section data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-10">
             <h2 class="text-xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center gap-2">
               <lucide-icon name="image" class="w-5 h-5 text-emerald-600"></lucide-icon>
               Galería destacada
@@ -139,7 +145,7 @@
 
         <!-- CTA QUIZ inferior -->
         @if (hasQuiz && !checkingQuiz) {
-          <div class="bg-gradient-to-br from-emerald-50 to-amber-50 border-2 border-emerald-200 rounded-2xl p-8 text-center">
+          <div data-aos="zoom-in" class="bg-gradient-to-br from-emerald-50 to-amber-50 border-2 border-emerald-200 rounded-2xl p-8 text-center">
             <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-400 mb-4">
               <lucide-icon name="award" class="w-8 h-8 text-emerald-900"></lucide-icon>
             </div>
@@ -181,6 +187,17 @@
             <div>
               <h4 class="text-lg font-semibold text-gray-800 mb-2">Descripción</h4>
               <p class="text-gray-600">{{ selectedSection.content }}</p>
+            </div>
+          }
+
+          @if (selectedSection.videos && selectedSection.videos.length > 0) {
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-3">Videos</h4>
+              <div class="space-y-4">
+                @for (vid of selectedSection.videos; track $index) {
+                  <video [src]="vid" controls class="w-full rounded-lg shadow-sm max-h-72"></video>
+                }
+              </div>
             </div>
           }
 

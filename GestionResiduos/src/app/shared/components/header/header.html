@@ -18,17 +18,11 @@
         <a [routerLink]="'/education'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Educación</a>
         <a [routerLink]="'/foro'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Foro</a>
         <a [routerLink]="'/ranking'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Ranking</a>
+        <a [routerLink]="'/about_us'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Nosotros</a>
       </div>
 
       <!-- Right section: Chat + Auth -->
       <div class="hidden md:flex md:items-center md:space-x-3">
-        <!-- Chat Reciclaje button -->
-        <button (click)="toggleChatbot()"
-          class="flex items-center px-2.5 py-1.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-sm font-medium transition border border-emerald-100">
-          <lucide-icon name="message-circle" class="w-4 h-4 mr-1.5"></lucide-icon>
-          Chat
-        </button>
-
         @if (isBrowser && authReady) {
           @if (!isLoggedIn) {
             <a [routerLink]="'/login'" class="text-gray-500 hover:text-emerald-600 text-sm">
@@ -120,25 +114,6 @@
     </div>
   </div>
 
-  <!-- Chatbot Modal -->
-  <div *ngIf="showChatbot" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-40">
-    <div class="bg-white rounded-2xl shadow-2xl p-0 relative max-w-full w-[95vw] md:w-[420px] animate-in fade-in zoom-in-95">
-      <button (click)="toggleChatbot()" class="absolute top-2 right-2 text-gray-400 hover:text-gray-700 bg-white rounded-full p-1 shadow">
-        <lucide-icon name="x" class="w-6 h-6"></lucide-icon>
-      </button>
-      <ng-container *ngIf="isLoggedIn; else loginMsg">
-        <recycling-chat [userId]="email"></recycling-chat>
-      </ng-container>
-      <ng-template #loginMsg>
-        <div class="p-8 text-center">
-          <lucide-icon name="lock" class="w-10 h-10 text-emerald-600 mx-auto mb-4"></lucide-icon>
-          <div class="text-lg font-semibold mb-2">Debes iniciar sesión para usar el chat</div>
-          <a [routerLink]="'/login'" class="btn-primary px-6 py-2 rounded-md text-white font-medium">Iniciar Sesión</a>
-        </div>
-      </ng-template>
-    </div>
-  </div>
-
   <!-- Mobile menu -->
   @if (isMobileMenuOpen) {
     <div class="md:hidden border-t border-gray-200 bg-white">
@@ -150,10 +125,7 @@
         <a routerLink="/education" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Educación</a>
         <a routerLink="/foro" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Foro</a>
         <a routerLink="/ranking" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Ranking</a>
-        <!-- Chat mobile -->
-        <button (click)="toggleChatbot(); isMobileMenuOpen = false" class="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-emerald-600 hover:bg-emerald-50">
-          Chat Reciclaje
-        </button>
+        <a routerLink="/about_us" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Nosotros</a>
       </div>
 
       @if (isBrowser && authReady) {

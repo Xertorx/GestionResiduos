@@ -1,35 +1,36 @@
 <!-- Main Content -->
-<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+<div class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
   <!-- Header -->
-  <div class="text-center mb-12">
-    <h1 class="text-3xl font-bold text-gray-900 mb-4 mt-8">Educación Ambiental</h1>
-    <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+  <div data-aos="fade-down" class="text-center mb-12">
+    <span class="section-badge">Aprende y crece</span>
+    <h1 class="text-4xl font-extrabold text-gray-900 mb-3 mt-1">Educación Ambiental</h1>
+    <p class="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
       Aprende sobre manejo de residuos, reciclaje y sostenibilidad con nuestros recursos educativos
     </p>
   </div>
 
   <!-- Progress Section solo si hay sesión iniciada -->
-  <div *ngIf="isLoggedIn" class="bg-white rounded-lg shadow-md p-6 mb-8">
+  <div data-aos="fade-up" *ngIf="isLoggedIn" class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl shadow-lg p-6 mb-10">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-semibold text-gray-900">Tu progreso de aprendizaje</h2>
-      <span class="text-emerald-600 font-medium">{{ stats.progress }}% completado</span>
+      <h2 class="text-xl font-bold text-white">Tu progreso de aprendizaje</h2>
+      <span class="bg-white/20 text-white text-sm font-semibold px-3 py-1 rounded-full">{{ stats.progress }}% completado</span>
     </div>
-    <div class="w-full bg-gray-200 rounded-full h-3 mb-4">
-      <div class="progress-bar bg-emerald-600 h-3 rounded-full transition-all duration-500"
+    <div class="w-full bg-white/20 rounded-full h-2.5 mb-5">
+      <div class="bg-white h-2.5 rounded-full transition-all duration-500"
            [style.width.%]="stats.progress"></div>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="text-center">
-        <div class="text-2xl font-bold text-emerald-600">{{ stats.totalContents }}</div>
-        <div class="text-sm text-gray-600">Contenidos disponibles</div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="text-center bg-white/10 rounded-xl p-4">
+        <div class="text-3xl font-extrabold text-white">{{ stats.totalContents }}</div>
+        <div class="text-sm text-emerald-100 mt-1">Contenidos disponibles</div>
       </div>
-      <div class="text-center">
-        <div class="text-2xl font-bold text-emerald-600">{{ stats.quizzesAnswered }}</div>
-        <div class="text-sm text-gray-600">Quizzes respondidos</div>
+      <div class="text-center bg-white/10 rounded-xl p-4">
+        <div class="text-3xl font-extrabold text-white">{{ stats.quizzesAnswered }}</div>
+        <div class="text-sm text-emerald-100 mt-1">Quizzes respondidos</div>
       </div>
-      <div class="text-center">
-        <div class="text-2xl font-bold text-emerald-600">{{ stats.points }}</div>
-        <div class="text-sm text-gray-600">Puntos ganados</div>
+      <div class="text-center bg-white/10 rounded-xl p-4">
+        <div class="text-3xl font-extrabold text-white">{{ stats.points }}</div>
+        <div class="text-sm text-emerald-100 mt-1">Puntos ganados</div>
       </div>
     </div>
   </div>
@@ -39,11 +40,12 @@
 
   <!-- Feedback por tarjeta -->
   <div class="mb-12">
-    <h2 class="text-2xl font-bold text-gray-900 mb-6">Recursos Educativos</h2>
+    <h2 data-aos="fade-up" class="text-2xl font-extrabold text-gray-900 mb-6">Recursos Educativos</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       @for (guide of guides; track guide.id) {
-      <div [ngClass]="{'opacity-60 pointer-events-none': !isLoggedIn}">
-        <div class="resource-card bg-white rounded-lg shadow-md overflow-hidden transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl relative pointer-events-auto cursor-pointer">
+      <div data-aos="fade-up" [ngClass]="{'opacity-60 pointer-events-none': !isLoggedIn}">
+        <div class="resource-card bg-white rounded-lg shadow-md overflow-hidden transform transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl relative pointer-events-auto cursor-pointer"
+             [routerLink]="isLoggedIn ? ['/education', guide.id] : null">
           <img [src]="guide.image" [alt]="guide.title" class="w-full h-48 object-cover" />
           <div class="p-6">
             <div class="flex items-center mb-2">
@@ -57,7 +59,7 @@
               {{ guide.description }}
             </p>
             <div class="flex justify-between items-center mb-2">
-              <button *ngIf="isLoggedIn" class="btn-primary  px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-100 transition-colors" [routerLink]="['/education/', guide.id]">
+              <button *ngIf="isLoggedIn" class="btn-primary  px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-100 transition-colors" [routerLink]="['/education', guide.id]">
                 {{ guide.button }}
               </button>
               <div *ngIf="!isLoggedIn" class="text-red-500 font-medium">Inicia sesión para ver el contenido</div>

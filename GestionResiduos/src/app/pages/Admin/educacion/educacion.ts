@@ -17,6 +17,12 @@ interface DraftQuestion {
   options: string[];
 }
 
+interface DraftSection {
+  title: string;
+  description: string;
+  files: File[];
+}
+
 @Component({
   selector: 'app-admin-educacion',
   standalone: true,
@@ -36,10 +42,19 @@ export class EducacionAdmin implements OnInit {
   isEditMode = false;
   editingId: number | null = null;
 
+  // Wizard steps: 1=datos básicos, 2=secciones, 3=quiz
+  wizardStep = 1;
+
   newTitle = '';
   newDescription = '';
   newCategory = 'reciclaje';
   selectedFiles: File[] = [];
+
+  // ── Secciones del wizard ──
+  draftSections: DraftSection[] = [];
+
+  // ── Quiz integrado en el wizard de creación ──
+  includeQuizInCreate = false;
 
   categories = [
     { value: 'reciclaje', label: 'Reciclaje' },
@@ -104,9 +119,37 @@ export class EducacionAdmin implements OnInit {
   toggleForm(): void {
     this.showForm = !this.showForm;
     if (!this.showForm) this.resetForm();
-    else { this.isEditMode = false; this.editingId = null; }
+    else { this.isEditMode = false; this.editingId = null; this.wizardStep = 1; }
   }
   cancelEdit(): void { this.resetForm(); this.showForm = false; }
+
+  // ── Wizard navigation ──
+  goToStep(step: number): void { this.wizardStep = step; }
+
+  nextStep(): void {
+    if (this.wizardStep === 1) {
+      if (!this.newTitle.trim()) { Swal.fire('Atención', 'El título es obligatorio.', 'warning'); return; }
+    }
+    this.wizardStep++;
+  }
+  prevStep(): void { if (this.wizardStep > 1) this.wizardStep--; }
+
+  // ── Secciones ──
+  addDraftSection(): void {
+    this.draftSections.push({ title: '', description: '', files: [] });
+  }
+  removeDraftSection(idx: number): void { this.draftSections.splice(idx, 1); }
+
+  onSectionFilesSelected(event: Event, idx: number): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.draftSections[idx].files = [...this.draftSections[idx].files, ...Array.from(input.files)];
+      input.value = '';
+    }
+  }
+  removeSectionFile(sIdx: number, fIdx: number): void {
+    this.draftSections[sIdx].files.splice(fIdx, 1);
+  }
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -137,27 +180,82 @@ export class EducacionAdmin implements OnInit {
     if (this.selectedFiles.length === 0) { Swal.fire('Atención', 'Debes seleccionar al menos un archivo.', 'warning'); return; }
 
     const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp', '.mp4', '.avi', '.mkv'];
-    const invalidFile = this.selectedFiles.find(f => {
+    const allFiles = [
+      ...this.selectedFiles,
+      ...this.draftSections.flatMap(s => s.files)
+    ];
+    const invalidFile = allFiles.find(f => {
       const name = f.name.toLowerCase();
       return !allowedExtensions.some(ext => name.endsWith(ext));
     });
     if (invalidFile) { Swal.fire('Error', `El archivo "${invalidFile.name}" tiene una extensión no permitida.`, 'error'); return; }
+
+    // Validar quiz si aplica
+    if (this.includeQuizInCreate) {
+      if (!this.quizTitle.trim()) { Swal.fire('Atención', 'El título del quiz es obligatorio.', 'warning'); return; }
+      if (this.draftQuestions.length === 0) { Swal.fire('Atención', 'Agrega al menos una pregunta al quiz.', 'warning'); return; }
+      for (let i = 0; i < this.draftQuestions.length; i++) {
+        const q = this.draftQuestions[i];
+        if (!q.text.trim()) { Swal.fire('Atención', `La pregunta #${i + 1} no tiene enunciado.`, 'warning'); return; }
+        if (q.options.some(o => !o.trim())) { Swal.fire('Atención', `La pregunta #${i + 1} tiene opciones vacías.`, 'warning'); return; }
+      }
+    }
 
     this.isSubmitting = true;
     this.educationService.create(
       this.newTitle.trim(), this.newDescription.trim(), this.newCategory, this.selectedFiles
     ).subscribe({
       next: (saved) => {
-        this.isSubmitting = false;
-        Swal.fire('¡Listo!', `Contenido "${saved.title}" creado con ${saved.files?.length ?? 0} archivo(s).`, 'success');
         this.contenidos.unshift(saved);
         this.contentHasQuiz[saved.id] = false;
-        this.resetForm(); this.showForm = false;
+        this.postCreateSectionsAndQuiz(saved.id, saved.title);
       },
       error: (err) => {
         this.isSubmitting = false;
         console.error('Error subiendo contenido:', err);
         Swal.fire('Error', 'No se pudo subir el contenido.', 'error');
+      }
+    });
+  }
+
+  private postCreateSectionsAndQuiz(contentId: number, contentTitle: string): void {
+    const sectionsToCreate = this.draftSections.filter(s => s.title.trim());
+
+    const createSections = (remaining: DraftSection[], done: () => void) => {
+      if (remaining.length === 0) { done(); return; }
+      const [sec, ...rest] = remaining;
+      this.educationService.addSection(contentId, sec.title.trim(), sec.description.trim(), sec.files)
+        .subscribe({ next: () => createSections(rest, done), error: () => createSections(rest, done) });
+    };
+
+    createSections(sectionsToCreate, () => {
+      if (this.includeQuizInCreate) {
+        const payload = {
+          title: this.quizTitle.trim(),
+          description: this.quizDescription.trim(),
+          pointsPerQuestion: this.quizPointsPerQuestion,
+          questions: this.draftQuestions.map(q => ({
+            text: q.text.trim(), correctIndex: q.correctIndex, options: q.options.map(o => o.trim())
+          }))
+        };
+        this.quizService.create(contentId, payload).subscribe({
+          next: () => {
+            this.contentHasQuiz[contentId] = true;
+            this.isSubmitting = false;
+            Swal.fire('¡Listo!', `Contenido "${contentTitle}" creado con secciones y quiz.`, 'success');
+            this.resetForm(); this.showForm = false;
+          },
+          error: () => {
+            this.isSubmitting = false;
+            Swal.fire('Parcial', `Contenido creado pero el quiz no se guardó. Puedes crearlo desde la tarjeta.`, 'warning');
+            this.resetForm(); this.showForm = false;
+          }
+        });
+      } else {
+        this.isSubmitting = false;
+        const secCount = sectionsToCreate.length;
+        Swal.fire('¡Listo!', `Contenido "${contentTitle}" creado${secCount ? ` con ${secCount} sección(es)` : ''}.`, 'success');
+        this.resetForm(); this.showForm = false;
       }
     });
   }
@@ -217,6 +315,8 @@ export class EducacionAdmin implements OnInit {
   private resetForm(): void {
     this.newTitle = ''; this.newDescription = ''; this.newCategory = 'reciclaje';
     this.selectedFiles = []; this.isEditMode = false; this.editingId = null; this.isSubmitting = false;
+    this.wizardStep = 1; this.draftSections = []; this.includeQuizInCreate = false;
+    this.quizTitle = ''; this.quizDescription = ''; this.quizPointsPerQuestion = 10; this.draftQuestions = [];
   }
 
   // ─────────── Helpers vista ───────────

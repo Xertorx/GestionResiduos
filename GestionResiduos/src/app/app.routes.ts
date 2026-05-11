@@ -12,6 +12,10 @@ import { Reports } from './pages/Client/reports/reports';
 import { Education } from './pages/Client/education/education';
 import { EcoPoints } from './pages/Client/eco-points/eco-points';
 import { Register } from './pages/Client/register/register';
+import { Faq } from './pages/Client/faq/faq';
+import { Contact } from './pages/Client/contact/contact';
+import { Privacy } from './pages/Client/privacy/privacy';
+import { Terms } from './pages/Client/terms/terms';
 
 import { Profile } from './pages/Client/register/profile/profile';
 import { Verify } from './pages/Client/register/verify/verify';
@@ -68,6 +72,10 @@ export const routes: Routes = [
       { path: 'access-denied', component: AccessDenied },
       { path: 'email-preview', component: EmailPreviewComponent },
       { path: 'ranking', component: Ranking },
+      { path: 'faq', component: Faq },
+      { path: 'contact', component: Contact },
+      { path: 'privacy', component: Privacy },
+      { path: 'terms', component: Terms },
 
       {
         path: 'foro',

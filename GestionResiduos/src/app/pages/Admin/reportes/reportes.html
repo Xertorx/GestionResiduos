@@ -1,33 +1,35 @@
 <div class="max-w-6xl mx-auto">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div data-aos="fade-down" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-        <lucide-icon name="file-text" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        <span class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <lucide-icon name="file-text" class="w-5 h-5 text-emerald-600"></lucide-icon>
+        </span>
         Administración de Reportes
       </h1>
-      <p class="text-sm text-gray-500 mt-1">Gestiona y revisa los reportes ciudadanos</p>
+      <p class="text-sm text-gray-400 mt-1">Gestiona y revisa los reportes ciudadanos</p>
     </div>
   </div>
 
   <!-- Estadísticas -->
   @if (stats) {
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-      <div class="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-        <p class="text-xs font-medium text-gray-400 uppercase">Total</p>
-        <p class="text-2xl font-bold text-gray-900 mt-1">{{ stats.total || 0 }}</p>
+    <div data-aos="fade-up" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total</p>
+        <p class="text-3xl font-extrabold text-gray-900 mt-1">{{ stats.total || 0 }}</p>
       </div>
-      <div class="bg-white rounded-xl border border-yellow-100 p-4 shadow-sm">
-        <p class="text-xs font-medium text-yellow-500 uppercase">Pendientes</p>
-        <p class="text-2xl font-bold text-yellow-700 mt-1">{{ stats.pendiente || 0 }}</p>
+      <div class="bg-amber-50 rounded-2xl border border-amber-100 p-5 shadow-sm">
+        <p class="text-xs font-bold text-amber-500 uppercase tracking-wider">Pendientes</p>
+        <p class="text-3xl font-extrabold text-amber-700 mt-1">{{ stats.pendiente || 0 }}</p>
       </div>
-      <div class="bg-white rounded-xl border border-blue-100 p-4 shadow-sm">
-        <p class="text-xs font-medium text-blue-500 uppercase">En revisión</p>
-        <p class="text-2xl font-bold text-blue-700 mt-1">{{ stats.en_revision || 0 }}</p>
+      <div class="bg-blue-50 rounded-2xl border border-blue-100 p-5 shadow-sm">
+        <p class="text-xs font-bold text-blue-500 uppercase tracking-wider">En revisión</p>
+        <p class="text-3xl font-extrabold text-blue-700 mt-1">{{ stats.en_revision || 0 }}</p>
       </div>
-      <div class="bg-white rounded-xl border border-emerald-100 p-4 shadow-sm">
-        <p class="text-xs font-medium text-emerald-500 uppercase">Resueltos</p>
-        <p class="text-2xl font-bold text-emerald-700 mt-1">{{ stats.resuelto || 0 }}</p>
+      <div class="bg-emerald-50 rounded-2xl border border-emerald-100 p-5 shadow-sm">
+        <p class="text-xs font-bold text-emerald-500 uppercase tracking-wider">Resueltos</p>
+        <p class="text-3xl font-extrabold text-emerald-700 mt-1">{{ stats.resuelto || 0 }}</p>
       </div>
     </div>
   }

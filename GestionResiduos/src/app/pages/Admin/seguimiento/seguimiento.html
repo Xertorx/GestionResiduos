@@ -1,10 +1,16 @@
-<div class="bg-white rounded-lg shadow p-6">
-  <h2 class="text-xl font-semibold mb-4">Seguimiento</h2>
-  <div class="grid grid-cols-2 gap-4">
+<div>
+  <div data-aos="fade-down" class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+      <lucide-icon name="bar-chart-2" class="w-6 h-6 text-emerald-600"></lucide-icon>
+      Seguimiento
+    </h1>
+    <p class="text-sm text-gray-500 mt-1">Métricas generales del sistema</p>
+  </div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
     @for (m of metrics; track m.id) {
-      <div class="p-4 border rounded">
-        <div class="text-sm text-gray-500">{{ m.etiqueta }}</div>
-        <div class="text-2xl font-bold">{{ m.valor }}</div>
+      <div data-aos="fade-up" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md transition">
+        <p class="text-sm font-medium text-gray-400 uppercase tracking-wider">{{ m.etiqueta }}</p>
+        <p class="text-4xl font-extrabold text-emerald-700 mt-2">{{ m.valor }}</p>
       </div>
     }
   </div>

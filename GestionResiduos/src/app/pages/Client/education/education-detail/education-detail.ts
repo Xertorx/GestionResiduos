@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel';
@@ -23,6 +23,7 @@ export interface Resource {
     summary?: string;
     images?: string[];
     pdfs?: { name: string; url: string }[];
+    videos?: string[];
     topics?: { title: string; content?: string }[];
   }[];
 }
@@ -38,6 +39,7 @@ export class EducationDetail implements OnInit {
   resource: Resource | null = null;
   selectedSection: any = null;
   completedSections: Set<string> = new Set();
+  viewedSections: Set<string> = new Set();
   resourceCompleted: boolean = false;
 
   isFromBackend = false;
@@ -47,12 +49,14 @@ export class EducationDetail implements OnInit {
   // ── HU22: estado del quiz para este contenido ──
   hasQuiz = false;
   checkingQuiz = true;
+  quizCompleted = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private educationService: EducationService,
-    private quizService: QuizService
+    private quizService: QuizService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -68,6 +72,7 @@ export class EducationDetail implements OnInit {
           this.backendContent = content;
           this.resource = this.mapBackendToResource(content);
           this.isLoading = false;
+          this.checkQuizCompletion();
         },
         error: (err) => {
           console.error('Error cargando contenido del backend:', err);
@@ -80,6 +85,7 @@ export class EducationDetail implements OnInit {
         next: (res) => {
           this.hasQuiz = res.exists;
           this.checkingQuiz = false;
+          this.checkQuizCompletion();
         },
         error: () => {
           this.hasQuiz = false;
@@ -93,37 +99,67 @@ export class EducationDetail implements OnInit {
   }
 
   private mapBackendToResource(content: EducationContent): Resource {
-    const images = (content.files ?? [])
-      .filter(f => f.fileType === 'IMAGE')
-      .map(f => f.fileUrl);
+    // Determine primary file type from sections or top-level files
+    const allFiles = content.sections?.length
+      ? content.sections.flatMap(s => s.files)
+      : (content.files ?? []);
+    const primaryType = allFiles[0]?.fileType ?? 'OTRO';
 
-    const pdfs = (content.files ?? [])
-      .filter(f => f.fileType === 'PDF')
-      .map(f => ({ name: content.title, url: f.fileUrl }));
+    let sections: Resource['sections'];
+    let globalImages: string[];
+    let globalPdfs: { name: string; url: string }[];
 
-    const primaryType = content.files?.[0]?.fileType ?? 'OTRO';
+    if (content.sections && content.sections.length > 0) {
+      // Use real sections returned by GET /education/{id}
+      sections = content.sections.map(sec => {
+        const secImages = sec.files.filter(f => f.fileType === 'IMAGE').map(f => f.fileUrl);
+        const secPdfs   = sec.files.filter(f => f.fileType === 'PDF').map(f => ({ name: sec.title, url: f.fileUrl }));
+        const secVideos = sec.files.filter(f => f.fileType === 'VIDEO').map(f => f.fileUrl);
+        const icon = sec.files[0]?.fileType
+          ? this.getIconByFileType(sec.files[0].fileType)
+          : this.getIconByFileType(primaryType);
+        return {
+          title:   sec.title,
+          content: sec.description ?? sec.content ?? content.description ?? '',
+          icon,
+          summary: sec.description ?? sec.content ?? 'Haz clic para ver más...',
+          images:  secImages,
+          pdfs:    secPdfs,
+          videos:  secVideos,
+          topics:  []
+        };
+      });
+      globalImages = sections.flatMap(s => s.images ?? []);
+      globalPdfs   = sections.flatMap(s => s.pdfs   ?? []);
+    } else {
+      // Fallback: build one section from top-level files
+      const files = content.files ?? [];
+      globalImages = files.filter(f => f.fileType === 'IMAGE').map(f => f.fileUrl);
+      globalPdfs   = files.filter(f => f.fileType === 'PDF').map(f => ({ name: content.title, url: f.fileUrl }));
+      const globalVideos = files.filter(f => f.fileType === 'VIDEO').map(f => f.fileUrl);
+      sections = [{
+        title:   content.title,
+        content: content.description ?? 'Contenido educativo subido por el administrador.',
+        icon:    this.getIconByFileType(primaryType),
+        summary: content.description ?? 'Haz clic para ver más...',
+        images:  globalImages,
+        pdfs:    globalPdfs,
+        videos:  globalVideos,
+        topics:  []
+      }];
+    }
 
     return {
-      id: content.id,
-      title: content.title,
-      description: content.description || 'Contenido educativo sobre gestión de residuos.',
-      type: primaryType,
-      time: '',
-      author: 'Administrador',
-      date: content.createdAt ? new Date(content.createdAt).toLocaleDateString() : '',
-      images: images,
-      pdfs: pdfs,
-      sections: [
-        {
-          title: content.title,
-          content: content.description || 'Contenido educativo subido por el administrador.',
-          icon: this.getIconByFileType(primaryType),
-          summary: content.description || 'Haz clic para ver más...',
-          images: images,
-          pdfs: pdfs,
-          topics: []
-        }
-      ]
+      id:          content.id,
+      title:       content.title,
+      description: content.description ?? 'Contenido educativo sobre gestión de residuos.',
+      type:        primaryType,
+      time:        '',
+      author:      'Administrador',
+      date:        content.createdAt ? new Date(content.createdAt).toLocaleDateString() : '',
+      images:      globalImages,
+      pdfs:        globalPdfs,
+      sections
     };
   }
 
@@ -141,7 +177,10 @@ export class EducationDetail implements OnInit {
     this.router.navigate(['/education', this.resource.id, 'quiz']);
   }
 
-  openModal(section: any) { this.selectedSection = section; }
+  openModal(section: any) {
+    this.selectedSection = section;
+    this.viewedSections.add(section.title);
+  }
   closeModal() { this.selectedSection = null; }
   selectSection(section: any) { this.selectedSection = section; }
   selectTopic(_topic: any) {}
@@ -160,6 +199,7 @@ export class EducationDetail implements OnInit {
   }
 
   toggleResourceCompleted(): void {
+    if (!this.canMarkCompleted) return;
     this.resourceCompleted = !this.resourceCompleted;
     if (this.resourceCompleted && this.resource?.sections) {
       this.resource.sections.forEach(section => this.completedSections.add(section.title));
@@ -170,5 +210,20 @@ export class EducationDetail implements OnInit {
 
   isResourceCompleted(): boolean {
     return this.resourceCompleted;
+  }
+
+  private checkQuizCompletion(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const id = this.resource?.id ?? this.backendContent?.id;
+    if (id != null) {
+      this.quizCompleted = localStorage.getItem(`quizCompleted_${id}`) === 'true';
+    }
+  }
+
+  get canMarkCompleted(): boolean {
+    const totalSections = this.resource?.sections?.length ?? 0;
+    const allSectionsViewed = totalSections > 0 && this.viewedSections.size >= totalSections;
+    const quizOk = !this.hasQuiz || this.quizCompleted;
+    return allSectionsViewed && quizOk;
   }
 }

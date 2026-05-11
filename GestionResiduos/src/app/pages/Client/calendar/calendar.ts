@@ -23,6 +23,7 @@ export class Calendar implements OnInit {
   calendarOptions: CalendarOptions | null = null;
   selectedDistrictId = 1;
   isLoadingSchedules = false;
+  upcomingEvents: Array<{date: string, color: string, residueLabel: string, startTime: string, endTime: string, description: string}> = [];
   showPreviewModal = false;
   selectedEvent: any = null;
 
@@ -223,21 +224,34 @@ export class Calendar implements OnInit {
     this.selectedEvent = null;
   }
 
+  getDayName(dateStr: string): string {
+    const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const d = new Date(dateStr + 'T00:00:00');
+    return `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]}`;
+  }
+
   private schedulesToEvents(schedules: any[]): EventInput[] {
     const dayMap: Record<string, number> = {
       DOMINGO: 0, LUNES: 1, MARTES: 2, MIERCOLES: 3,
       JUEVES: 4, VIERNES: 5, SABADO: 6
     };
-    // Verde institucional y variantes
     const colorMap: Record<string, string> = {
-      ORGANICO: '#059669', // verde principal
-      RECICLABLE: '#10b981', // verde claro
-      ESPECIAL: '#047857', // verde oscuro
-      RCD: '#059669' // igual a orgánico, sin amarillo
+      ORGANICO: '#059669',
+      RECICLABLE: '#2563eb',
+      ESPECIAL: '#7c3aed',
+      RCD: '#d97706'
+    };
+    const labelMap: Record<string, string> = {
+      ORGANICO: 'Orgánico',
+      RECICLABLE: 'Reciclable',
+      ESPECIAL: 'Especial',
+      RCD: 'RCD'
     };
 
     const events: EventInput[] = [];
     const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const start = new Date(today.getFullYear(), today.getMonth(), 1);
     const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
 
@@ -250,17 +264,19 @@ export class Calendar implements OnInit {
       while (current <= end) {
         if (current.getDay() === targetDay) {
           const dateStr = current.toISOString().slice(0, 10);
+          const color = colorMap[s.residueType] || '#059669';
           events.push({
-            title: `${s.residueType} (${s.startTime} - ${s.endTime})`,
+            title: labelMap[s.residueType] || s.residueType,
             date: dateStr,
-            backgroundColor: colorMap[s.residueType] || '#059669',
-            borderColor: '#047857',
+            backgroundColor: color,
+            borderColor: color,
             textColor: '#fff',
             extendedProps: {
               ...s,
               startTime: s.startTime,
               endTime: s.endTime,
               residueType: s.residueType,
+              residueLabel: labelMap[s.residueType] || s.residueType,
               description: s.description
             }
           });
@@ -268,6 +284,21 @@ export class Calendar implements OnInit {
         current.setDate(current.getDate() + 1);
       }
     }
+
+    // Próximos eventos desde hoy
+    const todayStr = today.toISOString().slice(0, 10);
+    this.upcomingEvents = events
+      .filter(e => (e.date as string) >= todayStr)
+      .sort((a, b) => ((a.date as string) > (b.date as string) ? 1 : -1))
+      .slice(0, 6)
+      .map(e => ({
+        date: e.date as string,
+        color: e.backgroundColor as string,
+        residueLabel: (e.extendedProps as any).residueLabel,
+        startTime: (e.extendedProps as any).startTime,
+        endTime: (e.extendedProps as any).endTime,
+        description: (e.extendedProps as any).description
+      }));
 
     return events;
   }

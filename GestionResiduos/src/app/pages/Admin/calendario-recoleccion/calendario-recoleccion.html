@@ -1,24 +1,26 @@
 <div class="max-w-6xl mx-auto">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div data-aos="fade-down" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-        <lucide-icon name="calendar" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        <span class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <lucide-icon name="calendar" class="w-5 h-5 text-emerald-600"></lucide-icon>
+        </span>
         Calendario de Recolección
       </h1>
-      <p class="text-sm text-gray-500 mt-1">Gestiona los horarios de recolección por localidad</p>
+      <p class="text-sm text-gray-400 mt-1">Gestiona los horarios de recolección por localidad</p>
     </div>
-    <button class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
+    <button class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition font-medium shadow-sm text-sm"
             (click)="openCreateForm()">
       <lucide-icon name="plus" class="w-4 h-4"></lucide-icon> Nuevo horario
     </button>
   </div>
 
   <!-- Filtro por localidad -->
-  <div class="mb-5 flex items-center gap-3">
+  <div data-aos="fade-up" class="mb-5 flex items-center gap-3">
     <label class="text-sm font-medium text-gray-600">Localidad:</label>
     <select [(ngModel)]="selectedDistrictId" (ngModelChange)="onDistrictChange()"
-            class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none">
+            class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none bg-white shadow-sm">
       @for (d of districts; track d.id) {
         <option [ngValue]="d.id">{{ d.name }}</option>
       }
@@ -43,9 +45,9 @@
     </div>
   } @else {
     <!-- Tabla de horarios -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+    <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
       <table class="w-full text-sm">
-        <thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+        <thead class="bg-gray-50 text-gray-400 uppercase text-xs tracking-wide">
           <tr>
             <th class="px-4 py-3 text-left">Día</th>
             <th class="px-4 py-3 text-left">Tipo de residuo</th>

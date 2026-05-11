@@ -1,78 +1,32 @@
-<div class="py-12 bg-gray-50">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-extrabold text-gray-900">Panel de Administración</h1>
-        <p class="text-sm text-gray-600">Accede a las secciones administrativas para gestionar contenidos, usuarios y operaciones.</p>
-      </div>
-      <div class="flex gap-3">
-        <!-- <button class="px-4 py-2 bg-emerald-600 text-white rounded-md">Crear elemento</button>
-        <button class="px-4 py-2 border border-emerald-600 text-emerald-600 rounded-md">Exportar</button>-->
-      </div>
-    </div>
-
-    <!-- Estadísticas rápidas 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
-        <div>
-          <div class="text-sm text-gray-500">Usuarios</div>
-          <div class="text-2xl font-bold">1.234</div>
-        </div>
-        <div class="bg-emerald-100 p-3 rounded-full">
-          <lucide-icon name="users" class="w-6 h-6 text-emerald-600"></lucide-icon>
-        </div>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
-        <div>
-          <div class="text-sm text-gray-500">Eco-puntos</div>
-          <div class="text-2xl font-bold">45</div>
-        </div>
-        <div class="bg-emerald-100 p-3 rounded-full">
-          <lucide-icon name="map-pin" class="w-6 h-6 text-emerald-600"></lucide-icon>
-        </div>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
-        <div>
-          <div class="text-sm text-gray-500">Reportes</div>
-          <div class="text-2xl font-bold">12</div>
-        </div>
-        <div class="bg-emerald-100 p-3 rounded-full">
-          <lucide-icon name="alert-triangle" class="w-6 h-6 text-emerald-600"></lucide-icon>
-        </div>
-      </div>
-      <div class="bg-white p-4 rounded-lg shadow flex items-center justify-between">
-        <div>
-          <div class="text-sm text-gray-500">Satisfacción</div>
-          <div class="text-2xl font-bold">85%</div>
-        </div>
-        <div class="bg-emerald-100 p-3 rounded-full">
-          <lucide-icon name="award" class="w-6 h-6 text-emerald-600"></lucide-icon>
-        </div>
+<div class="py-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Hero del panel -->
+    <div data-aos="fade-down" class="bg-gradient-to-r from-emerald-700 to-teal-600 text-white rounded-2xl p-8 mb-8 relative overflow-hidden">
+      <div class="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4"></div>
+      <div class="relative z-10">
+        <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest">Admin</span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold mt-3 mb-2">Panel de Administración</h1>
+        <p class="text-emerald-100 max-w-xl">Accede a las secciones administrativas para gestionar contenidos, usuarios y operaciones de EcoBolivar.</p>
       </div>
     </div>
 
     <!-- Tarjetas de acciones -->
-    <div class="mt-6">
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        @for (card of cards; track card.title) {
-          <a [href]="card.title === 'Foro Comunitario' ? '/dashboard/foro' : '/'" class="block">
-            <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <div class="h-12 w-12 rounded-md bg-emerald-50 flex items-center justify-center text-emerald-600">
-                    <lucide-icon [name]="card.icon" class="w-6 h-6"></lucide-icon>
-                  </div>
-                  <div>
-                    <h3 class="text-lg font-medium text-gray-900">{{ card.title }}</h3>
-                    <p class="text-sm text-gray-500">{{ card.description }}</p>
-                  </div>
-                </div>
-                <div class="text-gray-400">›</div>
-              </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      @for (card of cards; track card.title) {
+        <a [href]="card.title === 'Foro Comunitario' ? '/dashboard/foro' : '/'" data-aos="fade-up"
+           class="group block bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-200 p-6">
+          <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-all flex-shrink-0">
+              <lucide-icon [name]="card.icon" class="w-6 h-6"></lucide-icon>
             </div>
-          </a>
-        }
-      </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="text-base font-semibold text-gray-900 mb-1">{{ card.title }}</h3>
+              <p class="text-sm text-gray-500 leading-relaxed">{{ card.description }}</p>
+            </div>
+            <lucide-icon name="arrow-right" class="w-4 h-4 text-gray-300 group-hover:text-emerald-600 transition-colors flex-shrink-0 mt-1"></lucide-icon>
+          </div>
+        </a>
+      }
     </div>
   </div>
 </div>

@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -34,7 +34,8 @@ export class QuizPlay implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private quizService: QuizService
+    private quizService: QuizService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -130,6 +131,11 @@ export class QuizPlay implements OnInit {
       next: (res) => {
         this.submitting = false;
         this.result = res;
+
+        // Guardar que el quiz fue completado para habilitar "Marcar como completado"
+        if (isPlatformBrowser(this.platformId)) {
+          localStorage.setItem(`quizCompleted_${this.contentId}`, 'true');
+        }
 
         if (res.firstAttempt) {
           Swal.fire({

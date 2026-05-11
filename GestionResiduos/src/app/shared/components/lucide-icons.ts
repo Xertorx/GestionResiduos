@@ -8,7 +8,10 @@ import {
   CircleCheckBig, CircleAlert, XCircle, Key, UserCheck, UserX, Edit, Trash, Plus, Minus, Search, Lock, X, Upload, Inbox, CheckCircle,
   Eye, EyeOff, Tag, PieChart, Pencil,
   Trophy, Crown, Medal, Star, Hash, Flame,
-  Target, Sparkles, Gift
+  Target, Sparkles, Gift,
+  ChevronsDown, Heart, Code, Globe, ArrowRight,
+  Info, HelpCircle, LoaderCircle,
+  Mail, AlertCircle
 } from 'lucide-angular';
 
 export const LUCIDE_ICONS = { 
@@ -22,7 +25,10 @@ export const LUCIDE_ICONS = {
   Eye, EyeOff,
   MessageCircle, Pencil,
   Trophy, Crown, Medal, Star, Hash, Flame,
-  Target, Sparkles, Gift
+  Target, Sparkles, Gift,
+  ChevronsDown, Heart, Code, Globe, ArrowRight,
+  Info, HelpCircle, LoaderCircle,
+  Mail, AlertCircle
 };
 
 // also expose kebab-case keys used in templates

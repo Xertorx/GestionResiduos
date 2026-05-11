@@ -1,3 +1,23 @@
 .hero-gradient {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  position: relative;
+  background: linear-gradient(140deg, #059669 0%, #047857 55%, #065f46 100%);
+  overflow: hidden;
+  &::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -8%;
+    width: 480px; height: 480px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -35%; left: -5%;
+    width: 360px; height: 360px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    pointer-events: none;
+  }
 }

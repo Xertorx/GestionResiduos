@@ -1,15 +1,17 @@
 <div class="max-w-6xl mx-auto">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div data-aos="fade-down" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-        <lucide-icon name="users" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        <span class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <lucide-icon name="users" class="w-5 h-5 text-emerald-600"></lucide-icon>
+        </span>
         Administración de Usuarios
       </h1>
-      <p class="text-sm text-gray-500 mt-1">Consulta y gestiona los usuarios registrados en la plataforma</p>
+      <p class="text-sm text-gray-400 mt-1">Consulta y gestiona los usuarios registrados en la plataforma</p>
     </div>
-    <button class="text-sm text-emerald-600 hover:text-emerald-700 font-medium" (click)="loadUsers()">
-      <lucide-icon name="refresh-cw" class="w-4 h-4 inline mr-1"></lucide-icon> Actualizar
+    <button class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 font-medium transition shadow-sm" (click)="loadUsers()">
+      <lucide-icon name="refresh-cw" class="w-4 h-4"></lucide-icon> Actualizar
     </button>
   </div>
 
@@ -33,7 +35,7 @@
     <!-- Cards de usuarios -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       @for (user of users; track user.documentNumber) {
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition cursor-pointer flex items-center gap-4"
+        <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all cursor-pointer flex items-center gap-4"
              (click)="openDetail(user)">
           <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden flex-shrink-0">
             @if (user.photo) {

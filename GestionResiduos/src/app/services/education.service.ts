@@ -10,6 +10,15 @@ export interface EducationFile {
   fileType: string; // "PDF", "IMAGE", "VIDEO", "OTRO"
 }
 
+// ── Cada sección de un contenido (viene en GET /education/{id}) ──
+export interface EducationSection {
+  id?: number;
+  title: string;
+  description?: string;
+  content?: string;
+  files: EducationFile[];
+}
+
 // ── Interfaz que mapea lo que devuelve el backend ──
 export interface EducationContent {
   id: number;
@@ -17,6 +26,7 @@ export interface EducationContent {
   description: string;
   category: string;
   files: EducationFile[];
+  sections?: EducationSection[];
   createdAt: string;
 }
 
@@ -94,6 +104,17 @@ export class EducationService {
   update(id: number, dto: EducationUpdateDTO): Observable<EducationContent> {
     return this.http.put<EducationContent>(`${this.baseUrl}/${id}`, dto, {
       headers: this.getAuthHeaders().append('Content-Type', 'application/json')
+    });
+  }
+
+  // ── POST sección a un contenido existente ──
+  addSection(contentId: number, title: string, description: string, files: File[]): Observable<any> {
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('description', description);
+    files.forEach(file => formData.append('files', file));
+    return this.http.post(`${this.baseUrl}/${contentId}/sections`, formData, {
+      headers: this.getAuthHeaders()
     });
   }
 
