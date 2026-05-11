@@ -1,0 +1,36 @@
+info:
+  name: Actualizar Calendario (Admin)
+  type: http
+  seq: 4
+
+http:
+  method: PUT
+  url: http://localhost:8080/api/schedules/1
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "districtId": 1,
+        "residueType": "ORGANICO",
+        "dayOfWeek": "MARTES",
+        "startTime": "07:00",
+        "endTime": "13:00",
+        "description": "Recolección de orgánicos actualizada"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Actualiza un calendario existente. Solo ADMINISTRADOR.
+  Reemplazar 1 con el ID del calendario.
+

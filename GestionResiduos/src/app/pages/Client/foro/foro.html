@@ -3,51 +3,89 @@
       <router-outlet></router-outlet>
     } @else {
     <!-- Header -->
-        <div class="text-center mb-12 ">
-            <h1 class="text-3xl font-bold text-gray-900 mb-4">Foro</h1>
-            <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+        <div data-aos="fade-down" class="text-center mb-12 ">
+            <span class="section-badge">Comunidad</span>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-3 mt-1">Foro</h1>
+            <p class="text-lg text-gray-500 max-w-2xl mx-auto">
                 Agrega temas de debates o preguntas relacionadas a la gestión de residuos y participa en la conversación con la comunidad.
             </p>
         </div>
   <!-- Nuevo tema -->
-  <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Crear nuevo tema</h2>
-    <div class="flex space-x-4">
-      <input type="text" [value]="tituloTema" (input)="tituloTema = $event.target.value" placeholder="Escribe el título del tema..."
-        class="flex-grow border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-        <input type="text" [value]="nuevoTema" (input)="nuevoTema = $event.target.value" placeholder="Escribe la descripcion del tema..."
-        class="flex-grow border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
-      <button class="bg-emerald-600 text-white px-6 py-2 rounded-md font-medium hover:bg-emerald-700" (click)="crearNuevoTema()">
-        Publicar
-      </button>
+  @if (!authReady) {
+    <div class="h-16 mb-8"></div>
+  } @else if (isAuthenticated) {
+    <div data-aos="fade-up" class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-2xl font-semibold text-gray-900 mb-4">Crear nuevo tema</h2>
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input type="text" [(ngModel)]="tituloTema" placeholder="Título del tema..."
+          class="flex-grow border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <input type="text" [(ngModel)]="nuevoTema" placeholder="Descripción del tema..."
+          class="flex-grow border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <button class="bg-emerald-600 text-white px-6 py-2 rounded-md font-medium hover:bg-emerald-700 disabled:opacity-50 transition"
+                [disabled]="isCreating" (click)="crearNuevoTema()">
+          {{ isCreating ? 'Creando...' : 'Publicar' }}
+        </button>
+      </div>
     </div>
-  </div>
-   <!-- Mensaje de éxito -->
+  } @else {
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-5 mb-8 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 3a9 9 0 100 18 9 9 0 000-18z"/>
+        </svg>
+        <p class="text-sm text-amber-800">Debes <a routerLink="/login" class="font-semibold underline hover:text-amber-900">iniciar sesión</a> para crear un nuevo tema.</p>
+      </div>
+    </div>
+  }
+
+   <!-- Mensajes -->
     @if (mensajeExito) {
     <div class="bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-md mb-6">
         {{ mensajeExito }}
     </div>
     }
+    @if (mensajeError) {
+    <div class="bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-md mb-6">
+        {{ mensajeError }}
+    </div>
+    }
+    @if (error) {
+    <!-- Mensaje de error removido -->
+    }
 
   <!-- Lista de temas -->
-  <div class="bg-white rounded-lg shadow-md p-6">
+  <div data-aos="fade-up" data-aos-delay="100" class="bg-white rounded-lg shadow-md p-6">
     <h2 class="text-xl font-semibold text-gray-900 mb-4">Temas de conversación</h2>
+
+    @if (isLoading) {
+      <div class="flex justify-center py-12">
+        <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+      </div>
+    } @else if (temas.length === 0) {
+      <p class="text-gray-500 text-center py-8">No hay temas de conversación aún. ¡Sé el primero en crear uno!</p>
+    } @else {
     <div class="divide-y divide-gray-200">
         @for (tema of temas; track tema.id) {
-      <div class="py-4 hover:bg-gray-50 cursor-pointer"
+      <div class="py-4 hover:bg-emerald-50 cursor-pointer rounded-xl px-4 transition-all border-b border-gray-100 last:border-0"
            (click)="verTema(tema.id)">
-        <div class="flex justify-between items-center">
-          <h3 class="text-lg font-medium text-gray-800">{{ tema.titulo }}</h3>
-          @if (tema.comentarios == 0) {
-            <span class="text-sm text-gray-500">Sin comentarios</span>
-          } @else {
-            <span class="text-sm text-gray-500">{{ tema.comentarios }} comentarios</span>
-          }
+        <div class="flex justify-between items-start gap-3">
+          <h3 class="text-base font-semibold text-gray-800 group-hover:text-emerald-700">{{ tema.titulo }}</h3>
+          <span class="flex-shrink-0 text-xs bg-emerald-50 text-emerald-700 font-semibold px-2.5 py-1 rounded-full border border-emerald-100">{{ tema.comentariosCount ?? tema.comentarios ?? 0 }} respuestas</span>
         </div>
-        <p class="text-sm text-gray-600 mt-1">{{ tema.descripcion }}</p>
+        <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ tema.descripcion }}</p>
+        @if (tema.autorNombre) {
+          <p class="text-xs text-gray-400 mt-2 flex items-center gap-1">
+            <span class="inline-block w-4 h-4 bg-emerald-100 rounded-full text-center leading-4 text-emerald-700 font-bold text-[10px]">{{ tema.autorNombre[0] }}</span>
+            {{ tema.autorNombre }}
+          </p>
+        }
       </div>
       }
     </div>
+    }
   </div>
     }
 </div>

@@ -1,0 +1,194 @@
+<div class="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+
+  <!-- Botón volver -->
+  <button (click)="goBack()"
+          class="inline-flex items-center text-emerald-700 hover:text-emerald-900 font-medium mb-6 transition">
+    <lucide-icon name="chevron-left" class="w-4 h-4 mr-1"></lucide-icon>
+    Volver al contenido
+  </button>
+
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-12 w-12 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+    </div>
+  }
+
+  <!-- Error / sin quiz -->
+  @else if (errorMsg) {
+    <div class="bg-amber-50 border-2 border-amber-200 rounded-xl p-8 text-center">
+      <lucide-icon name="circle-alert" class="w-12 h-12 text-amber-500 mx-auto mb-3"></lucide-icon>
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">Quiz no disponible</h2>
+      <p class="text-gray-600">{{ errorMsg }}</p>
+    </div>
+  }
+
+  <!-- Quiz cargado -->
+  @else if (quiz) {
+
+    <!-- Header del quiz -->
+    <div data-aos="fade-down" class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl shadow-lg p-8 mb-8">
+      <div class="flex items-center gap-3 mb-3">
+        <lucide-icon name="award" class="w-8 h-8"></lucide-icon>
+        <span class="text-emerald-100 text-sm font-medium uppercase tracking-wider">Quiz interactivo</span>
+      </div>
+      <h1 class="text-3xl font-bold mb-2">{{ quiz.title }}</h1>
+      @if (quiz.description) {
+        <p class="text-emerald-50">{{ quiz.description }}</p>
+      }
+      <div class="flex flex-wrap gap-4 mt-4 text-sm">
+        <span class="bg-emerald-800/40 px-3 py-1 rounded-full">
+          {{ totalQuestions }} pregunta(s)
+        </span>
+        <span class="bg-emerald-800/40 px-3 py-1 rounded-full">
+          +{{ quiz.pointsPerQuestion }} pts por respuesta correcta
+        </span>
+      </div>
+    </div>
+
+    <!-- Barra de progreso -->
+    @if (!result) {
+      <div class="bg-white rounded-xl shadow-md p-5 mb-8 sticky top-4 z-10">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm font-medium text-gray-700">
+            Progreso: {{ answeredCount }}/{{ totalQuestions }}
+          </span>
+          <span class="text-sm font-semibold text-emerald-600">{{ progressPercent }}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+          <div class="bg-emerald-600 h-2 rounded-full transition-all duration-300"
+               [style.width.%]="progressPercent"></div>
+        </div>
+      </div>
+    }
+
+    <!-- Resumen del resultado -->
+    @if (result) {
+      <div id="quiz-result-summary"
+           class="bg-white rounded-2xl shadow-lg p-8 mb-8 border-2"
+           [class.border-emerald-400]="result.correctAnswers === result.totalQuestions"
+           [class.border-emerald-200]="result.correctAnswers !== result.totalQuestions">
+        <div class="text-center">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-emerald-100 mb-4">
+            <lucide-icon name="award" class="w-10 h-10 text-emerald-600"></lucide-icon>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">¡Quiz finalizado!</h2>
+          <p class="text-gray-600 mb-6">Aquí tienes tu resumen:</p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="bg-gray-50 rounded-xl p-5">
+              <div class="text-3xl font-bold text-emerald-600">
+                {{ result.correctAnswers }}/{{ result.totalQuestions }}
+              </div>
+              <div class="text-sm text-gray-600 mt-1">Respuestas correctas</div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5">
+              <div class="text-3xl font-bold text-emerald-600">
+                +{{ result.pointsEarned }}
+              </div>
+              <div class="text-sm text-gray-600 mt-1">Puntos ganados ahora</div>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-5">
+              <div class="text-3xl font-bold text-emerald-600">
+                {{ result.userTotalPoints }}
+              </div>
+              <div class="text-sm text-gray-600 mt-1">Total acumulado</div>
+            </div>
+          </div>
+
+          @if (!result.firstAttempt) {
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6 text-sm text-amber-800">
+              Solo el primer intento otorga puntos. ¡Sigue practicando para reforzar lo aprendido!
+            </div>
+          }
+
+          <div class="flex flex-col sm:flex-row justify-center gap-3">
+            <button (click)="retry()"
+                    class="inline-flex items-center justify-center px-5 py-2.5 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition">
+              <lucide-icon name="refresh-cw" class="w-4 h-4 mr-2"></lucide-icon>
+              Reintentar
+            </button>
+            <button (click)="goBack()"
+                    class="inline-flex items-center justify-center px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition">
+              <lucide-icon name="arrow-left" class="w-4 h-4 mr-2"></lucide-icon>
+              Volver al contenido
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Lista de preguntas -->
+    <div class="space-y-6">
+      @for (q of quiz.questions; track q.id; let qIndex = $index) {
+        <div class="bg-white rounded-2xl shadow-md p-6 border-l-4"
+             [class.border-emerald-500]="!result"
+             [class.border-emerald-600]="result && wasCorrect(q.id) === true"
+             [class.border-red-400]="result && wasCorrect(q.id) === false">
+
+          <div class="flex items-start gap-3 mb-5">
+            <span class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center">
+              {{ qIndex + 1 }}
+            </span>
+            <h3 class="text-lg font-semibold text-gray-900 leading-snug">
+              {{ q.text }}
+            </h3>
+          </div>
+
+          <div class="space-y-2">
+            @for (opt of q.options; track $index; let oIndex = $index) {
+              <button type="button"
+                      (click)="selectOption(q.id, oIndex)"
+                      [disabled]="!!result"
+                      class="quiz-option w-full text-left px-4 py-3 rounded-lg border-2 transition flex items-center gap-3"
+                      [class.border-emerald-500]="!result && isSelected(q.id, oIndex)"
+                      [class.bg-emerald-50]="!result && isSelected(q.id, oIndex)"
+                      [class.border-gray-200]="!result && !isSelected(q.id, oIndex)"
+                      [class.hover:border-emerald-300]="!result && !isSelected(q.id, oIndex)"
+                      [class.hover:bg-emerald-50]="!result && !isSelected(q.id, oIndex)"
+                      [class.border-emerald-600]="result && correctIndexFor(q.id) === oIndex"
+                      [class.bg-emerald-100]="result && correctIndexFor(q.id) === oIndex"
+                      [class.border-red-400]="result && isSelected(q.id, oIndex) && correctIndexFor(q.id) !== oIndex"
+                      [class.bg-red-50]="result && isSelected(q.id, oIndex) && correctIndexFor(q.id) !== oIndex">
+
+                <span class="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+                      [class.border-emerald-600]="(!result && isSelected(q.id, oIndex)) || (result && correctIndexFor(q.id) === oIndex)"
+                      [class.bg-emerald-600]="(!result && isSelected(q.id, oIndex)) || (result && correctIndexFor(q.id) === oIndex)"
+                      [class.text-white]="(!result && isSelected(q.id, oIndex)) || (result && correctIndexFor(q.id) === oIndex)"
+                      [class.border-gray-300]="!result && !isSelected(q.id, oIndex)"
+                      [class.text-gray-500]="!result && !isSelected(q.id, oIndex)">
+                  {{ ['A','B','C','D','E','F'][oIndex] }}
+                </span>
+
+                <span class="flex-1 text-gray-800">{{ opt }}</span>
+
+                <!-- Iconos de feedback después de enviar -->
+                @if (result && correctIndexFor(q.id) === oIndex) {
+                  <lucide-icon name="check-circle" class="w-5 h-5 text-emerald-600"></lucide-icon>
+                }
+                @if (result && isSelected(q.id, oIndex) && correctIndexFor(q.id) !== oIndex) {
+                  <lucide-icon name="x-circle" class="w-5 h-5 text-red-500"></lucide-icon>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Botón enviar (solo antes de tener resultado) -->
+    @if (!result) {
+      <div class="mt-8 flex justify-center">
+        <button (click)="submit()"
+                [disabled]="submitting"
+                class="inline-flex items-center px-8 py-3 bg-emerald-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:bg-emerald-700 hover:shadow-xl transition disabled:opacity-60 disabled:cursor-not-allowed">
+          <lucide-icon name="send" class="w-5 h-5 mr-2"></lucide-icon>
+          {{ submitting ? 'Enviando...' : 'Enviar respuestas' }}
+        </button>
+      </div>
+    }
+  }
+</div>

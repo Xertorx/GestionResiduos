@@ -1,10 +1,25 @@
-import { httpResource } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, signal, Signal, viewChild, ViewChild, viewChildren, computed } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, signal, viewChild, ViewChild, viewChildren, computed, OnInit } from '@angular/core';
 import { GoogleMap, GoogleMapsModule, MapAdvancedMarker,MapInfoWindow} from '@angular/google-maps';
 import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../enviroment/enviroment';
 
+//Interface de la respuesta de la API para los ecopuntos
+export interface EcoPoint{
+  id : number;
+  name : string;
+  address : string;
+  latitude : number;
+  longitude : number;
+  description : string;
+  status : string;
+  residueTypes : string[];
+  neighborhood: number;
+  openingTime: string;
+  closingTime: string;
+}
 
 @Component({
   selector: 'app-map',
@@ -14,27 +29,46 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './map.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Map {
+export class Map implements OnInit{
+
+  ngOnInit(): void {
+    this.getEcopoints();
+  }
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {
+
+  }
+
+  EcoPoints = signal<EcoPoint[]>([]);
   center: google.maps.LatLngLiteral = { lat: 4.5769013, lng: -74.1608906 };
   zoom = 14;
 
-  placeResource = httpResource<Places[]>(() => '/places.json');
   searchTerm = signal<string>('');
 
   // Computed para filtrar lugares según el término de búsqueda
   filteredPlaces = computed(() => {
-    const places = this.placeResource.value();
+    const places = this.EcoPoints();
     const search = this.searchTerm().toLowerCase();
     
     if (!search) return places;
     
-    return places?.filter(place => 
-      place.place.toLowerCase().includes(search) ||
-      place.barrio.toLowerCase().includes(search) ||
-      place.localidad.toLowerCase().includes(search) ||
-      place.direccion.toLowerCase().includes(search)
+    return places.filter(place => 
+      place.name.toLowerCase().includes(search) ||
+      place.address.toLowerCase().includes(search) ||
+      place.description.toLowerCase().includes(search)
     );
   });
+  
+  getEcopoints() {
+    this.http.get<EcoPoint[]>(`${environment.apiUrl}/ecopoints`).subscribe({
+      next: (data) => {
+        this.EcoPoints.set(data);
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error obteniendo ecopoints:', error);
+      }
+    });
+  }  
 
   onSearchChange(value: string): void {
     this.searchTerm.set(value);
@@ -48,7 +82,7 @@ export class Map {
     gmpDraggable: false,
 
   }
-  selectedPlace: Signal<Places | null> = signal<Places | null>(null);
+  selectedPlace = signal<EcoPoint | null>(null);
 
   @ViewChild(GoogleMap) mapReference!: GoogleMap;
 
@@ -57,12 +91,12 @@ export class Map {
   private advanceMarkers = viewChildren<MapAdvancedMarker>(MapAdvancedMarker);
   
 
-  changeLocation(place: Places, marker?: MapAdvancedMarker, index?: number) {
+  changeLocation(place: EcoPoint, marker?: MapAdvancedMarker, index?: number) {
     
-    this.selectedPlace = signal<Places | null>(place);
-    this.center = { lat: place.latitud, lng: place.longitud };
+    this.selectedPlace.set(place);
+    this.center = { lat: place.latitude, lng: place.longitude };
     this.mapReference.googleMap?.panTo(this.center);
-    const placeIndex = this.placeResource.value()?.findIndex(p => p.idPlace === place.idPlace);
+    const placeIndex = this.EcoPoints().findIndex(p => p.id === place.id);
 
     this.infoWindowReference().open(marker ?? this.advanceMarkers().at(index!));
   
@@ -81,8 +115,8 @@ export class Map {
     }
   }
 
-  getMarkerContent(place: Places) {
-    if (place.idPlace === this.selectedPlace()?.idPlace) {
+  getMarkerContent(place: EcoPoint) {
+    if (place.id === this.selectedPlace()?.id) {
       const beachFlag = 'img/icons/trash-2.svg'
       let imgTag = document.createElement('img');
       imgTag.src = beachFlag;
@@ -92,17 +126,4 @@ export class Map {
       return null;
     }
   }
-}
-export interface Places {
-  idPlace: number;
-  place: string;
-  direccion: string;
-  openingHours: string;
-  closingHours: string;
-  latitud: number;
-  longitud: number;
-  ciudad: string;
-  localidad: string;
-  barrio: string;
-  closeStoreString: string;
 }

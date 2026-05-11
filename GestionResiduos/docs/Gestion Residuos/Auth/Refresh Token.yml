@@ -1,0 +1,30 @@
+info:
+  name: Refresh Token
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: http://localhost:8080/auth/refresh
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqdWFubWEyNTA1MUBnbWFpbC5jb20iLCJpYXQiOjE3NzU2MzU3MjksImV4cCI6MTc3NTY0MjkyOX0.ZTYfNfd1JhOpQGsWNoc7lQbSjfQL3PlCY7E1sPTVNho
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.body;
+
+        // Guardar variable global
+        bru.setEnvVar("JWT", data.accessToken);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

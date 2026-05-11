@@ -1,0 +1,40 @@
+<!-- Chat panel -->
+<div class="chat-panel" [class.chat-panel--open]="isOpen">
+  <div class="chat-panel__header">
+    <div class="chat-panel__header-info">
+      <div class="chat-panel__avatar">
+        <lucide-icon name="message-circle" class="w-5 h-5 text-white"></lucide-icon>
+      </div>
+      <div>
+        <p class="chat-panel__title">EcoAsistente</p>
+        <p class="chat-panel__subtitle">Siempre en línea</p>
+      </div>
+    </div>
+    <button class="chat-panel__close" (click)="toggle()" aria-label="Cerrar chat">
+      <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+    </button>
+  </div>
+
+  <div class="chat-panel__body">
+    <ng-container *ngIf="isLoggedIn; else loginPrompt">
+      <recycling-chat [userId]="email"></recycling-chat>
+    </ng-container>
+    <ng-template #loginPrompt>
+      <div class="chat-panel__login">
+        <lucide-icon name="lock" class="w-10 h-10 text-emerald-500 mx-auto mb-3"></lucide-icon>
+        <p class="font-semibold text-gray-700 text-base mb-1">Inicia sesión para chatear</p>
+        <p class="text-gray-500 text-sm mb-4">Usa el asistente de reciclaje personalizado.</p>
+        <a [routerLink]="'/login'" (click)="toggle()"
+          class="inline-block bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2 rounded-xl transition">
+          Iniciar sesión
+        </a>
+      </div>
+    </ng-template>
+  </div>
+</div>
+
+<!-- FAB button -->
+<button class="chat-fab" (click)="toggle()" [class.chat-fab--open]="isOpen" aria-label="Abrir chat">
+  <lucide-icon *ngIf="!isOpen" name="message-circle" class="w-7 h-7 text-white"></lucide-icon>
+  <lucide-icon *ngIf="isOpen" name="x" class="w-7 h-7 text-white"></lucide-icon>
+</button>

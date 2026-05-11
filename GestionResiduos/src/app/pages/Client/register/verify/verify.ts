@@ -1,26 +1,70 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AuthStateService } from '../../../../services/auth-state.service';
+import { RegistrationStateService } from '../../../../services/registration-state.service';
+import { ApiService } from '../../../../services/api.service';
+
+interface AuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  email: string;
+  nickName: string;
+  photo: string;
+  role: string;
+}
 
 @Component({
   selector: 'app-verify',
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './verify.html',
   styleUrl: './verify.scss'
 })
-export class Verify implements OnInit, OnDestroy{
-  countdown: string = '05:00'; // Valor inicial
+export class Verify implements OnInit, OnDestroy {
+  countdown: string = '15:00';
+  message: string = 'Esperando token de verificación...';
+  error: string = '';
   private interval: any;
-  private totalSeconds: number = 5 * 60; // 5 minutos
+  private totalSeconds: number = 15 * 60;
+  public emailRegister: string = '';
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private authState: AuthStateService,
+    private registrationState: RegistrationStateService,
+    private api: ApiService,
+    @Inject(PLATFORM_ID) private platformId: Object
+  ) { }
 
   ngOnInit() {
     this.startCountdown();
+
+    this.emailRegister = this.registrationState.getPendingEmail();
+
+    const tokenQuery = this.route.snapshot.queryParamMap.get('token');
+
+    if (tokenQuery) {
+      this.message = 'Verificando token...';
+      this.verifyToken(tokenQuery);
+      return;
+    }
+
+    if (isPlatformBrowser(this.platformId)) {
+      if (this.registrationState.consumeVerifyAccess()) {
+        this.message = 'Registro completado. Revisa tu correo para verificar tu cuenta.';
+      } else {
+        this.message = 'No se encontró token de verificación.';
+      }
+    }
   }
 
   ngOnDestroy() {
-    clearInterval(this.interval); // Limpiar intervalo al salir del componente
+    clearInterval(this.interval);
   }
 
   startCountdown() {
-    this.updateCountdown(); // Actualiza el primer valor
+    this.updateCountdown();
     this.interval = setInterval(() => {
       if (this.totalSeconds > 0) {
         this.totalSeconds--;
@@ -35,5 +79,46 @@ export class Verify implements OnInit, OnDestroy{
     const minutes = Math.floor(this.totalSeconds / 60);
     const seconds = this.totalSeconds % 60;
     this.countdown = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  requestNewToken() {
+    if (!this.emailRegister) {
+      this.error = 'No se encontró el email. Intenta registrarte de nuevo.';
+      return;
+    }
+
+    const verifyUrl = this.emailRegister;
+    this.api.resendVerification(this.emailRegister).subscribe({
+      next: () => {
+        this.message = 'Nuevo correo de verificación enviado. Revisa tu bandeja de entrada.';
+        this.totalSeconds = 15 * 60;
+        this.updateCountdown();
+      },
+      error: (err) => {
+        console.error('Error al solicitar nuevo token', err);
+        this.error = 'Error al solicitar nuevo token. Intenta otra vez.';
+      }
+    });
+  }
+
+  verifyToken(token: string) {
+    this.api.verifyEmail(token).subscribe({
+      next: (res) => {
+        this.registrationState.setPendingEmail(res.email || this.emailRegister);
+        this.message = '¡Token válido! Redirigiendo al perfil...';
+        setTimeout(() => this.router.navigate(['/register/profile'], { replaceUrl: true }), 800);
+      },
+      error: (err) => {
+        console.error('Error de verificación', err);
+        if (err?.status === 405) {
+          this.error = 'Método inválido.';
+        } else if (err?.status === 0) {
+          this.error = 'No se pudo conectar al servidor.';
+        } else {
+          this.error = err?.error?.message || 'Error al verificar token. Intenta otra vez.';
+        }
+        this.message = '';
+      }
+    });
   }
 }

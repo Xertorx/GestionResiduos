@@ -1,0 +1,23 @@
+info:
+  name: Eliminar Tema
+  type: http
+  seq: 5
+
+http:
+  method: DELETE
+  url: http://localhost:8080/api/forum/topics/1
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Elimina un tema del foro. Solo el autor o un ADMINISTRADOR pueden eliminar.
+  Reemplazar 1 con el ID del tema.
+
+

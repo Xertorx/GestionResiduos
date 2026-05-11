@@ -1,0 +1,18 @@
+info:
+  name: Cambiar Estado Ecopunto
+  type: http
+  seq: 12
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/ecopoints/1/status?status=INACTIVO
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

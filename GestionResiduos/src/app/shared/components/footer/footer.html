@@ -1,126 +1,173 @@
-<footer class="bg-gray-800">
-      <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div>
-            <h3
-              class="text-sm font-semibold text-gray-300 tracking-wider uppercase"
-            >
-              EcoBolívar
-            </h3>
-            <ul class="mt-4 space-y-4">
-              <li>
-                <a href="#" class="text-base text-gray-400 hover:text-white"
-                  >Sobre nosotros</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-base text-gray-400 hover:text-white"
-                  >Preguntas frecuentes</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-base text-gray-400 hover:text-white"
-                  >Contacto</a
-                >
-              </li>
-            </ul>
+<footer class="bg-gray-900 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
+
+    <!-- Grid superior -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
+
+      <!-- Columna 1: Marca + descripción -->
+      <div class="col-span-2 md:col-span-1">
+        <a [routerLink]="'/'" class="flex items-center gap-2 mb-4">
+          <div class="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center">
+            <lucide-icon name="leaf" class="w-5 h-5 text-white"></lucide-icon>
           </div>
-          <div>
-            <h3
-              class="text-sm font-semibold text-gray-300 tracking-wider uppercase"
-            >
-              Recursos
-            </h3>
-            <ul class="mt-4 space-y-4">
-              <li>
-                <a
-                  href="educacion.html"
-                  class="text-base text-gray-400 hover:text-white"
-                  >Educación ambiental</a
-                >
-              </li>
-              <li>
-                <a
-                  href="calendario.html"
-                  class="text-base text-gray-400 hover:text-white"
-                  >Calendario</a
-                >
-              </li>
-              <li>
-                <a
-                  href="mapa.html"
-                  class="text-base text-gray-400 hover:text-white"
-                  >Mapa de eco-puntos</a
-                >
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3
-              class="text-sm font-semibold text-gray-300 tracking-wider uppercase"
-            >
-              Legal
-            </h3>
-            <ul class="mt-4 space-y-4">
-              <li>
-                <a href="#" class="text-base text-gray-400 hover:text-white"
-                  >Política de privacidad</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-base text-gray-400 hover:text-white"
-                  >Términos de servicio</a
-                >
-              </li>
-              <li>
-                <a href="#" class="text-base text-gray-400 hover:text-white"
-                  >Habeas data</a
-                >
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h3
-              class="text-sm font-semibold text-gray-300 tracking-wider uppercase"
-            >
-              Conéctate
-            </h3>
-            <div class="mt-4 flex space-x-6">
-              <a href="#" class="text-gray-400 hover:text-white">
-                <lucide-icon name="facebook" class="h-6 w-6"></lucide-icon>
-              </a>
-              <a href="#" class="text-gray-400 hover:text-white">
-                <lucide-icon name="twitter" class="h-6 w-6"></lucide-icon>
-              </a>
-              <a href="#" class="text-gray-400 hover:text-white">
-                <lucide-icon name="instagram" class="h-6 w-6"></lucide-icon>
-              </a>
-              <a href="#" class="text-gray-400 hover:text-white">
-                <lucide-icon name="youtube" class="h-6 w-6"></lucide-icon>
-              </a>
-            </div>
-            <div class="mt-6">
-              <p class="text-gray-400 text-sm">Suscríbete a nuestro boletín</p>
-              <form class="mt-2 flex">
-                <input
-                  type="email"
-                  placeholder="Tu correo"
-                  class="px-3 py-2 border border-gray-600 rounded-l-md bg-gray-700 text-white focus:outline-none focus:ring-1 focus:ring-emerald-500 w-full"
-                />
-                <button
-                  type="submit"
-                  class="bg-emerald-600 px-4 py-2 rounded-r-md text-white hover:bg-emerald-700 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                >
-                  <lucide-icon name="send" class="h-4 w-4"></lucide-icon>
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-        <div class="mt-12 border-t border-gray-700 pt-8">
-          <p class="text-base text-gray-400 text-center">
-            &copy; 2025 EcoBolívar. Todos los derechos reservados.
-          </p>
+          <span class="text-lg font-extrabold tracking-tight text-white">EcoBolívar</span>
+        </a>
+        <p class="text-gray-400 text-sm leading-relaxed mb-5">
+          Plataforma ciudadana para la gestión sostenible de residuos en Ciudad Bolívar, Bogotá.
+        </p>
+        <!-- Redes sociales -->
+        <div class="flex gap-3">
+          <a href="#" aria-label="Facebook"
+             class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-emerald-600 hover:text-white transition-colors">
+            <lucide-icon name="facebook" class="w-4 h-4"></lucide-icon>
+          </a>
+          <a href="#" aria-label="Instagram"
+             class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-emerald-600 hover:text-white transition-colors">
+            <lucide-icon name="instagram" class="w-4 h-4"></lucide-icon>
+          </a>
+          <a href="#" aria-label="YouTube"
+             class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-emerald-600 hover:text-white transition-colors">
+            <lucide-icon name="youtube" class="w-4 h-4"></lucide-icon>
+          </a>
+          <a href="#" aria-label="Twitter / X"
+             class="w-9 h-9 rounded-xl bg-gray-800 flex items-center justify-center text-gray-400 hover:bg-emerald-600 hover:text-white transition-colors">
+            <lucide-icon name="twitter" class="w-4 h-4"></lucide-icon>
+          </a>
         </div>
       </div>
-    </footer>
+
+      <!-- Columna 2: EcoBolívar -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-300 tracking-widest uppercase mb-4">EcoBolívar</h3>
+        <ul class="space-y-3">
+          <li>
+            <a [routerLink]="'/about_us'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="info" class="w-3.5 h-3.5"></lucide-icon>
+              Sobre nosotros
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/faq'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="help-circle" class="w-3.5 h-3.5"></lucide-icon>
+              Preguntas frecuentes
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/contact'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="mail" class="w-3.5 h-3.5"></lucide-icon>
+              Contacto
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/ranking'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="award" class="w-3.5 h-3.5"></lucide-icon>
+              Ranking
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Columna 3: Recursos -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-300 tracking-widest uppercase mb-4">Recursos</h3>
+        <ul class="space-y-3">
+          <li>
+            <a [routerLink]="'/education'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="book-open" class="w-3.5 h-3.5"></lucide-icon>
+              Educación ambiental
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/calendar'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="calendar" class="w-3.5 h-3.5"></lucide-icon>
+              Calendario
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/eco-points'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="map-pin" class="w-3.5 h-3.5"></lucide-icon>
+              Eco-puntos
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/reports'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="alert-circle" class="w-3.5 h-3.5"></lucide-icon>
+              Reportes
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/foro'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="message-square" class="w-3.5 h-3.5"></lucide-icon>
+              Foro comunitario
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Columna 4: Legal + Newsletter -->
+      <div>
+        <h3 class="text-xs font-semibold text-gray-300 tracking-widest uppercase mb-4">Legal</h3>
+        <ul class="space-y-3 mb-7">
+          <li>
+            <a [routerLink]="'/privacy'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="shield" class="w-3.5 h-3.5"></lucide-icon>
+              Política de privacidad
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/terms'"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="file-text" class="w-3.5 h-3.5"></lucide-icon>
+              Términos de servicio
+            </a>
+          </li>
+          <li>
+            <a [routerLink]="'/privacy'" fragment="habeas"
+               class="text-sm text-gray-400 hover:text-emerald-400 transition-colors flex items-center gap-1.5">
+              <lucide-icon name="lock" class="w-3.5 h-3.5"></lucide-icon>
+              Habeas data
+            </a>
+          </li>
+        </ul>
+
+        <!-- Boletín -->
+        <p class="text-xs text-gray-400 mb-2 font-medium">Suscríbete al boletín</p>
+        <form class="flex">
+          <input
+            type="email"
+            placeholder="Tu correo"
+            class="flex-1 min-w-0 px-3 py-2 text-sm bg-gray-800 border border-gray-700 rounded-l-lg text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          />
+          <button
+            type="submit"
+            class="bg-emerald-600 px-3 py-2 rounded-r-lg text-white hover:bg-emerald-700 transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            aria-label="Suscribirse"
+          >
+            <lucide-icon name="send" class="w-4 h-4"></lucide-icon>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Divisor + copyright -->
+    <div class="mt-12 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p class="text-sm text-gray-500">
+        &copy; 2026 EcoBolívar. Todos los derechos reservados.
+      </p>
+      <p class="text-xs text-gray-600">
+        Hecho con <span class="text-emerald-600">♥</span> para Ciudad Bolívar
+      </p>
+    </div>
+
+  </div>
+</footer>

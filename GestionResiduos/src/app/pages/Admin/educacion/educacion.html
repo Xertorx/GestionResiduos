@@ -1,16 +1,458 @@
-<div class="bg-white rounded-lg shadow p-6">
-  <h2 class="text-xl font-semibold mb-4">Educación</h2>
-  <div class="space-y-3">
-    @for (c of contenidos; track c.id) {
-      <div class="p-3 border rounded flex justify-between items-center">
+<div class="max-w-7xl mx-auto py-6 px-2 sm:px-0">
+
+  <!-- Header -->
+  <div data-aos="fade-down" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <span class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <lucide-icon name="book-open" class="w-5 h-5 text-emerald-600"></lucide-icon>
+        </span>
+        Gestión de Educación Ambiental
+      </h1>
+      <p class="text-sm text-gray-400 mt-1">Sube contenidos educativos y diseña quizzes interactivos.</p>
+    </div>
+    <button (click)="toggleForm()"
+            class="inline-flex items-center px-4 py-2.5 rounded-xl font-medium text-sm transition shadow-sm"
+            [class]="showForm ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-emerald-600 text-white hover:bg-emerald-700'">
+      <lucide-icon [name]="showForm ? 'x' : 'plus'" class="w-4 h-4 mr-2"></lucide-icon>
+      {{ showForm ? 'Cerrar' : 'Nuevo contenido' }}
+    </button>
+  </div>
+
+  <!-- ════════ FORM CONTENIDO (WIZARD) ════════ -->
+  @if (showForm) {
+    <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+
+      <!-- Título del form -->
+      <h2 class="text-xl font-bold text-gray-900 mb-5">
+        {{ isEditMode ? 'Editar contenido' : 'Crear nuevo contenido' }}
+      </h2>
+
+      <!-- Steps indicator (solo en modo crear) -->
+      @if (!isEditMode) {
+        <div class="flex items-center gap-0 mb-8">
+          @for (step of [1,2,3]; track step) {
+            <div class="flex items-center" [class.flex-1]="step < 3">
+              <button (click)="goToStep(step)"
+                      [class.bg-emerald-600]="wizardStep >= step"
+                      [class.bg-gray-200]="wizardStep < step"
+                      [class.text-white]="wizardStep >= step"
+                      [class.text-gray-400]="wizardStep < step"
+                      class="w-8 h-8 rounded-full text-sm font-bold flex items-center justify-center transition">
+                {{ step }}
+              </button>
+              <span class="ml-2 text-sm font-medium hidden sm:inline"
+                    [class.text-emerald-700]="wizardStep >= step"
+                    [class.text-gray-400]="wizardStep < step">
+                {{ step === 1 ? 'Datos básicos' : step === 2 ? 'Secciones' : 'Quiz' }}
+              </span>
+              @if (step < 3) {
+                <div class="flex-1 h-0.5 mx-3"
+                     [class.bg-emerald-400]="wizardStep > step"
+                     [class.bg-gray-200]="wizardStep <= step"></div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── PASO 1: Datos básicos ── -->
+      @if (wizardStep === 1 || isEditMode) {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Título *</label>
+            <input type="text" [(ngModel)]="newTitle"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <select [(ngModel)]="newCategory"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+              @for (cat of categories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <textarea [(ngModel)]="newDescription" rows="3"
+                      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"></textarea>
+          </div>
+
+          @if (!isEditMode) {
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">Archivos principales (PDF, imágenes, videos)</label>
+              <input type="file" multiple (change)="onFilesSelected($event)"
+                     accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4,.avi,.mkv"
+                     class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+              @if (selectedFiles.length > 0) {
+                <ul class="mt-3 space-y-1">
+                  @for (f of selectedFiles; track $index) {
+                    <li class="flex items-center justify-between bg-gray-50 px-3 py-1.5 rounded text-sm">
+                      <span class="truncate">{{ f.name }}</span>
+                      <button (click)="removeSelectedFile($index)" class="text-red-500 ml-2">
+                        <lucide-icon name="x" class="w-4 h-4"></lucide-icon>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="flex justify-end gap-2 mt-6">
+          <button (click)="cancelEdit()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">Cancelar</button>
+          @if (isEditMode) {
+            <button (click)="submitContent()" [disabled]="isSubmitting"
+                    class="px-5 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition disabled:opacity-60">
+              {{ isSubmitting ? 'Guardando...' : 'Guardar cambios' }}
+            </button>
+          } @else {
+            <button (click)="nextStep()"
+                    class="px-5 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition">
+              Siguiente: Secciones
+              <lucide-icon name="chevron-right" class="w-4 h-4 ml-1 inline"></lucide-icon>
+            </button>
+          }
+        </div>
+      }
+
+      <!-- ── PASO 2: Secciones ── -->
+      @if (wizardStep === 2 && !isEditMode) {
         <div>
-          <div class="font-medium">{{ c.titulo }}</div>
-          <div class="text-sm text-gray-500">Tipo: {{ c.tipo }}</div>
+          <p class="text-sm text-gray-500 mb-4">
+            Las secciones permiten organizar el contenido en partes. Cada sección puede tener su propio título, descripción y archivos.
+            <span class="text-gray-400">(Opcional)</span>
+          </p>
+
+          <div class="space-y-5">
+            @for (sec of draftSections; track $index; let sIdx = $index) {
+              <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+                <div class="flex items-center justify-between mb-3">
+                  <span class="font-semibold text-gray-700">Sección #{{ sIdx + 1 }}</span>
+                  <button (click)="removeDraftSection(sIdx)"
+                          class="text-red-500 hover:text-red-700 text-sm flex items-center gap-1">
+                    <lucide-icon name="trash-2" class="w-4 h-4"></lucide-icon>
+                    Eliminar
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 gap-3">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Título de la sección *</label>
+                    <input type="text" [(ngModel)]="sec.title" placeholder="Ej: Introducción"
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none" />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                    <textarea [(ngModel)]="sec.description" rows="2" placeholder="Descripción de la sección..."
+                              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Archivos de esta sección</label>
+                    <input type="file" multiple [id]="'sec-file-' + sIdx"
+                           (change)="onSectionFilesSelected($event, sIdx)"
+                           accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4,.avi,.mkv"
+                           class="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                    @if (sec.files.length > 0) {
+                      <ul class="mt-2 space-y-1">
+                        @for (f of sec.files; track $index; let fIdx = $index) {
+                          <li class="flex items-center justify-between bg-white border border-gray-100 px-3 py-1.5 rounded text-sm">
+                            <span class="truncate text-gray-700">{{ f.name }}</span>
+                            <button (click)="removeSectionFile(sIdx, fIdx)" class="text-red-500 ml-2">
+                              <lucide-icon name="x" class="w-4 h-4"></lucide-icon>
+                            </button>
+                          </li>
+                        }
+                      </ul>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <button (click)="addDraftSection()"
+                  class="mt-4 inline-flex items-center px-4 py-2 border-2 border-dashed border-blue-400 text-blue-700 rounded-lg font-medium hover:bg-blue-50 transition">
+            <lucide-icon name="plus" class="w-4 h-4 mr-2"></lucide-icon>
+            Agregar sección
+          </button>
+        </div>
+
+        <div class="flex justify-between mt-6">
+          <button (click)="prevStep()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+            <lucide-icon name="chevron-left" class="w-4 h-4 mr-1 inline"></lucide-icon>
+            Anterior
+          </button>
+          <div class="flex gap-2">
+            <button (click)="cancelEdit()"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">Cancelar</button>
+            <button (click)="nextStep()"
+                    class="px-5 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition">
+              Siguiente: Quiz
+              <lucide-icon name="chevron-right" class="w-4 h-4 ml-1 inline"></lucide-icon>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ── PASO 3: Quiz ── -->
+      @if (wizardStep === 3 && !isEditMode) {
+        <div>
+          <!-- Toggle incluir quiz -->
+          <div class="flex items-center gap-3 mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+            <input type="checkbox" id="includeQuiz" [(ngModel)]="includeQuizInCreate"
+                   class="w-5 h-5 text-amber-500 rounded" />
+            <label for="includeQuiz" class="font-semibold text-gray-800 cursor-pointer">
+              <lucide-icon name="award" class="w-4 h-4 text-amber-500 inline mr-1"></lucide-icon>
+              Incluir quiz para este contenido
+            </label>
+          </div>
+
+          @if (includeQuizInCreate) {
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div class="md:col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Título del quiz *</label>
+                <input type="text" [(ngModel)]="quizTitle"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 outline-none" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Puntos por respuesta correcta</label>
+                <input type="number" min="1" [(ngModel)]="quizPointsPerQuestion"
+                       class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 outline-none" />
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Descripción del quiz</label>
+                <textarea [(ngModel)]="quizDescription" rows="2"
+                          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+              </div>
+            </div>
+
+            <h3 class="text-base font-bold text-gray-900 mb-3">Preguntas</h3>
+            <div class="space-y-4">
+              @for (q of draftQuestions; track $index; let qIdx = $index) {
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="font-semibold text-gray-700">Pregunta #{{ qIdx + 1 }}</span>
+                    <button (click)="removeDraftQuestion(qIdx)"
+                            class="text-red-500 hover:text-red-700 text-sm flex items-center gap-1">
+                      <lucide-icon name="trash-2" class="w-4 h-4"></lucide-icon>
+                      Eliminar
+                    </button>
+                  </div>
+                  <input type="text" [(ngModel)]="q.text" placeholder="Enunciado de la pregunta"
+                         class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-amber-500 outline-none" />
+                  <p class="text-xs text-gray-500 mb-2">Marca la opción correcta:</p>
+                  <div class="space-y-2">
+                    @for (opt of q.options; track $index; let oIdx = $index) {
+                      <div class="flex items-center gap-2">
+                        <input type="radio" [name]="'wiz-correct-' + qIdx" [value]="oIdx" [(ngModel)]="q.correctIndex"
+                               class="w-4 h-4 text-amber-500" />
+                        <input type="text" [(ngModel)]="q.options[oIdx]" [placeholder]="'Opción ' + (oIdx + 1)"
+                               class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-amber-500 outline-none" />
+                        <button (click)="removeDraftOption(qIdx, oIdx)" [disabled]="q.options.length <= 2"
+                                class="text-red-500 disabled:opacity-30">
+                          <lucide-icon name="minus" class="w-4 h-4"></lucide-icon>
+                        </button>
+                      </div>
+                    }
+                  </div>
+                  <button (click)="addDraftOption(qIdx)" [disabled]="q.options.length >= 6"
+                          class="mt-3 text-sm text-amber-700 hover:text-amber-900 font-medium flex items-center disabled:opacity-50">
+                    <lucide-icon name="plus" class="w-4 h-4 mr-1"></lucide-icon>Agregar opción
+                  </button>
+                </div>
+              }
+            </div>
+            <button (click)="addDraftQuestion()"
+                    class="mt-4 inline-flex items-center px-4 py-2 border-2 border-dashed border-amber-400 text-amber-700 rounded-lg font-medium hover:bg-amber-50 transition">
+              <lucide-icon name="plus" class="w-4 h-4 mr-2"></lucide-icon>
+              Agregar pregunta
+            </button>
+          }
+        </div>
+
+        <div class="flex justify-between mt-6 pt-6 border-t border-gray-200">
+          <button (click)="prevStep()"
+                  class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">
+            <lucide-icon name="chevron-left" class="w-4 h-4 mr-1 inline"></lucide-icon>
+            Anterior
+          </button>
+          <div class="flex gap-2">
+            <button (click)="cancelEdit()"
+                    class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">Cancelar</button>
+            <button (click)="submitContent()" [disabled]="isSubmitting"
+                    class="px-6 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition disabled:opacity-60 flex items-center gap-2">
+              <lucide-icon name="save" class="w-4 h-4"></lucide-icon>
+              {{ isSubmitting ? 'Guardando...' : 'Crear contenido' }}
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ════════ FORM QUIZ ════════ -->
+  @if (showQuizForm) {
+    <div class="bg-white rounded-2xl shadow-md border-2 border-amber-200 p-6 mb-8">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+          <lucide-icon name="award" class="w-5 h-5 text-amber-500"></lucide-icon>
+          {{ isQuizEditMode ? 'Editar quiz' : 'Crear quiz' }}
+        </h2>
+        <button (click)="cancelQuizForm()" class="text-gray-500 hover:text-gray-700">
+          <lucide-icon name="x" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Título del quiz *</label>
+          <input type="text" [(ngModel)]="quizTitle"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
         </div>
         <div>
-          <button class="text-emerald-600">Editar</button>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Puntos por respuesta correcta</label>
+          <input type="number" min="1" [(ngModel)]="quizPointsPerQuestion"
+                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+        </div>
+        <div class="md:col-span-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+          <textarea [(ngModel)]="quizDescription" rows="2"
+                    class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"></textarea>
         </div>
       </div>
-    }
-  </div>
+
+      <h3 class="text-base font-bold text-gray-900 mb-3">Preguntas</h3>
+
+      <div class="space-y-4">
+        @for (q of draftQuestions; track $index; let qIdx = $index) {
+          <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
+            <div class="flex items-center justify-between mb-3">
+              <span class="font-semibold text-gray-700">Pregunta #{{ qIdx + 1 }}</span>
+              <button (click)="removeDraftQuestion(qIdx)"
+                      class="text-red-500 hover:text-red-700 text-sm font-medium flex items-center gap-1">
+                <lucide-icon name="trash-2" class="w-4 h-4"></lucide-icon>
+                Eliminar
+              </button>
+            </div>
+
+            <input type="text" [(ngModel)]="q.text" placeholder="Enunciado de la pregunta"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 mb-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+
+            <p class="text-xs text-gray-500 mb-2">Marca la opción correcta con el radio button:</p>
+
+            <div class="space-y-2">
+              @for (opt of q.options; track $index; let oIdx = $index) {
+                <div class="flex items-center gap-2">
+                  <input type="radio" [name]="'correct-' + qIdx" [value]="oIdx" [(ngModel)]="q.correctIndex"
+                         class="w-4 h-4 text-emerald-600 focus:ring-emerald-500" />
+                  <input type="text" [(ngModel)]="q.options[oIdx]" [placeholder]="'Opción ' + (oIdx + 1)"
+                         class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none" />
+                  <button (click)="removeDraftOption(qIdx, oIdx)" [disabled]="q.options.length <= 2"
+                          class="text-red-500 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed">
+                    <lucide-icon name="minus" class="w-4 h-4"></lucide-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <button (click)="addDraftOption(qIdx)" [disabled]="q.options.length >= 6"
+                    class="mt-3 inline-flex items-center text-sm text-emerald-700 hover:text-emerald-900 font-medium disabled:opacity-50">
+              <lucide-icon name="plus" class="w-4 h-4 mr-1"></lucide-icon>
+              Agregar opción
+            </button>
+          </div>
+        }
+      </div>
+
+      <button (click)="addDraftQuestion()"
+              class="mt-4 inline-flex items-center px-4 py-2 border-2 border-dashed border-emerald-400 text-emerald-700 rounded-lg font-medium hover:bg-emerald-50 transition">
+        <lucide-icon name="plus" class="w-4 h-4 mr-2"></lucide-icon>
+        Agregar pregunta
+      </button>
+
+      <div class="flex justify-end gap-2 mt-6 pt-6 border-t border-gray-200">
+        <button (click)="cancelQuizForm()"
+                class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition">Cancelar</button>
+        <button (click)="saveQuiz()" [disabled]="isSubmittingQuiz"
+                class="px-5 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition disabled:opacity-60">
+          {{ isSubmittingQuiz ? 'Guardando...' : (isQuizEditMode ? 'Actualizar quiz' : 'Crear quiz') }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ════════ LISTADO DE CONTENIDOS ════════ -->
+  @if (isLoading) {
+    <div class="flex justify-center py-12">
+      <svg class="animate-spin h-10 w-10 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+    </div>
+  } @else if (contenidos.length === 0) {
+    <div class="text-center py-16 text-gray-500">
+      <lucide-icon name="inbox" class="w-12 h-12 mx-auto mb-3 text-gray-400"></lucide-icon>
+      Aún no hay contenidos educativos. Crea el primero arriba.
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      @for (c of contenidos; track c.id) {
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition overflow-hidden flex flex-col">
+          <div class="p-5 flex-1">
+            <div class="flex items-center gap-2 mb-2">
+              <lucide-icon [name]="getFileTypeIcon(getPrimaryFileType(c))" class="w-4 h-4 text-emerald-600"></lucide-icon>
+              <span class="text-xs uppercase tracking-wider text-gray-500 font-semibold">{{ getPrimaryFileType(c) }}</span>
+              @if (hasQuizFor(c.id)) {
+                <span class="ml-auto inline-flex items-center gap-1 bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full">
+                  <lucide-icon name="award" class="w-3 h-3"></lucide-icon>
+                  Quiz
+                </span>
+              }
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-1">{{ c.title }}</h3>
+            <p class="text-sm text-gray-600 line-clamp-2">{{ c.description }}</p>
+            <p class="text-xs text-gray-400 mt-2">{{ c.files.length }} archivo(s)</p>
+          </div>
+
+          <div class="px-5 pb-5 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2">
+            <button (click)="openEditForm(c)"
+                    class="inline-flex items-center justify-center px-3 py-2 bg-purple-600 text-white text-sm rounded-lg font-medium hover:bg-purple-700 transition">
+              <lucide-icon name="pencil" class="w-4 h-4 mr-1"></lucide-icon>
+              Editar
+            </button>
+            <button (click)="deleteContent(c)"
+                    class="inline-flex items-center justify-center px-3 py-2 bg-red-600 text-white text-sm rounded-lg font-medium hover:bg-red-700 transition">
+              <lucide-icon name="trash-2" class="w-4 h-4 mr-1"></lucide-icon>
+              Eliminar
+            </button>
+
+            <!-- HU22: gestión del quiz -->
+            @if (!hasQuizFor(c.id)) {
+              <button (click)="openCreateQuizForm(c)"
+                      class="col-span-2 inline-flex items-center justify-center px-3 py-2 bg-amber-500 text-white text-sm rounded-lg font-medium hover:bg-amber-600 transition">
+                <lucide-icon name="plus" class="w-4 h-4 mr-1"></lucide-icon>
+                Crear quiz
+              </button>
+            } @else {
+              <button (click)="openEditQuizForm(c)"
+                      class="inline-flex items-center justify-center px-3 py-2 bg-emerald-600 text-white text-sm rounded-lg font-medium hover:bg-emerald-700 transition">
+                <lucide-icon name="pencil" class="w-4 h-4 mr-1"></lucide-icon>
+                Editar quiz
+              </button>
+              <button (click)="deleteQuizFor(c)"
+                      class="inline-flex items-center justify-center px-3 py-2 bg-rose-500 text-white text-sm rounded-lg font-medium hover:bg-rose-600 transition">
+                <lucide-icon name="trash" class="w-4 h-4 mr-1"></lucide-icon>
+                Borrar quiz
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
 </div>

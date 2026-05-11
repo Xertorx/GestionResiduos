@@ -1,0 +1,32 @@
+info:
+  name: Agregar Comentario a Tema
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: http://localhost:8080/api/forum/topics/1/comments
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "texto": "Excelente tema, yo separo los plásticos por tipo antes de reciclar."
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Agrega un comentario a un tema del foro. Requiere JWT.
+  Reemplazar 1 con el ID del tema.
+
+

@@ -1,79 +1,214 @@
 <!-- Main Content -->
 <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">
+    <div data-aos="fade-down" class="text-center mb-8">
+      <span class="section-badge">Planifica tu semana</span>
+      <h1 class="text-4xl font-extrabold text-gray-900 mb-2 mt-1">
         Calendario de Recolección
       </h1>
-      <p class="text-lg text-gray-600">
+      <p class="text-lg text-gray-500">
         Consulta los horarios y días de recolección en tu localidad
       </p>
     </div>
 
     <!-- Localidad Selector -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-      <div
-        class="flex flex-col sm:flex-row sm:items-center sm:justify-between"
-      >
-        <div class="mb-4 sm:mb-0">
-          <h2 class="text-lg font-medium text-gray-900">
-            Selecciona tu localidad
-          </h2>
-          <p class="text-sm text-gray-600">
-            Para ver el calendario específico de tu zona
-          </p>
+    <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">Selecciona tu localidad</h2>
+          <p class="text-sm text-gray-400 mt-0.5">Ver el calendario específico de tu zona</p>
         </div>
-        <div class="flex-1 sm:max-w-xs">
+        <div class="flex items-center gap-3">
           <select
-            id="localidad-select"
-            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            [(ngModel)]="selectedDistrictId"
+            (ngModelChange)="onDistrictChange()"
+            class="border border-gray-200 rounded-xl px-4 py-2 text-sm bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 min-w-[200px]"
           >
-            <option value="ciudad-bolivar">Ciudad Bolívar</option>
-            <option value="usme">Usme</option>
-            <option value="bosa">Bosa</option>
-            <option value="kennedy">Kennedy</option>
-            <option value="suba">Suba</option>
+            @for (d of districts; track d.id) {
+              <option [ngValue]="d.id">{{ d.name }}</option>
+            }
           </select>
+          @if (isLoadingSchedules) {
+            <svg class="animate-spin h-5 w-5 text-emerald-600 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+          }
         </div>
       </div>
     </div>
 
     <!-- Calendar -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+    <div data-aos="fade-up" data-aos-delay="100" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6">
       @if (calendarOptions) {
         <full-calendar [options]="calendarOptions"></full-calendar>
       } @else {
         <div class="flex justify-center items-center h-64">
-          <p class="text-gray-500">Cargando calendario...</p>
+          <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+          </svg>
         </div>
       }
     </div>
 
+    <!-- Leyenda -->
+    <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+      <div class="flex flex-wrap gap-2 items-center">
+        <span class="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">Tipos:</span>
+        <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-sm font-medium text-emerald-700">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Orgánico
+        </span>
+        <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-sm font-medium text-blue-700">
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Reciclable
+        </span>
+        <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200 text-sm font-medium text-purple-700">
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span> Especial
+        </span>
+        <span class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-sm font-medium text-amber-700">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> RCD
+        </span>
+      </div>
+    </div>
+
+    <!-- Próximas recolecciones -->
+    @if (upcomingEvents.length > 0) {
+      <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-6">
+        <h3 class="text-base font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <lucide-icon name="clock" class="w-4 h-4 text-emerald-600"></lucide-icon>
+          Próximas recolecciones
+        </h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          @for (ev of upcomingEvents; track ev.date + ev.residueLabel) {
+            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100">
+              <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white text-xs font-bold" [style.background-color]="ev.color">
+                {{ ev.residueLabel.slice(0, 2).toUpperCase() }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-900">{{ ev.residueLabel }}</p>
+                <p class="text-xs text-gray-400">{{ getDayName(ev.date) }}</p>
+              </div>
+              <div class="text-xs text-gray-400 flex-shrink-0">{{ ev.startTime }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Modal Previsualización Evento -->
+    @if (showPreviewModal && selectedEvent) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" (click)="closePreviewModal()">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 relative" (click)="$event.stopPropagation()">
+          <button (click)="closePreviewModal()" class="absolute top-3 right-3 p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+          <!-- Color header strip -->
+          <div class="w-full h-2 rounded-full mb-4" [ngStyle]="{'background': selectedEvent.backgroundColor}"></div>
+          <h2 class="text-lg font-bold text-gray-900 mb-4">Detalle de recolección</h2>
+          <div class="space-y-3">
+            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <lucide-icon name="calendar" class="w-4 h-4 text-gray-400 flex-shrink-0"></lucide-icon>
+              <div>
+                <p class="text-xs text-gray-400">Fecha</p>
+                <p class="text-sm font-medium text-gray-800">{{ selectedEvent.start | date:'EEEE d MMM, y' }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <lucide-icon name="clock" class="w-4 h-4 text-gray-400 flex-shrink-0"></lucide-icon>
+              <div>
+                <p class="text-xs text-gray-400">Horario</p>
+                <p class="text-sm font-medium text-gray-800">{{ selectedEvent.extendedProps?.startTime }} – {{ selectedEvent.extendedProps?.endTime }}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+              <lucide-icon name="trash-2" class="w-4 h-4 text-gray-400 flex-shrink-0"></lucide-icon>
+              <div>
+                <p class="text-xs text-gray-400">Tipo de residuo</p>
+                <span class="inline-block mt-0.5 text-xs font-bold px-2 py-0.5 rounded-full text-white" [ngStyle]="{'background': selectedEvent.backgroundColor}">
+                  {{ selectedEvent.extendedProps?.residueLabel || selectedEvent.extendedProps?.residueType }}
+                </span>
+              </div>
+            </div>
+            @if (selectedEvent.extendedProps?.description) {
+              <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                <lucide-icon name="info" class="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5"></lucide-icon>
+                <div>
+                  <p class="text-xs text-gray-400">Descripción</p>
+                  <p class="text-sm text-gray-700">{{ selectedEvent.extendedProps?.description }}</p>
+                </div>
+              </div>
+            }
+          </div>
+          <div class="mt-5 flex justify-end">
+            <button type="button"
+              class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition"
+              (click)="openNonComplianceModal(selectedEvent)">
+              <lucide-icon name="alert-triangle" class="w-4 h-4"></lucide-icon>
+              Reportar incumplimiento
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Modal Reporte de Incumplimiento -->
+    @if (showNonComplianceModal) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">Reporte de Incumplimiento</h3>
+          <!-- Formulario de reporte de incumplimiento -->
+          <form [formGroup]="nonComplianceForm" (ngSubmit)="submitNonComplianceReport()" class="space-y-4">
+            <div>
+              <label class="block text-gray-700 mb-2">Categoría de residuo</label>
+              <select formControlName="categoryId" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500">
+                <option value="">Selecciona una categoría</option>
+                @for (category of nonComplianceCategories; track category.id) {
+                  <option [value]="category.id">{{ category.name }}</option>
+                }
+              </select>
+            </div>
+            <div>
+              <label class="block text-gray-700 mb-2">Descripción</label>
+              <textarea rows="3" formControlName="description" class="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500" placeholder="Describe el incumplimiento"></textarea>
+            </div>
+            <div *ngIf="nonComplianceFormError" class="text-sm text-red-600">{{ nonComplianceFormError }}</div>
+            <div class="flex justify-end gap-3">
+              <button type="button" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100" (click)="closeNonComplianceModal()">Cancelar</button>
+              <button type="submit" class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700" [disabled]="isSubmittingNonCompliance">{{ isSubmittingNonCompliance ? 'Enviando...' : 'Enviar reporte' }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <!-- Modal Confirmación de Envío -->
+    @if (showNonComplianceConfirmModal) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">Confirmar envío</h3>
+          <p class="mb-4 text-gray-600">¿Deseas enviar el reporte de incumplimiento?</p>
+          <div class="flex justify-end gap-3">
+            <button type="button" class="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100" (click)="cancelNonComplianceConfirm()">Cancelar</button>
+            <button type="button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700" (click)="confirmNonComplianceSubmission()">Aceptar</button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Modal Éxito -->
+    @if (showNonComplianceSuccessModal) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl text-center">
+          <h3 class="text-2xl font-bold text-gray-800 mb-2">Reporte enviado</h3>
+          <p class="mb-4 text-gray-600">El reporte de incumplimiento se envió correctamente.</p>
+          <button type="button" class="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700" (click)="closeNonComplianceSuccessModal()">Aceptar</button>
+        </div>
+      </div>
+    }
+
      
 
     <!-- Legend -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-      <h3 class="text-lg font-medium text-gray-900 mb-4">Leyenda</h3>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="flex items-center">
-          <div
-            class="w-4 h-4 bg-emerald-100 border-2 border-emerald-500 rounded mr-3"
-          ></div>
-          <span class="text-sm">Recolección Orgánica</span>
-        </div>
-        <div class="flex items-center">
-          <div
-            class="w-4 h-4 bg-blue-100 border-2 border-blue-500 rounded mr-3"
-          ></div>
-          <span class="text-sm">Recolección Reciclable</span>
-        </div>
-        <div class="flex items-center">
-          <div
-            class="w-4 h-4 bg-indigo-100 border-2 border-indigo-500 rounded mr-3"
-          ></div>
-          <span class="text-sm">Recolección Especial</span>
-        </div>
-      </div>
-    </div>
+
 
     <!-- Download & Sync Options 
     <div class="bg-white rounded-lg shadow-md p-6">

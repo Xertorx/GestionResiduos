@@ -1,0 +1,63 @@
+info:
+  name: Crear un Ecopunto
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: http://localhost:8080/api/ecopoints
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+          "name": "Eco Centro-ciudad bolivar",
+          "address": "Carrera 5 #10-20",
+          "latitude": 4.7110,
+          "longitude": -74.0721,
+          "description": "Centro de recolección",
+          "status": "ACTIVO",
+          "residueTypes": ["ORGANICO", "RECICLABLE"],
+          "neighborhood": {"neighborhoodId": 1},
+          "openingTime": "08:00",
+          "closingTime": "18:00"
+        }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: "Generated from cURL: curl -X POST http://localhost:8080/api/ecopoints \\\r
+
+  \  -H \"Content-Type: application/json\" \\\r
+
+  \  -d '{\r
+
+  \    \"name\": \"EcoPoint Centro\",\r
+
+  \    \"address\": \"Carrera 5 #10-20\",\r
+
+  \    \"latitude\": 4.7110,\r
+
+  \    \"longitude\": -74.0721,\r
+
+  \    \"description\": \"Centro de recolección\",\r
+
+  \    \"status\": \"ACTIVO\",\r
+
+  \    \"residueTypes\": [\"ORGANICO\", \"RECICLABLE\"],\r
+
+  \    \"neighborhoodId\": 1,\r
+
+  \    \"openingTime\": \"08:00\",\r
+
+  \    \"closingTime\": \"18:00\"\r
+
+  \  }'\r\n"

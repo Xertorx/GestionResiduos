@@ -1,0 +1,34 @@
+info:
+  name: Cambiar Estado Usuario (Admin)
+  type: http
+  seq: 6
+
+http:
+  method: PATCH
+  url: http://localhost:8080/api/users/admin/999999999/status
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "status": "INACTIVO"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Cambia el estado de un usuario (VERIFICADO o INACTIVO).
+  Solo accesible para usuarios con rol ADMINISTRADOR.
+  Requiere JWT en el header Authorization.
+  Reemplazar 999999999 con el documentNumber real del usuario.
+  Valores válidos para status: "VERIFICADO", "INACTIVO".
+

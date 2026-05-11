@@ -1,0 +1,33 @@
+info:
+  name: Crear nuevo reporte- Incumplimiento Calendario
+  type: http
+  seq: 10
+
+http:
+  method: POST
+  url: http://localhost:8080/api/reports
+  body:
+    type: multipart-form
+    data:
+      - name: type
+        type: text
+        value: incumplimiento_calendario
+      - name: categoryId
+        type: text
+        value: "{{categoryId}}"
+      - name: description
+        type: text
+        value: "{{description}}"
+      - name: calendarId
+        type: text
+        value: "{{calendarId}}"
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

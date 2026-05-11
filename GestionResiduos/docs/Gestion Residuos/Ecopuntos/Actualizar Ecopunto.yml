@@ -1,0 +1,36 @@
+info:
+  name: Actualizar Ecopunto
+  type: http
+  seq: 11
+
+http:
+  method: PUT
+  url: http://localhost:8080/api/ecopoints/1
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Eco Centro Actualizado",
+        "address": "Carrera 5 #10-25",
+        "latitude": 4.7110,
+        "longitude": -74.0721,
+        "description": "Centro de recolección actualizado",
+        "status": "ACTIVO",
+        "residueTypes": ["ORGANICO", "RECICLABLE", "ESPECIAL"],
+        "neighborhood": {"neighborhoodId": 1},
+        "openingTime": "07:00",
+        "closingTime": "20:00"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

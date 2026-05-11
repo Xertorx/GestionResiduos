@@ -1,151 +1,244 @@
-<div class="max-w-screen-2xl min-h-screen mx-auto py-8 px-4 sm:px-6 lg:px-8 m-5 flex gap-8">
+<div class="max-w-screen-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 
-	<!-- Sidebar -->
-	<aside class="w-64 bg-white border-r border-gray-200 p-6 overflow-y-auto border rounded-lg shadow-lg">
-		<h2 class="text-xl font-bold mb-4">Contenido del curso</h2>
-		<ul class="space-y-2">
-			@for (section of resource?.sections; track section) {
-			<li>
-				<button (click)="selectSection(section)"
-					class="w-full text-left px-3 py-2 rounded hover:bg-emerald-100 transition-colors">
-					{{ section?.title }}
-				</button>
-				<ul class="ml-4 mt-1 text-gray-500 text-sm space-y-1">
-					@for (topic of section?.topics ?? []; track topic) {
-					<li>
-						<button (click)="selectTopic(topic)"
-							class="w-full text-left px-2 py-1 rounded hover:bg-gray-100 transition-colors">
-							{{ topic?.title }}
-						</button>
-					</li>
-					}
-				</ul>
-			</li>
-			}
-		</ul>
-	</aside>
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="flex justify-center py-20">
+      <svg class="animate-spin h-12 w-12 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+    </div>
+  }
 
-	<!-- Área principal -->
-	<main class="flex-1 p-8 overflow-y-auto justify-items-center">
-		<div class="flex justify-between items-center mb-8">
-			<div>
-				<h1 class="text-3xl font-bold text-gray-900 mb-2">{{ resource?.title }}</h1>
-				<p class="text-sm text-gray-600">{{ resource?.description }}</p>
-			</div>
-			<button (click)="toggleResourceCompleted()"
-				[class.bg-emerald-600]="isResourceCompleted()"
-				[class.bg-gray-400]="!isResourceCompleted()"
-				class="text-white px-5 py-3 rounded-lg flex items-center gap-2 transition text-sm font-medium hover:shadow-lg whitespace-nowrap">
-				<lucide-icon name="award" class="h-5 w-5"></lucide-icon>
-				{{ isResourceCompleted() ? 'Completado' : 'Marcar todo como completado' }}
-			</button>
-		</div>
+  @else if (resource) {
 
-		<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6 w-full">
-			@for (section of resource?.sections ?? []; track section) {
-			<div class="bg-white rounded-2xl shadow-md p-6 cursor-pointer hover:shadow-xl transition-shadow"
-				(click)="openModal(section)">
-				<div class="flex items-center gap-3 mb-4">
+    <!-- HERO -->
+    <section data-aos="fade-down" class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white rounded-2xl shadow-lg p-8 mb-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            <span class="bg-white/20 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+              {{ resource.type || 'Recurso educativo' }}
+            </span>
+            @if (resource.date) {
+              <span class="text-emerald-100 text-sm">{{ resource.date }}</span>
+            }
+          </div>
+          <h1 class="text-3xl md:text-4xl font-bold mb-2">{{ resource.title }}</h1>
+          <p class="text-emerald-50 max-w-2xl">{{ resource.description }}</p>
+        </div>
 
-					<!-- Mostrar Lucide Icon si es un nombre de ícono -->
-					@if (section.icon && !section.icon.includes('/')) {
-					<lucide-icon [name]="section.icon" class="w-10 h-10 text-emerald-600"></lucide-icon>
-					}
-					<!-- Mostrar imagen si es una ruta -->
-					@else {
-					<img [src]="section.icon || 'assets/icons/default.png'" class="w-10 h-10 rounded-full"
-						alt="{{ section.title }}" />
-					}
+        <div class="flex flex-col gap-3 md:items-end">
+          <button (click)="toggleResourceCompleted()"
+                  [disabled]="!canMarkCompleted"
+                  [class.bg-white]="isResourceCompleted()"
+                  [class.text-emerald-700]="isResourceCompleted()"
+                  [class.bg-emerald-800]="!isResourceCompleted() && canMarkCompleted"
+                  [class.text-white]="!isResourceCompleted() && canMarkCompleted"
+                  [class.bg-gray-300]="!canMarkCompleted"
+                  [class.text-gray-500]="!canMarkCompleted"
+                  [class.cursor-not-allowed]="!canMarkCompleted"
+                  [class.opacity-60]="!canMarkCompleted"
+                  [title]="!canMarkCompleted ? 'Debes ver todas las secciones' + (hasQuiz ? ' y completar el quiz' : '') + ' para marcar como completado' : ''"
+                  class="inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-sm font-medium hover:shadow-lg transition whitespace-nowrap">
+            <lucide-icon name="award" class="h-4 w-4 mr-2"></lucide-icon>
+            {{ isResourceCompleted() ? 'Completado' : 'Marcar como completado' }}
+          </button>
 
-					<h2 class="text-lg font-semibold">{{ section.title }}</h2>
-				</div>
+          <!-- Botón Tomar Quiz (solo si existe) -->
+          @if (hasQuiz && !checkingQuiz) {
+            <button (click)="goToQuiz()"
+                    class="inline-flex items-center justify-center px-5 py-2.5 bg-amber-400 text-emerald-900 rounded-lg text-sm font-semibold hover:bg-amber-300 hover:shadow-lg transition whitespace-nowrap">
+              <lucide-icon name="award" class="h-4 w-4 mr-2"></lucide-icon>
+              Tomar Quiz y ganar puntos
+            </button>
+          }
+        </div>
+      </div>
+    </section>
 
-				<p class="text-gray-600 text-sm">
-					{{ section.summary || 'Haz click para ver más...' }}
-				</p>
-			</div>
-			}
-		</div>
-		<section class="py-10">
-			<h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Galería Destacada</h2>
+    <!-- LAYOUT PRINCIPAL -->
+    <div class="flex flex-col lg:flex-row gap-8">
 
-			<app-carousel [images]="resource?.images ?? []"></app-carousel>
+      <!-- Sidebar -->
+      <aside data-aos="fade-right" class="lg:w-72 flex-shrink-0 bg-white border border-gray-200 rounded-xl shadow-sm p-6 h-fit lg:sticky lg:top-4">
+        <h2 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <lucide-icon name="book-open" class="w-4 h-4 text-emerald-600"></lucide-icon>
+          Contenido del módulo
+        </h2>
+        <ul class="space-y-1">
+          @for (section of resource.sections ?? []; track section) {
+            <li>
+              <button (click)="selectSection(section)"
+                      class="w-full text-left px-3 py-2 rounded-lg hover:bg-emerald-50 transition-colors text-sm font-medium text-gray-700 flex items-center gap-2">
+                @if (isSectionCompleted(section)) {
+                  <lucide-icon name="check-circle" class="w-4 h-4 text-emerald-600"></lucide-icon>
+                } @else {
+                  <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                }
+                <span class="flex-1">{{ section?.title }}</span>
+              </button>
+              @if ((section?.topics ?? []).length > 0) {
+                <ul class="ml-6 mt-1 space-y-1 text-gray-500 text-xs">
+                  @for (topic of section?.topics ?? []; track topic) {
+                    <li>
+                      <button (click)="selectTopic(topic)"
+                              class="w-full text-left px-2 py-1 rounded hover:bg-gray-100 transition">
+                        {{ topic?.title }}
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </li>
+          }
+        </ul>
+      </aside>
 
-		</section>
+      <!-- Área principal -->
+      <main class="flex-1 min-w-0">
+        <h2 data-aos="fade-up" class="text-xl font-bold text-gray-900 mb-4">Secciones</h2>
 
-	</main>
-	<!-- Modal -->
-	@if (selectedSection) {
-	<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-		<div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 overflow-y-auto max-h-[90vh]">
-			<div class="flex justify-between items-center mb-6">
-				<div class="flex items-center gap-3">
-					<h3 class="text-2xl font-bold">{{ selectedSection.title }}</h3>
-					<button (click)="toggleSectionCompleted(selectedSection)"
-						[class.bg-emerald-600]="isSectionCompleted(selectedSection)"
-						[class.bg-gray-300]="!isSectionCompleted(selectedSection)"
-						class="text-white px-3 py-1 rounded-lg flex items-center gap-2 transition text-sm font-medium hover:shadow-md">
-						<lucide-icon name="award" class="h-4 w-4"></lucide-icon>
-						{{ isSectionCompleted(selectedSection) ? 'Completado' : 'Marcar como hecho' }}
-					</button>
-				</div>
-				<button (click)="closeModal()" class="text-gray-500 hover:text-gray-800 text-2xl">&times;</button>
-			</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5 mb-10">
+          @for (section of resource.sections ?? []; track section) {
+            <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow p-6 cursor-pointer border border-gray-100"
+                 (click)="openModal(section)">
+              <div class="flex items-center gap-3 mb-3">
+                @if (section.icon && !section.icon.includes('/')) {
+                  <div class="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center">
+                    <lucide-icon [name]="section.icon" class="w-6 h-6 text-emerald-600"></lucide-icon>
+                  </div>
+                } @else {
+                  <img [src]="section.icon || 'assets/icons/default.png'"
+                       class="w-12 h-12 rounded-xl"
+                       alt="{{ section.title }}" />
+                }
+                <h3 class="text-base font-semibold text-gray-900 leading-tight">
+                  {{ section.title }}
+                </h3>
+              </div>
 
-			<!-- Contenido del módulo -->
-			<div class="space-y-6 text-gray-700">
-				@if (selectedSection.content) {
-				<div>
-					<h4 class="text-lg font-semibold text-gray-800 mb-2">Descripción</h4>
-					<p class="text-gray-600">{{ selectedSection.content }}</p>
-				</div>
-				}
+              <p class="text-gray-600 text-sm line-clamp-3">
+                {{ section.summary || 'Haz click para ver más...' }}
+              </p>
 
-				<!-- Visor de PDF -->
-				@if (selectedSection.pdfs && selectedSection.pdfs.length > 0) {
-				<div>
-					<h4 class="text-lg font-semibold text-gray-800 mb-3">Documentos PDF</h4>
-					<div class="space-y-3">
-						@for (pdf of selectedSection.pdfs; track $index) {
-						<div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-4 border-2 border-red-200">
-							<div class="flex items-center justify-between">
-								<div class="flex items-center gap-3">
-									<lucide-icon name="file-text" class="h-8 w-8 text-red-600"></lucide-icon>
-									<div>
-										<h5 class="font-semibold text-gray-800">{{ pdf.name }}</h5>
-										<p class="text-sm text-gray-500">Documento PDF disponible para consultar</p>
-									</div>
-								</div>
-								<div class="flex gap-2">
-									<a [href]="pdf.url" target="_blank"
-										class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
-										<lucide-icon name="file-text" class="h-4 w-4"></lucide-icon>
-										Ver
-									</a>
-								</div>
-							</div>
-						</div>
-						}
-					</div>
-				</div>
-				}
+              <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+                <span class="text-emerald-700 text-xs font-semibold uppercase tracking-wider">
+                  Ver detalle
+                </span>
+                <lucide-icon name="chevron-right" class="w-4 h-4 text-emerald-600"></lucide-icon>
+              </div>
+            </div>
+          }
+        </div>
 
-				<!-- Imágenes (opcional, si existen) -->
-				@if (selectedSection.images && selectedSection.images.length > 0) {
-				<div>
-					<h4 class="text-lg font-semibold text-gray-800 mb-3">Galería de Imágenes</h4>
-					<div class="grid grid-cols-2 gap-4">
-						@for (img of selectedSection.images; track img) {
-						<img [src]="img" class="w-full h-36 object-cover rounded-lg shadow-sm hover:shadow-md transition" />
-						}
-					</div>
-				</div>
-				}
+        <!-- Galería -->
+        @if ((resource.images ?? []).length > 0) {
+          <section data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-10">
+            <h2 class="text-xl font-bold text-gray-900 mb-6 text-center flex items-center justify-center gap-2">
+              <lucide-icon name="image" class="w-5 h-5 text-emerald-600"></lucide-icon>
+              Galería destacada
+            </h2>
+            <app-carousel [images]="resource.images ?? []"></app-carousel>
+          </section>
+        }
 
-			</div>
-		</div>
-	</div>
-	}
+        <!-- CTA QUIZ inferior -->
+        @if (hasQuiz && !checkingQuiz) {
+          <div data-aos="zoom-in" class="bg-gradient-to-br from-emerald-50 to-amber-50 border-2 border-emerald-200 rounded-2xl p-8 text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-400 mb-4">
+              <lucide-icon name="award" class="w-8 h-8 text-emerald-900"></lucide-icon>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">¿Listo para poner a prueba lo aprendido?</h3>
+            <p class="text-gray-600 mb-5 max-w-md mx-auto">
+              Responde el quiz interactivo y suma puntos a tu perfil por cada respuesta correcta.
+            </p>
+            <button (click)="goToQuiz()"
+                    class="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:bg-emerald-700 hover:shadow-xl transition">
+              <lucide-icon name="award" class="w-5 h-5 mr-2"></lucide-icon>
+              Comenzar quiz
+            </button>
+          </div>
+        }
+      </main>
+    </div>
+  }
 
+  <!-- Modal de sección -->
+  @if (selectedSection) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-6 overflow-y-auto max-h-[90vh]">
+        <div class="flex justify-between items-center mb-6">
+          <div class="flex items-center gap-3">
+            <h3 class="text-2xl font-bold text-gray-900">{{ selectedSection.title }}</h3>
+            <button (click)="toggleSectionCompleted(selectedSection)"
+                    [class.bg-emerald-600]="isSectionCompleted(selectedSection)"
+                    [class.bg-gray-300]="!isSectionCompleted(selectedSection)"
+                    class="text-white px-3 py-1 rounded-lg flex items-center gap-2 transition text-sm font-medium hover:shadow-md">
+              <lucide-icon name="award" class="h-4 w-4"></lucide-icon>
+              {{ isSectionCompleted(selectedSection) ? 'Completado' : 'Marcar como hecho' }}
+            </button>
+          </div>
+          <button (click)="closeModal()" class="text-gray-500 hover:text-gray-800 text-2xl leading-none">&times;</button>
+        </div>
 
+        <div class="space-y-6 text-gray-700">
+          @if (selectedSection.content) {
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">Descripción</h4>
+              <p class="text-gray-600">{{ selectedSection.content }}</p>
+            </div>
+          }
+
+          @if (selectedSection.videos && selectedSection.videos.length > 0) {
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-3">Videos</h4>
+              <div class="space-y-4">
+                @for (vid of selectedSection.videos; track $index) {
+                  <video [src]="vid" controls class="w-full rounded-lg shadow-sm max-h-72"></video>
+                }
+              </div>
+            </div>
+          }
+
+          @if (selectedSection.pdfs && selectedSection.pdfs.length > 0) {
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-3">Documentos PDF</h4>
+              <div class="space-y-3">
+                @for (pdf of selectedSection.pdfs; track $index) {
+                  <div class="bg-gradient-to-r from-red-50 to-orange-50 rounded-lg p-4 border-2 border-red-200">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <lucide-icon name="file-text" class="h-8 w-8 text-red-600"></lucide-icon>
+                        <div>
+                          <h5 class="font-semibold text-gray-800">{{ pdf.name }}</h5>
+                          <p class="text-sm text-gray-500">Documento PDF disponible para consultar</p>
+                        </div>
+                      </div>
+                      <a [href]="pdf.url" target="_blank"
+                         class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition text-sm font-medium">
+                        <lucide-icon name="file-text" class="h-4 w-4"></lucide-icon>
+                        Ver
+                      </a>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          @if (selectedSection.images && selectedSection.images.length > 0) {
+            <div>
+              <h4 class="text-lg font-semibold text-gray-800 mb-3">Galería de imágenes</h4>
+              <div class="grid grid-cols-2 gap-4">
+                @for (img of selectedSection.images; track img) {
+                  <img [src]="img" class="w-full h-36 object-cover rounded-lg shadow-sm hover:shadow-md transition" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
 </div>

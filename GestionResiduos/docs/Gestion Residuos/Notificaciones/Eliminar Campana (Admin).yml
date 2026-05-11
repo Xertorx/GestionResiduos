@@ -1,0 +1,21 @@
+info:
+  name: Eliminar Campana (Admin)
+  type: http
+  seq: 8
+
+http:
+  method: DELETE
+  url: http://localhost:8080/api/notifications/campaigns/1
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Elimina una campaña. Solo ADMINISTRADOR.
+

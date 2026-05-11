@@ -1,0 +1,60 @@
+<!-- Hero -->
+<section class="bg-gradient-to-br from-emerald-700 to-teal-600 text-white py-20 px-4 text-center">
+  <div class="max-w-3xl mx-auto">
+    <div class="inline-flex items-center gap-2 bg-white/15 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+      <lucide-icon name="help-circle" class="w-4 h-4"></lucide-icon>
+      Centro de ayuda
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-extrabold mb-4">Preguntas Frecuentes</h1>
+    <p class="text-emerald-100 text-lg max-w-xl mx-auto">
+      Resolvemos tus dudas sobre EcoBolívar para que puedas aprovechar al máximo la plataforma.
+    </p>
+  </div>
+</section>
+
+<!-- FAQ Content -->
+<section class="max-w-3xl mx-auto px-4 py-16">
+  @for (cat of categories; track cat.label; let ci = $index) {
+    <div class="mb-10">
+      <h2 class="text-lg font-bold text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <span class="block w-6 h-0.5 bg-emerald-500 rounded"></span>
+        {{ cat.label }}
+      </h2>
+      <div class="space-y-3">
+        @for (item of cat.items; track item.question; let ii = $index) {
+          <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <button
+              (click)="toggle(ci, ii)"
+              class="w-full text-left flex items-center justify-between px-5 py-4 bg-white hover:bg-gray-50 transition-colors gap-4 font-medium text-gray-800"
+            >
+              <span>{{ item.question }}</span>
+              <lucide-icon
+                [name]="item.open ? 'chevron-up' : 'chevron-down'"
+                class="w-5 h-5 text-emerald-600 flex-shrink-0 transition-transform"
+              ></lucide-icon>
+            </button>
+            @if (item.open) {
+              <div class="px-5 py-4 bg-gray-50 text-gray-600 text-sm leading-relaxed border-t border-gray-100">
+                {{ item.answer }}
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- CTA Contact -->
+  <div class="mt-12 bg-emerald-50 border border-emerald-100 rounded-2xl p-8 text-center">
+    <lucide-icon name="message-circle" class="w-10 h-10 text-emerald-600 mx-auto mb-3"></lucide-icon>
+    <h3 class="text-xl font-bold text-gray-800 mb-2">¿No encontraste tu respuesta?</h3>
+    <p class="text-gray-500 mb-5">Escríbenos directamente y te responderemos a la brevedad.</p>
+    <a
+      [routerLink]="'/contact'"
+      class="inline-flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-emerald-700 transition-colors"
+    >
+      <lucide-icon name="send" class="w-4 h-4"></lucide-icon>
+      Contactar soporte
+    </a>
+  </div>
+</section>

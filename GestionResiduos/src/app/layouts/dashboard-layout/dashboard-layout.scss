@@ -2,11 +2,14 @@
   display: block;
 }
 
-/* Suaviza los scrolls y anima la apertura del menú */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: rgba(16, 185, 129, 0.4); /* emerald-500 con transparencia */
-  border-radius: 8px;
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #f8fafc; }
+::-webkit-scrollbar-thumb { background-color: #10b981; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background-color: #059669; }
+
+/* Active nav link highlight */
+nav a.active-link {
+  background-color: #ecfdf5;
+  color: #059669;
+  font-weight: 600;
 }

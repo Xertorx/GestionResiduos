@@ -1,0 +1,41 @@
+info:
+  name: Register USer
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: http://localhost:8080/auth/register
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: "{\r
+
+      \  \"documentNumber\": 28879875,\r
+
+      \  \"names\": \"Juan Manuel\",\r
+
+      \  \"lastName\": \"Pérez Loaiza\",\r
+
+      \  \"email\": \"juan.perez22@example.com\",\r
+
+      \  \"password\": \"password123\",\r
+
+      \  \"phoneNumber\": \"30012345673\"\r
+
+      }\r\n"
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: "Generated from cURL:   curl -X POST http://localhost:8080/auth/register \\\r
+
+  \  -H \"Content-Type: application/json\" \\\r
+
+  \  -d @register_sample.json\r\n"

@@ -1,0 +1,36 @@
+info:
+  name: Crear Campana (Admin)
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: http://localhost:8080/api/notifications/campaigns
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "title": "Jornada de limpieza río Bogotá",
+        "message": "Únete a la jornada de limpieza este sábado de 8am a 12pm. Punto de encuentro: Parque Simón Bolívar.",
+        "districtId": 1,
+        "startDate": "2026-04-20",
+        "endDate": "2026-04-25"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+
+docs: |-
+  Crea una nueva campaña ambiental. Solo ADMINISTRADOR.
+  districtId: localidad objetivo (null = todas las localidades).
+  La campaña se notificará automáticamente a los usuarios al día siguiente a las 09:00.
+

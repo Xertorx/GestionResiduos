@@ -1,0 +1,138 @@
+<!-- Hero -->
+<section class="bg-gradient-to-br from-emerald-700 to-teal-600 text-white py-20 px-4 text-center">
+  <div class="max-w-3xl mx-auto">
+    <div class="inline-flex items-center gap-2 bg-white/15 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
+      <lucide-icon name="mail" class="w-4 h-4"></lucide-icon>
+      Estamos para ayudarte
+    </div>
+    <h1 class="text-4xl sm:text-5xl font-extrabold mb-4">Contáctanos</h1>
+    <p class="text-emerald-100 text-lg max-w-xl mx-auto">
+      ¿Tienes dudas, sugerencias o reportes? Escríbenos y te responderemos lo antes posible.
+    </p>
+  </div>
+</section>
+
+<section class="max-w-5xl mx-auto px-4 py-16 grid md:grid-cols-3 gap-10">
+
+  <!-- Info cards -->
+  <div class="space-y-5">
+    <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex gap-4 items-start">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+        <lucide-icon name="map-pin" class="w-5 h-5"></lucide-icon>
+      </div>
+      <div>
+        <p class="font-semibold text-gray-800 text-sm">Ubicación</p>
+        <p class="text-gray-500 text-sm mt-0.5">Ciudad Bolívar, Bogotá D.C., Colombia</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex gap-4 items-start">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+        <lucide-icon name="mail" class="w-5 h-5"></lucide-icon>
+      </div>
+      <div>
+        <p class="font-semibold text-gray-800 text-sm">Correo</p>
+        <p class="text-gray-500 text-sm mt-0.5">soporte&#64;ecobolivar.co</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex gap-4 items-start">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+        <lucide-icon name="clock" class="w-5 h-5"></lucide-icon>
+      </div>
+      <div>
+        <p class="font-semibold text-gray-800 text-sm">Horario de atención</p>
+        <p class="text-gray-500 text-sm mt-0.5">Lunes a Viernes · 8am – 5pm</p>
+      </div>
+    </div>
+    <div class="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm flex gap-4 items-start">
+      <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 flex-shrink-0">
+        <lucide-icon name="message-circle" class="w-5 h-5"></lucide-icon>
+      </div>
+      <div>
+        <p class="font-semibold text-gray-800 text-sm">Chat en vivo</p>
+        <p class="text-gray-500 text-sm mt-0.5">Disponible a través del botón de chat en la plataforma.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="md:col-span-2 bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+    @if (sent) {
+      <div class="flex flex-col items-center justify-center h-full text-center py-12">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 mb-4">
+          <lucide-icon name="check-circle" class="w-8 h-8"></lucide-icon>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">¡Mensaje enviado!</h3>
+        <p class="text-gray-500 max-w-xs">Recibimos tu mensaje. Te responderemos al correo registrado en un máximo de 48 horas hábiles.</p>
+        <button
+          (click)="sent = false"
+          class="mt-6 text-emerald-600 font-medium hover:underline"
+        >Enviar otro mensaje</button>
+      </div>
+    } @else {
+      <h2 class="text-xl font-bold text-gray-800 mb-6">Envíanos un mensaje</h2>
+      <form (ngSubmit)="submit()" class="space-y-5" #contactForm="ngForm">
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nombre completo *</label>
+            <input
+              type="text"
+              [(ngModel)]="form.name"
+              name="name"
+              required
+              placeholder="Tu nombre"
+              class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Correo electrónico *</label>
+            <input
+              type="email"
+              [(ngModel)]="form.email"
+              name="email"
+              required
+              placeholder="correo@ejemplo.com"
+              class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+            />
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Asunto</label>
+          <select
+            [(ngModel)]="form.subject"
+            name="subject"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition bg-white"
+          >
+            <option value="" disabled selected>Selecciona un asunto</option>
+            @for (s of subjects; track s) {
+              <option [value]="s">{{ s }}</option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Mensaje *</label>
+          <textarea
+            [(ngModel)]="form.message"
+            name="message"
+            required
+            rows="5"
+            placeholder="Escribe tu mensaje aquí..."
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition resize-none"
+          ></textarea>
+        </div>
+        <button
+          type="submit"
+          [disabled]="sending || !form.name || !form.email || !form.message"
+          class="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 rounded-xl font-semibold hover:bg-emerald-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+        >
+          @if (sending) {
+            <lucide-icon name="loader-circle" class="w-4 h-4 animate-spin"></lucide-icon>
+            Enviando...
+          } @else {
+            <lucide-icon name="send" class="w-4 h-4"></lucide-icon>
+            Enviar mensaje
+          }
+        </button>
+      </form>
+    }
+  </div>
+</section>

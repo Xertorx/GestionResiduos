@@ -1,95 +1,160 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
 
+import { EducationService, EducationContent } from '../../../services/education.service';
+import { AuthStateService } from '../../../services/auth-state.service';
+import { QuizService, UserQuizStats } from '../../../services/quiz.service';
+
 @Component({
   selector: 'app-education',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule,RouterLink],
+  imports: [CommonModule, LucideAngularModule, RouterLink],
   templateUrl: './education.html',
   styleUrls: ['./education.scss'],
-  
 })
-export class Education {
-  // 🔹 Estas guías pueden venir luego de tu servicio/BD
- guides = [
-  {
-    id: 1,
-    icon: 'book-open', // Guía PDF
-    type: 'Guía PDF',
-    title: 'Guía de Separación de Residuos',
-    description:
-      'Aprende a separar correctamente los residuos orgánicos, reciclables y especiales.',
-    image: 'http://static.photos/education/640x360/1',
-    time: '15 min',
-    button: 'Ver guía',
-  },
-  {
-    id: 2,
-    icon: 'video', // Video
-    type: 'Video',
-    title: 'Introducción al Compostaje',
-    description:
-      'Aprende a transformar tus residuos orgánicos en abono natural para plantas.',
-    image: 'http://static.photos/education/640x360/2',
-    time: '8 min',
-    button: 'Ver video',
-  },
-  {
-    id: 3,
-    icon: 'image', // Infografía
-    type: 'Infografía',
-    title: 'Tipos de Plástico y su Reciclaje',
-    description:
-      'Identifica los diferentes tipos de plástico y cómo reciclarlos correctamente.',
-    image: 'http://static.photos/education/640x360/3',
-    time: '5 min',
-    button: 'Ver infografía',
-  },
-  {
-    id: 4,
-    icon: 'book-open', // Guía PDF
-    type: 'Guía PDF',
-    title: 'Manejo de Residuos Peligrosos',
-    description:
-      'Guía completa para el manejo seguro de residuos peligrosos en el hogar.',
-    image: 'http://static.photos/education/640x360/4',
-    time: '20 min',
-    button: 'Ver guía',
-  },
-  {
-    id: 5,
-    icon: 'video', // Video
-    type: 'Video',
-    title: 'Reduciendo tu Huella Ecológica',
-    description:
-      'Consejos prácticos para reducir tu impacto ambiental en el día a día.',
-    image: 'http://static.photos/education/640x360/5',
-    time: '12 min',
-    button: 'Ver video',
-  },
-  {
-    id: 6,
-    icon: 'image', // Infografía
-    type: 'Infografía',
-    title: 'Economía Circular en Casa',
-    description:
-      'Cómo aplicar principios de economía circular en tu hogar y comunidad.',
-    image: 'http://static.photos/education/640x360/6',
-    time: '7 min',
-    button: 'Ver infografía',
-  },
-];
+export class Education implements OnInit {
 
+  backendContents: EducationContent[] = [];
+  isLoading = true;
+  errorMsg = '';
 
-openModal() {
-  Swal.fire({
-    title: "Gracias Por daros tu Opinion",
-  icon: "success",
-  draggable: true
-  });
-}
+  guides: any[] = [];
+  isLoggedIn = false;
 
+  // ── HU22: estadísticas del usuario ──
+  stats: UserQuizStats = {
+    totalContents: 0,
+    quizzesAnswered: 0,
+    points: 0,
+    progress: 0
+  };
+  loadingStats = false;
+
+  public feedbackState: { [contentId: number]: boolean } = {};
+
+  constructor(
+    private educationService: EducationService,
+    private authState: AuthStateService,
+    private quizService: QuizService
+  ) {}
+
+  ngOnInit(): void {
+    this.loadContents();
+    this.authState.isLoggedIn$.subscribe((logged) => {
+      this.isLoggedIn = logged;
+      if (logged) this.loadStats();
+    });
+  }
+
+  loadContents(): void {
+    this.isLoading = true;
+    this.educationService.getAll().subscribe({
+      next: (data) => {
+        this.backendContents = data;
+        this.buildGuides();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Error cargando contenidos educativos:', err);
+        this.errorMsg = 'No se pudieron cargar los contenidos. Mostrando datos de ejemplo.';
+        this.buildGuides();
+        this.isLoading = false;
+      }
+    });
+  }
+
+  loadStats(): void {
+    this.loadingStats = true;
+    this.quizService.getMyStats().subscribe({
+      next: (data) => {
+        this.stats = data;
+        this.loadingStats = false;
+      },
+      error: () => {
+        this.loadingStats = false;
+      }
+    });
+  }
+
+  private buildGuides(): void {
+    this.guides = this.backendContents.map((c) => {
+      const primaryType = c.files?.[0]?.fileType ?? 'OTRO';
+      const firstImage = c.files?.find(f => f.fileType === 'IMAGE');
+      const cover = firstImage
+        ? firstImage.fileUrl
+        : `https://picsum.photos/seed/edu${c.id}/640/360`;
+
+      return {
+        id: c.id,
+        icon: this.getIconByFileType(primaryType),
+        type: primaryType,
+        title: c.title,
+        description: c.description || 'Contenido educativo sobre gestión de residuos.',
+        image: cover,
+        time: '',
+        button: this.getButtonByFileType(primaryType),
+      };
+    });
+  }
+
+  private getIconByFileType(fileType: string): string {
+    switch (fileType) {
+      case 'PDF': return 'book-open';
+      case 'IMAGE': return 'image';
+      case 'VIDEO': return 'video';
+      default: return 'file-text';
+    }
+  }
+
+  private getButtonByFileType(fileType: string): string {
+    switch (fileType) {
+      case 'PDF': return 'Ver guía';
+      case 'IMAGE': return 'Ver infografía';
+      case 'VIDEO': return 'Ver video';
+      default: return 'Ver contenido';
+    }
+  }
+
+  public hasVoted(contentId: number): boolean {
+    return !!this.feedbackState[contentId];
+  }
+
+  public sendFeedback(contentId: number, useful: boolean): void {
+    if (this.hasVoted(contentId)) return;
+    this.educationService.sendFeedback(contentId, useful).subscribe({
+      next: (res) => {
+        if (
+          (res && (res.alreadyVoted || res.useful !== undefined || res.notUseful !== undefined)) ||
+          (res && typeof res.message === 'string' && res.message.includes('Ya se registró el feedback'))
+        ) {
+          this.feedbackState[contentId] = true;
+        }
+        if (res && typeof res.message === 'string' && res.message.includes('Ya se registró el feedback')) {
+          Swal.fire('Info', 'Ya enviaste feedback para este contenido.', 'info');
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Gracias por tu feedback!',
+            text: useful ? 'Tu opinión nos ayuda a mejorar el contenido.' : 'Gracias por ayudarnos a mejorar.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        }
+      },
+      error: (err) => {
+        if (
+          err?.error?.alreadyVoted ||
+          (err?.error?.message && typeof err.error.message === 'string' && err.error.message.includes('Ya se registró el feedback'))
+        ) {
+          this.feedbackState[contentId] = true;
+          Swal.fire('Info', 'Ya enviaste feedback para este contenido.', 'info');
+        } else {
+          Swal.fire('Error', 'No se pudo enviar tu feedback.', 'error');
+        }
+      }
+    });
+  }
 }

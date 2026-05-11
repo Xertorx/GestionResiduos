@@ -1,33 +1,173 @@
-<div class="bg-white rounded-lg shadow p-6">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-xl font-semibold">Usuarios</h2>
-    <div class="flex items-center gap-2">
-      <input type="text" placeholder="Buscar usuario..." [(ngModel)]="buscar" class="border px-3 py-2 rounded" />
-      <button class="px-4 py-2 bg-emerald-600 text-white rounded">Nuevo</button>
+<div class="max-w-6xl mx-auto">
+  <!-- Header -->
+  <div data-aos="fade-down" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <span class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <lucide-icon name="users" class="w-5 h-5 text-emerald-600"></lucide-icon>
+        </span>
+        Administración de Usuarios
+      </h1>
+      <p class="text-sm text-gray-400 mt-1">Consulta y gestiona los usuarios registrados en la plataforma</p>
     </div>
+    <button class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-emerald-600 hover:bg-emerald-50 hover:border-emerald-300 font-medium transition shadow-sm" (click)="loadUsers()">
+      <lucide-icon name="refresh-cw" class="w-4 h-4"></lucide-icon> Actualizar
+    </button>
   </div>
 
-  <table class="w-full text-left text-sm">
-    <thead>
-      <tr class="text-gray-600 border-b">
-        <th class="py-2">Nombre</th>
-        <th class="py-2">Correo</th>
-        <th class="py-2">Rol</th>
-        <th class="py-2">Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (u of usuarios; track u.id) {
-        <tr class="border-b">
-          <td class="py-2">{{ u.nombre }}</td>
-          <td class="py-2">{{ u.correo }}</td>
-          <td class="py-2">{{ u.rol }}</td>
-          <td class="py-2">
-            <button class="text-emerald-600 mr-2" (click)="editar(u)">Editar</button>
-            <button class="text-red-600" (click)="eliminar(u)">Eliminar</button>
-          </td>
-        </tr>
+  @if (error) {
+    <div class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{{ error }}</div>
+  }
+
+  @if (isLoading) {
+    <div class="flex justify-center py-16">
+      <svg class="animate-spin h-10 w-10 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+      </svg>
+    </div>
+  } @else if (users.length === 0) {
+    <div class="text-center py-16 text-gray-500">
+      <lucide-icon name="users" class="w-12 h-12 mx-auto mb-3 text-gray-300"></lucide-icon>
+      <p>No hay usuarios registrados.</p>
+    </div>
+  } @else {
+    <!-- Cards de usuarios -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (user of users; track user.documentNumber) {
+        <div data-aos="fade-up" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-all cursor-pointer flex items-center gap-4"
+             (click)="openDetail(user)">
+          <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+            @if (user.photo) {
+              <img [src]="user.photo" alt="Foto" class="w-full h-full object-cover">
+            } @else {
+              <lucide-icon name="user" class="w-7 h-7 text-emerald-600"></lucide-icon>
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-gray-900 truncate">{{ user.names }} {{ user.lastName }}</p>
+            <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
+            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1"
+                  [class]="statusColor(user.status)">
+              <span class="w-1.5 h-1.5 rounded-full mr-1" [class]="statusDot(user.status)"></span>
+              {{ user.status }}
+            </span>
+          </div>
+          <lucide-icon name="chevron-right" class="w-5 h-5 text-gray-300 flex-shrink-0"></lucide-icon>
+        </div>
       }
-    </tbody>
-  </table>
+    </div>
+  }
 </div>
+
+<!-- Modal Detalle del Usuario -->
+@if (showDetailModal && selectedUser) {
+  <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" (click)="closeDetail()">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Detalle del Usuario</h2>
+        <button class="p-1 text-gray-400 hover:text-gray-600" (click)="closeDetail()">
+          <lucide-icon name="x-circle" class="w-5 h-5"></lucide-icon>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="px-6 py-5">
+        @if (isLoadingDetail) {
+          <div class="flex justify-center py-8">
+            <svg class="animate-spin h-8 w-8 text-emerald-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+          </div>
+        } @else if (selectedUserDetail) {
+          <!-- Foto y nombre -->
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center overflow-hidden">
+              @if (selectedUserDetail.photo) {
+                <img [src]="selectedUserDetail.photo" alt="Foto" class="w-full h-full object-cover">
+              } @else {
+                <lucide-icon name="user" class="w-8 h-8 text-emerald-600"></lucide-icon>
+              }
+            </div>
+            <div>
+              <p class="text-lg font-semibold text-gray-900">{{ selectedUserDetail.names }} {{ selectedUserDetail.lastName }}</p>
+              <p class="text-sm text-gray-500">{{ selectedUserDetail.email }}</p>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase">Documento</p>
+                <p class="text-sm text-gray-800 mt-0.5">{{ selectedUserDetail.documentNumber }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase">Teléfono</p>
+                <p class="text-sm text-gray-800 mt-0.5">{{ selectedUserDetail.phoneNumber || '—' }}</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase">Dirección</p>
+                <p class="text-sm text-gray-800 mt-0.5">{{ selectedUserDetail.address || '—' }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase">Barrio</p>
+                <p class="text-sm text-gray-800 mt-0.5">{{ selectedUserDetail.neighborhoodName || '—' }}</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase">Rol</p>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+                      [class]="roleColor(selectedUserDetail.role)">
+                  {{ selectedUserDetail.role?.name || selectedUserDetail.role }}
+                </span>
+              </div>
+              <div>
+                <p class="text-xs font-medium text-gray-400 uppercase">Estado</p>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium mt-1"
+                      [class]="statusColor(selectedUser.status)">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5" [class]="statusDot(selectedUser.status)"></span>
+                  {{ selectedUser.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+        } @else {
+          <p class="text-sm text-gray-500 text-center py-4">No se pudo cargar el detalle del usuario.</p>
+        }
+      </div>
+
+      <!-- Footer con acciones -->
+      <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+        <div class="flex gap-2">
+          @if (selectedUser.status === 'ACTIVO') {
+            <button
+              class="px-4 py-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition disabled:opacity-50"
+              [disabled]="isChangingStatus"
+              (click)="changeUserStatus('INACTIVO')">
+              <lucide-icon name="user-x" class="w-4 h-4 inline mr-1"></lucide-icon>
+              {{ isChangingStatus ? 'Cambiando...' : 'Desactivar' }}
+            </button>
+          } @else {
+            <button
+              class="px-4 py-2 text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition disabled:opacity-50"
+              [disabled]="isChangingStatus"
+              (click)="changeUserStatus('ACTIVO')">
+              <lucide-icon name="user-check" class="w-4 h-4 inline mr-1"></lucide-icon>
+              {{ isChangingStatus ? 'Cambiando...' : 'Activar' }}
+            </button>
+          }
+        </div>
+        <button
+          class="px-4 py-2 text-sm text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+          (click)="closeDetail()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+}

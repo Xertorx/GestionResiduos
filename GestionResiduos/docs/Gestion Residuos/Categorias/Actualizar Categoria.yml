@@ -1,0 +1,28 @@
+info:
+  name: Actualizar Categoria
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: http://localhost:8080/api/report-categories/1
+  headers:
+    - name: Content-Type
+      value: application/json
+  body:
+    type: json
+    data: |-
+      {
+        "name": "Residuos Peligrosos",
+        "description": "Descripción actualizada de la categoría",
+        "status": "ACTIVO"
+      }
+  auth:
+    type: bearer
+    token: "{{JWT}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
