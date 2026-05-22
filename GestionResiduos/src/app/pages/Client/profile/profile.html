@@ -51,7 +51,9 @@
               <p class="text-xs text-gray-500 uppercase tracking-wider">Correo electrónico</p>
               <p class="text-sm font-medium text-gray-900">{{ profile.email || 'No registrado' }}</p>
             </div>
-            <!-- HU22: Puntos acumulados -->
+          </div>
+
+          <!-- HU22: Puntos acumulados -->
           <div class="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-emerald-50 rounded-lg p-4 border border-amber-200">
             <div class="bg-amber-400 rounded-full p-2">
               <lucide-icon name="award" class="w-5 h-5 text-emerald-900"></lucide-icon>
@@ -60,7 +62,6 @@
               <p class="text-xs text-gray-500 uppercase tracking-wider">Puntos por quizzes</p>
               <p class="text-lg font-bold text-emerald-700">{{ profile.points ?? 0 }} pts</p>
             </div>
-          </div>
           </div>
 
           <!-- Phone -->

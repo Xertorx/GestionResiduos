@@ -59,7 +59,7 @@ export class Map implements OnInit{
   });
   
   getEcopoints() {
-    this.http.get<EcoPoint[]>(`${environment.apiUrl}/ecopoints`).subscribe({
+    this.http.get<EcoPoint[]>(`${environment.apiUrl}/ecopoints/active`).subscribe({
       next: (data) => {
         this.EcoPoints.set(data);
         this.cdr.markForCheck();

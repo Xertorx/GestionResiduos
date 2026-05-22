@@ -115,14 +115,15 @@
         </button>
 
         <!-- Botón del perfil -->
-        <div class="relative" (click)="isProfileMenuOpen = !isProfileMenuOpen">
-          <div
-            class="flex items-center cursor-pointer bg-white rounded-full border border-emerald-100 hover:bg-emerald-50 p-1">
+        <div class="relative profile-menu-container">
+          <button (click)="toggleProfileMenu($event)"
+            class="flex items-center cursor-pointer bg-white rounded-full border border-emerald-100 hover:bg-emerald-50 p-1 transition">
             <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center">
               <lucide-icon name="user" class="w-5 h-5 text-emerald-600"></lucide-icon>
             </div>
-            <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-500 ml-2"></lucide-icon>
-          </div>
+            <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-500 ml-2 transition-transform"
+              [class.rotate-180]="isProfileMenuOpen"></lucide-icon>
+          </button>
 
           <!-- Menú desplegable -->
           @if (isProfileMenuOpen) {
@@ -131,24 +132,21 @@
               <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
                 <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
               </div>
-              <div>
-                <p class="font-medium text-gray-800">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
-                <p class="text-sm text-gray-500">{{ authReady && email ? email : 'Sin correo disponible' }}</p>
+              <div class="min-w-0">
+                <p class="font-medium text-gray-800 truncate">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
+                <p class="text-sm text-gray-500 truncate">{{ authReady && email ? email : 'Sin correo' }}</p>
               </div>
             </div>
-            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50">
-              <lucide-icon name="user" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> My account
+            <a routerLink="/profile" (click)="isProfileMenuOpen = false"
+               class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition">
+              <lucide-icon name="user" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon>
+              Mi cuenta
             </a>
-            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50">
-              <lucide-icon name="shield" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Privacy policy
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50">
-              <lucide-icon name="message-square" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Share feedback
-            </a>
-            <div class="border-t border-gray-100"></div>
-            <button class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50"
+            <div class="border-t border-gray-100 my-1"></div>
+            <button class="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
               (click)="openModal()">
-              <lucide-icon name="log-out" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Sign out
+              <lucide-icon name="log-out" class="w-4 h-4 mr-2"></lucide-icon>
+              Cerrar sesión
             </button>
           </div>
           }

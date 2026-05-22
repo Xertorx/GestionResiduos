@@ -73,7 +73,7 @@
            (click)="verTema(tema.id)">
         <div class="flex justify-between items-start gap-3">
           <h3 class="text-base font-semibold text-gray-800 group-hover:text-emerald-700">{{ tema.titulo }}</h3>
-          <span class="flex-shrink-0 text-xs bg-emerald-50 text-emerald-700 font-semibold px-2.5 py-1 rounded-full border border-emerald-100">{{ tema.comentariosCount ?? tema.comentarios ?? 0 }} respuestas</span>
+          <span class="flex-shrink-0 text-xs bg-emerald-50 text-emerald-700 font-semibold px-2.5 py-1 rounded-full border border-emerald-100">{{ commentCounts[tema.id] || 0 }} respuestas</span>
         </div>
         <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ tema.descripcion }}</p>
         @if (tema.autorNombre) {

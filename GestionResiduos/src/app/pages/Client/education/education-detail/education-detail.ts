@@ -3,7 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel';
-import { EducationService, EducationContent } from '../../../../services/education.service';
+import { EducationService, EducationContent, ContentProgress } from '../../../../services/education.service';
 import { QuizService } from '../../../../services/quiz.service';
 
 export interface Resource {
@@ -17,6 +17,7 @@ export interface Resource {
   images?: string[];
   pdfs?: { name: string; url: string }[];
   sections?: {
+    id?: number;
     title: string;
     content: string;
     icon?: string;
@@ -38,9 +39,9 @@ export interface Resource {
 export class EducationDetail implements OnInit {
   resource: Resource | null = null;
   selectedSection: any = null;
-  completedSections: Set<string> = new Set();
   viewedSections: Set<string> = new Set();
-  resourceCompleted: boolean = false;
+  progressData: ContentProgress | null = null;
+  progressLoading = false;
 
   isFromBackend = false;
   backendContent: EducationContent | null = null;
@@ -73,6 +74,7 @@ export class EducationDetail implements OnInit {
           this.resource = this.mapBackendToResource(content);
           this.isLoading = false;
           this.checkQuizCompletion();
+          this.loadProgress();
         },
         error: (err) => {
           console.error('Error cargando contenido del backend:', err);
@@ -119,6 +121,7 @@ export class EducationDetail implements OnInit {
           ? this.getIconByFileType(sec.files[0].fileType)
           : this.getIconByFileType(primaryType);
         return {
+          id:      sec.id,
           title:   sec.title,
           content: sec.description ?? sec.content ?? content.description ?? '',
           icon,
@@ -186,30 +189,31 @@ export class EducationDetail implements OnInit {
   selectTopic(_topic: any) {}
 
   toggleSectionCompleted(section: any): void {
-    const sectionId = section.title;
-    if (this.completedSections.has(sectionId)) {
-      this.completedSections.delete(sectionId);
-    } else {
-      this.completedSections.add(sectionId);
-    }
+    if (!section.id || this.isSectionCompleted(section)) return;
+    const contentId = this.resource?.id ?? this.backendContent?.id;
+    if (!contentId) return;
+    this.educationService.completeSectionProgress(contentId, section.id).subscribe({
+      next: () => this.loadProgress(),
+      error: (err) => console.error('Error completando sección:', err)
+    });
   }
 
   isSectionCompleted(section: any): boolean {
-    return this.completedSections.has(section.title);
+    return this.progressData?.sections?.find(s => s.sectionId === section.id)?.completed ?? false;
   }
 
   toggleResourceCompleted(): void {
     if (!this.canMarkCompleted) return;
-    this.resourceCompleted = !this.resourceCompleted;
-    if (this.resourceCompleted && this.resource?.sections) {
-      this.resource.sections.forEach(section => this.completedSections.add(section.title));
-    } else {
-      this.completedSections.clear();
-    }
+    const contentId = this.resource?.id ?? this.backendContent?.id;
+    if (!contentId) return;
+    this.educationService.completeContent(contentId).subscribe({
+      next: (progress) => { this.progressData = progress; },
+      error: (err) => console.error('Error completando contenido:', err)
+    });
   }
 
   isResourceCompleted(): boolean {
-    return this.resourceCompleted;
+    return this.progressData?.contentCompleted ?? false;
   }
 
   private checkQuizCompletion(): void {
@@ -220,10 +224,25 @@ export class EducationDetail implements OnInit {
     }
   }
 
+  private loadProgress(): void {
+    const id = this.resource?.id ?? this.backendContent?.id;
+    if (!id) return;
+    this.progressLoading = true;
+    this.educationService.getProgress(id).subscribe({
+      next: (progress) => {
+        this.progressData = progress;
+        this.progressLoading = false;
+        // Marcar como vistas las secciones ya completadas
+        progress.sections.filter(s => s.completed).forEach(s => this.viewedSections.add(s.sectionTitle));
+      },
+      error: () => { this.progressLoading = false; }
+    });
+  }
+
   get canMarkCompleted(): boolean {
-    const totalSections = this.resource?.sections?.length ?? 0;
-    const allSectionsViewed = totalSections > 0 && this.viewedSections.size >= totalSections;
+    const total = this.progressData?.totalSections ?? 0;
+    const allSectionsCompleted = total > 0 && (this.progressData?.completedSections ?? 0) >= total;
     const quizOk = !this.hasQuiz || this.quizCompleted;
-    return allSectionsViewed && quizOk;
+    return allSectionsCompleted && quizOk && !this.isResourceCompleted();
   }
 }

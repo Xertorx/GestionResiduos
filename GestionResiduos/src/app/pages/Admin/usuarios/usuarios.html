@@ -144,7 +144,7 @@
       <!-- Footer con acciones -->
       <div class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
         <div class="flex gap-2">
-          @if (selectedUser.status === 'ACTIVO') {
+          @if (isActive(selectedUser.status)) {
             <button
               class="px-4 py-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition disabled:opacity-50"
               [disabled]="isChangingStatus"
@@ -156,7 +156,7 @@
             <button
               class="px-4 py-2 text-sm text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition disabled:opacity-50"
               [disabled]="isChangingStatus"
-              (click)="changeUserStatus('ACTIVO')">
+              (click)="changeUserStatus('VERIFICADO')">
               <lucide-icon name="user-check" class="w-4 h-4 inline mr-1"></lucide-icon>
               {{ isChangingStatus ? 'Cambiando...' : 'Activar' }}
             </button>

@@ -96,7 +96,7 @@ export class ReportStatsComponent implements OnInit {
         );
       })
     ).subscribe();
-    this.filterForm.patchValue({ startDate: this.getDefaultStart(), endDate: this.getDefaultEnd() }, { emitEvent: true });
+    this.filterForm.patchValue({ startDate: this.getDefaultStart(), endDate: this.getDefaultEnd() }, { emitEvent: false });
   }
 
   private loadAllStatistics() {
@@ -110,23 +110,8 @@ export class ReportStatsComponent implements OnInit {
       })
     ).subscribe(data => {
       if (data) {
-        // Map the flat statistics response to the shapes used by mapStatsToCharts
-        // Expected payload example:
-        // { total, pending, inReview, resolved, rejected, criticalPoints, calendarNonCompliance }
-        const normalized = {
-          total: data.total,
-          byStatus: {
-            PENDIENTE: data.pending ?? 0,
-            EN_REVISION: data.inReview ?? 0,
-            RESUELTO: data.resolved ?? 0,
-            RECHAZADO: data.rejected ?? 0
-          },
-          criticalPoints: data.criticalPoints,
-          calendarNonCompliance: data.calendarNonCompliance
-        };
-        this.stats = { ...data, ...normalized };
-        console.log('[ReportStats] getStatistics response', this.stats);
-        this.mapStatsToCharts(this.stats);
+        this.stats = data;
+        this.mapStatsToCharts(data);
       }
       this.loading = false;
       this.cdr.markForCheck();
@@ -142,30 +127,48 @@ export class ReportStatsComponent implements OnInit {
       return;
     }
 
-    // Pie: reportes por estado
-    const byStatus = data.byStatus || data.statusCounts || {};
-    const pieLabels = Object.keys(byStatus);
-    const pieValues = pieLabels.map(k => byStatus[k] || 0);
-    this.pieChartData = { labels: pieLabels, datasets: [{ data: pieValues, backgroundColor: ['#059669', '#f59e0b', '#ef4444', '#3b82f6'] }] };
+    // Pie: distribución por estado — construido desde los campos planos de la API
+    const pending  = data.pending  ?? data.byStatus?.PENDIENTE   ?? 0;
+    const inReview = data.inReview ?? data.byStatus?.EN_REVISION  ?? 0;
+    const resolved = data.resolved ?? data.byStatus?.RESUELTO     ?? 0;
+    const rejected = data.rejected ?? data.byStatus?.RECHAZADO    ?? 0;
+    this.pieChartData = {
+      labels: ['Pendiente', 'En revisión', 'Resuelto', 'Rechazado'],
+      datasets: [{ data: [pending, inReview, resolved, rejected],
+                   backgroundColor: ['#f59e0b', '#6366f1', '#059669', '#ef4444'] }]
+    };
 
-    // Bar: reportes por barrio
-    const byBarrio = data.byBarrio || data.barrioCounts || [];
-    const barLabels = Array.isArray(byBarrio) ? byBarrio.map((b: any) => b.name || b.barrio) : Object.keys(byBarrio);
-    const barValues = Array.isArray(byBarrio) ? byBarrio.map((b: any) => b.count || b.total || 0) : barLabels.map((k: any) => byBarrio[k] || 0);
-    this.barChartData = { labels: barLabels, datasets: [{ label: 'Reportes', data: barValues, backgroundColor: '#059669' }] };
+    // Bar: comparativa por tipo de reporte
+    const criticalPoints       = data.criticalPoints        ?? 0;
+    const calendarNonCompliance = data.calendarNonCompliance ?? 0;
+    this.barChartData = {
+      labels: ['Punto crítico', 'Incumplimiento calendario'],
+      datasets: [{ label: 'Reportes', data: [criticalPoints, calendarNonCompliance],
+                   backgroundColor: ['#059669', '#3b82f6'] }]
+    };
 
-    // Line: tendencia en el tiempo
+    // Line: tendencia si la API la devuelve; si no, usa los totales por estado como snapshot
     const trend = data.trend || data.timeSeries || [];
-    const lineLabels = Array.isArray(trend) ? trend.map((t: any) => t.label || t.date) : [];
-    const lineValues = Array.isArray(trend) ? trend.map((t: any) => t.count || t.value || 0) : [];
-    this.lineChartData = { labels: lineLabels, datasets: [{ label: 'Tendencia', data: lineValues, borderColor: '#3b82f6', fill: false }] };
+    if (Array.isArray(trend) && trend.length > 0) {
+      const lineLabels = trend.map((t: any) => t.label || t.date);
+      const lineValues = trend.map((t: any) => t.count || t.value || 0);
+      this.lineChartData = { labels: lineLabels,
+        datasets: [{ label: 'Tendencia', data: lineValues, borderColor: '#3b82f6', fill: false, tension: 0.3 }] };
+    } else {
+      // Fallback: comparativa de estados como gráfico de línea puntual
+      this.lineChartData = {
+        labels: ['Pendiente', 'En revisión', 'Resuelto', 'Rechazado'],
+        datasets: [{ label: 'Reportes por estado', data: [pending, inReview, resolved, rejected],
+                     borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.15)', fill: true, tension: 0.3 }]
+      };
+    }
 
-    // KPIs
-    this.stats.total = data.total ?? (pieValues.reduce((s, v) => s + v, 0));
-    const resolvedCount = (byStatus.RESUELTO ?? byStatus.Resuelto ?? byStatus.resuelto ?? 0) as number;
-    const totalCount = Math.max(this.stats.total || 0, 1);
-    this.stats.percentResolved = data.percentResolved ?? Number(((resolvedCount / totalCount) * 100).toFixed(1));
-    this.stats.percentPending = data.percentPending ?? Number((100 - (this.stats.percentResolved || 0)).toFixed(1));
+    // Asegurar que los campos planos estén en stats para las tarjetas KPI
+    this.stats = { ...data, pending, inReview, resolved, rejected, criticalPoints, calendarNonCompliance };
+    const totalCount = Math.max(data.total ?? (pending + inReview + resolved + rejected), 1);
+    this.stats.total = totalCount;
+    this.stats.percentResolved = data.percentResolved ?? Number(((resolved / totalCount) * 100).toFixed(1));
+    this.stats.percentPending  = data.percentPending  ?? Number(((pending  / totalCount) * 100).toFixed(1));
     this.stats.avgResolutionTime = data.avgResolutionTime ?? data.avgHoursToResolve ?? null;
   }
 

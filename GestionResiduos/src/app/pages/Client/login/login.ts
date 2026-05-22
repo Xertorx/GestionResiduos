@@ -1,5 +1,5 @@
 // ...existing imports and decorators...
-import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -17,7 +17,8 @@ declare const google: any;
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
-export class Login implements OnInit {
+export class Login implements OnInit, AfterViewInit, OnDestroy {
+  private googleInterval: any;
   showPassword = false;
 
   form: FormGroup;
@@ -43,28 +44,35 @@ export class Login implements OnInit {
 
   get f() { return this.form.controls; }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.initGoogleSDK();
     }
   }
 
-  initGoogleSDK() {
-    const waitForGoogle = setInterval(() => {
-      if (typeof (window as any).google !== 'undefined') {
-        clearInterval(waitForGoogle);
+  ngOnDestroy() {
+    if (this.googleInterval) {
+      clearInterval(this.googleInterval);
+    }
+  }
 
-            if (!(window as any).__gsi_initialized) {
-              google.accounts.id.initialize({
+  initGoogleSDK() {
+    this.googleInterval = setInterval(() => {
+      if (typeof (window as any).google !== 'undefined') {
+        clearInterval(this.googleInterval);
+
+        google.accounts.id.initialize({
           client_id: environment.googleClientId,
+          use_fedcm_for_prompt: false,
+          use_fedcm_for_button: false,
           callback: (response: any) => {
             this.ngZone.run(() => {
-              this.handleGoogleLogin(response); // ← nombre correcto
+              this.handleGoogleLogin(response);
             });
           }
-              });
-              (window as any).__gsi_initialized = true;
-            }
+        });
 
         google.accounts.id.renderButton(
           document.getElementById('google-login-btn'),

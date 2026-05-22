@@ -3,13 +3,15 @@ import { AuthStateService } from '../../../services/auth-state.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { EducationService, EducationContent } from '../../../services/education.service';
+import { EducationService, EducationContent, EducationFile } from '../../../services/education.service';
 import {
   QuizService,
   QuizAdmin,
   QuizRequestPayload
 } from '../../../services/quiz.service';
 import Swal from 'sweetalert2';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 interface DraftQuestion {
   text: string;
@@ -21,6 +23,15 @@ interface DraftSection {
   title: string;
   description: string;
   files: File[];
+}
+
+interface ExistingSection {
+  id: number;
+  title: string;
+  description: string;
+  existingFiles: EducationFile[];
+  newFiles: File[];
+  markedForDelete: boolean;
 }
 
 @Component({
@@ -49,6 +60,27 @@ export class EducacionAdmin implements OnInit {
   newDescription = '';
   newCategory = 'reciclaje';
   selectedFiles: File[] = [];
+
+  // ── Edit mode additional state ──
+  existingSections: ExistingSection[] = [];
+  newContentFiles: File[] = [];
+  editContentCurrentFiles: EducationFile[] = [];
+  includeQuizInEdit = false;
+
+  // ── Portada e imágenes de galería (create mode) ──
+  coverImageFile: File | null = null;
+  coverImagePreviewUrl: string | null = null;
+  galleryFiles: File[] = [];
+  galleryPreviews: string[] = [];
+
+  // ── Portada e imágenes de galería (edit mode) ──
+  newCoverImageFile: File | null = null;
+  newCoverImagePreviewUrl: string | null = null;
+  newGalleryFiles: File[] = [];
+  newGalleryPreviews: string[] = [];
+
+  // Estado de carga del detalle en modo edición
+  isLoadingEditData = false;
 
   // ── Secciones del wizard ──
   draftSections: DraftSection[] = [];
@@ -95,10 +127,26 @@ export class EducacionAdmin implements OnInit {
     this.isLoading = true;
     this.educationService.getAll().subscribe({
       next: (data) => {
-        this.contenidos = data;
-        this.isLoading = false;
-        // Verificar quiz por cada contenido
-        this.contenidos.forEach(c => this.refreshQuizFlag(c.id));
+        if (!data.length) {
+          this.contenidos = [];
+          this.isLoading = false;
+          return;
+        }
+        // Cargar detalle completo de cada contenido para obtener archivos y secciones
+        forkJoin(
+          data.map(c => this.educationService.getById(c.id).pipe(catchError(() => of(c))))
+        ).subscribe({
+          next: (fullData) => {
+            this.contenidos = fullData;
+            this.isLoading = false;
+            this.contenidos.forEach(c => this.refreshQuizFlag(c.id));
+          },
+          error: () => {
+            this.contenidos = data;
+            this.isLoading = false;
+            this.contenidos.forEach(c => this.refreshQuizFlag(c.id));
+          }
+        });
       },
       error: (err) => {
         console.error('Error cargando contenidos:', err);
@@ -129,6 +177,9 @@ export class EducacionAdmin implements OnInit {
   nextStep(): void {
     if (this.wizardStep === 1) {
       if (!this.newTitle.trim()) { Swal.fire('Atención', 'El título es obligatorio.', 'warning'); return; }
+      if (this.isEditMode && this.isLoadingEditData) {
+        Swal.fire('Atención', 'Espera mientras se cargan los datos del contenido.', 'info'); return;
+      }
     }
     this.wizardStep++;
   }
@@ -160,6 +211,111 @@ export class EducacionAdmin implements OnInit {
   }
   removeSelectedFile(index: number): void { this.selectedFiles.splice(index, 1); }
 
+  onNewContentFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.newContentFiles = [...this.newContentFiles, ...Array.from(input.files)];
+      input.value = '';
+    }
+  }
+  removeNewContentFile(index: number): void { this.newContentFiles.splice(index, 1); }
+
+  // ── Portada (create) ──
+  onCoverImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      if (this.coverImagePreviewUrl) URL.revokeObjectURL(this.coverImagePreviewUrl);
+      this.coverImageFile = input.files[0];
+      this.coverImagePreviewUrl = URL.createObjectURL(input.files[0]);
+      input.value = '';
+    }
+  }
+  removeCoverImage(): void {
+    if (this.coverImagePreviewUrl) URL.revokeObjectURL(this.coverImagePreviewUrl);
+    this.coverImageFile = null;
+    this.coverImagePreviewUrl = null;
+  }
+
+  // ── Galería (create) ──
+  onGalleryFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      Array.from(input.files).forEach(f => {
+        this.galleryFiles.push(f);
+        this.galleryPreviews.push(URL.createObjectURL(f));
+      });
+      input.value = '';
+    }
+  }
+  removeGalleryFile(index: number): void {
+    URL.revokeObjectURL(this.galleryPreviews[index]);
+    this.galleryFiles.splice(index, 1);
+    this.galleryPreviews.splice(index, 1);
+  }
+
+  // ── Portada (edit) ──
+  onNewCoverImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      if (this.newCoverImagePreviewUrl) URL.revokeObjectURL(this.newCoverImagePreviewUrl);
+      this.newCoverImageFile = input.files[0];
+      this.newCoverImagePreviewUrl = URL.createObjectURL(input.files[0]);
+      input.value = '';
+    }
+  }
+  removeNewCoverImage(): void {
+    if (this.newCoverImagePreviewUrl) URL.revokeObjectURL(this.newCoverImagePreviewUrl);
+    this.newCoverImageFile = null;
+    this.newCoverImagePreviewUrl = null;
+  }
+
+  // ── Galería (edit) ──
+  onNewGalleryFilesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      Array.from(input.files).forEach(f => {
+        this.newGalleryFiles.push(f);
+        this.newGalleryPreviews.push(URL.createObjectURL(f));
+      });
+      input.value = '';
+    }
+  }
+  removeNewGalleryFile(index: number): void {
+    URL.revokeObjectURL(this.newGalleryPreviews[index]);
+    this.newGalleryFiles.splice(index, 1);
+    this.newGalleryPreviews.splice(index, 1);
+  }
+
+  // ── Getters para edit mode: cover / galería / otros archivos ──
+  get editCurrentCover(): EducationFile | null {
+    return this.editContentCurrentFiles.find(f => f.fileType === 'IMAGE') ?? null;
+  }
+  get editCurrentGalleryImages(): EducationFile[] {
+    return this.editContentCurrentFiles.filter(f => f.fileType === 'IMAGE').slice(1);
+  }
+  get editCurrentOtherFiles(): EducationFile[] {
+    return this.editContentCurrentFiles.filter(f => f.fileType !== 'IMAGE');
+  }
+
+  onExistingSectionNewFilesSelected(event: Event, sIdx: number): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.existingSections[sIdx].newFiles = [...this.existingSections[sIdx].newFiles, ...Array.from(input.files)];
+      input.value = '';
+    }
+  }
+  removeExistingSectionNewFile(sIdx: number, fIdx: number): void {
+    this.existingSections[sIdx].newFiles.splice(fIdx, 1);
+  }
+
+  toggleSectionDelete(sIdx: number): void {
+    this.existingSections[sIdx].markedForDelete = !this.existingSections[sIdx].markedForDelete;
+  }
+
+  getFileName(url: string): string {
+    return url.split('/').pop()?.split('?')[0] || url;
+  }
+
   openEditForm(content: EducationContent): void {
     this.isEditMode = true;
     this.editingId = content.id;
@@ -167,8 +323,66 @@ export class EducacionAdmin implements OnInit {
     this.newDescription = content.description || '';
     this.newCategory = content.category || 'reciclaje';
     this.selectedFiles = [];
+    this.newContentFiles = [];
+    this.draftSections = [];
+    this.existingSections = [];
+    this.editContentCurrentFiles = content.files || [];
+    this.wizardStep = 1;
+
+    // Quiz init
+    this.quizForContentId = content.id;
+    this.includeQuizInEdit = !!this.contentHasQuiz[content.id];
+    this.isQuizEditMode = false;
+    this.editingQuizId = null;
+    this.quizTitle = '';
+    this.quizDescription = '';
+    this.quizPointsPerQuestion = 10;
+    this.draftQuestions = [];
+
     this.showForm = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Cargar detalle completo (secciones + archivos actuales)
+    this.isLoadingEditData = true;
+    this.educationService.getById(content.id).subscribe({
+      next: (full) => {
+        this.editContentCurrentFiles = full.files || [];
+        this.existingSections = (full.sections || [])
+          .filter(s => s.id != null)
+          .map(s => ({
+            id: s.id!,
+            title: s.title,
+            description: s.description || '',
+            existingFiles: s.files || [],
+            newFiles: [],
+            markedForDelete: false
+          }));
+        this.isLoadingEditData = false;
+      },
+      error: (err) => {
+        console.error('Error cargando detalle del contenido:', err);
+        this.isLoadingEditData = false;
+      }
+    });
+
+    // Load quiz if exists
+    if (this.contentHasQuiz[content.id]) {
+      this.quizService.getAdminByContent(content.id).subscribe({
+        next: (q: QuizAdmin) => {
+          this.isQuizEditMode = true;
+          this.editingQuizId = q.id;
+          this.quizTitle = q.title;
+          this.quizDescription = q.description || '';
+          this.quizPointsPerQuestion = q.pointsPerQuestion;
+          this.draftQuestions = q.questions.map(qq => ({
+            text: qq.text,
+            correctIndex: qq.correctIndex,
+            options: [...qq.options]
+          }));
+        },
+        error: () => {}
+      });
+    }
   }
 
   submitContent(): void {
@@ -177,11 +391,18 @@ export class EducacionAdmin implements OnInit {
 
   private submitCreate(): void {
     if (!this.newTitle.trim()) { Swal.fire('Atención', 'El título es obligatorio.', 'warning'); return; }
-    if (this.selectedFiles.length === 0) { Swal.fire('Atención', 'Debes seleccionar al menos un archivo.', 'warning'); return; }
+
+    // Build combined files: portada first, then gallery, then other files
+    const allSubmitFiles: File[] = [
+      ...(this.coverImageFile ? [this.coverImageFile] : []),
+      ...this.galleryFiles,
+      ...this.selectedFiles
+    ];
+    if (allSubmitFiles.length === 0) { Swal.fire('Atención', 'Debes seleccionar al menos un archivo (portada, galería u otros).', 'warning'); return; }
 
     const allowedExtensions = ['.pdf', '.jpg', '.jpeg', '.png', '.webp', '.mp4', '.avi', '.mkv'];
     const allFiles = [
-      ...this.selectedFiles,
+      ...allSubmitFiles,
       ...this.draftSections.flatMap(s => s.files)
     ];
     const invalidFile = allFiles.find(f => {
@@ -203,7 +424,7 @@ export class EducacionAdmin implements OnInit {
 
     this.isSubmitting = true;
     this.educationService.create(
-      this.newTitle.trim(), this.newDescription.trim(), this.newCategory, this.selectedFiles
+      this.newTitle.trim(), this.newDescription.trim(), this.newCategory, allSubmitFiles
     ).subscribe({
       next: (saved) => {
         this.contenidos.unshift(saved);
@@ -244,11 +465,13 @@ export class EducacionAdmin implements OnInit {
             this.isSubmitting = false;
             Swal.fire('¡Listo!', `Contenido "${contentTitle}" creado con secciones y quiz.`, 'success');
             this.resetForm(); this.showForm = false;
+            this.loadContents();
           },
           error: () => {
             this.isSubmitting = false;
             Swal.fire('Parcial', `Contenido creado pero el quiz no se guardó. Puedes crearlo desde la tarjeta.`, 'warning');
             this.resetForm(); this.showForm = false;
+            this.loadContents();
           }
         });
       } else {
@@ -256,6 +479,7 @@ export class EducacionAdmin implements OnInit {
         const secCount = sectionsToCreate.length;
         Swal.fire('¡Listo!', `Contenido "${contentTitle}" creado${secCount ? ` con ${secCount} sección(es)` : ''}.`, 'success');
         this.resetForm(); this.showForm = false;
+        this.loadContents();
       }
     });
   }
@@ -264,24 +488,105 @@ export class EducacionAdmin implements OnInit {
     if (!this.editingId) return;
     if (!this.newTitle.trim()) { Swal.fire('Atención', 'El título es obligatorio.', 'warning'); return; }
 
+    if (this.includeQuizInEdit) {
+      if (!this.quizTitle.trim()) { Swal.fire('Atención', 'El título del quiz es obligatorio.', 'warning'); return; }
+      if (this.draftQuestions.length === 0) { Swal.fire('Atención', 'Agrega al menos una pregunta al quiz.', 'warning'); return; }
+      for (let i = 0; i < this.draftQuestions.length; i++) {
+        const q = this.draftQuestions[i];
+        if (!q.text.trim()) { Swal.fire('Atención', `La pregunta #${i + 1} no tiene enunciado.`, 'warning'); return; }
+        if (q.options.some(o => !o.trim())) { Swal.fire('Atención', `La pregunta #${i + 1} tiene opciones vacías.`, 'warning'); return; }
+      }
+    }
+
+    const contentId = this.editingId;
     this.isSubmitting = true;
-    this.educationService.update(this.editingId, {
+
+    // Nuevos archivos (portada + galería + otros) se envían directamente con el PUT
+    const newFilesToUpload: File[] = [
+      ...(this.newCoverImageFile ? [this.newCoverImageFile] : []),
+      ...this.newGalleryFiles,
+      ...this.newContentFiles
+    ];
+
+    this.educationService.update(contentId, {
       title: this.newTitle.trim(),
       description: this.newDescription.trim(),
       category: this.newCategory
-    }).subscribe({
+    }, newFilesToUpload).subscribe({
       next: (updated) => {
-        this.isSubmitting = false;
-        Swal.fire('¡Actualizado!', `Cambios guardados en "${updated.title}".`, 'success');
         const idx = this.contenidos.findIndex(c => c.id === updated.id);
-        if (idx !== -1) this.contenidos[idx] = updated;
-        this.resetForm(); this.showForm = false;
+        if (idx !== -1) this.contenidos[idx] = { ...this.contenidos[idx], ...updated };
+        this.processEditSections(contentId, () => {
+          this.processEditQuiz(contentId, () => {
+            this.isSubmitting = false;
+            Swal.fire('¡Actualizado!', `Cambios guardados en "${updated.title}".`, 'success');
+            this.resetForm(); this.showForm = false;
+            this.loadContents();
+          });
+        });
       },
-      error: (err) => {
+      error: () => {
         this.isSubmitting = false;
-        console.error('Error actualizando:', err);
         Swal.fire('Error', 'No se pudieron guardar los cambios.', 'error');
       }
+    });
+  }
+
+  private processEditSections(contentId: number, done: () => void): void {
+    const ops: (() => any)[] = [];
+
+    this.existingSections.filter(s => s.markedForDelete).forEach(s => {
+      ops.push(() => this.educationService.deleteSection(contentId, s.id));
+    });
+
+    this.existingSections.filter(s => !s.markedForDelete).forEach(s => {
+      // PUT /api/v1/education/sections/{sectionId} — si se envían files, reemplaza los anteriores
+      ops.push(() => this.educationService.updateSection(s.id, s.title.trim(), s.description.trim(), s.newFiles));
+    });
+
+    this.draftSections.filter(s => s.title.trim()).forEach(s => {
+      ops.push(() => this.educationService.addSection(contentId, s.title.trim(), s.description.trim(), s.files));
+    });
+
+    const run = (remaining: (() => any)[], cb: () => void) => {
+      if (!remaining.length) { cb(); return; }
+      const [first, ...rest] = remaining;
+      first().subscribe({ next: () => run(rest, cb), error: () => run(rest, cb) });
+    };
+    run(ops, done);
+  }
+
+  private processEditNewContentFiles(contentId: number, done: () => void): void {
+    const filesToAdd: File[] = [
+      ...(this.newCoverImageFile ? [this.newCoverImageFile] : []),
+      ...this.newGalleryFiles,
+      ...this.newContentFiles
+    ];
+    if (!filesToAdd.length) { done(); return; }
+    this.educationService.addFilesToContent(contentId, filesToAdd).subscribe({
+      next: () => done(), error: () => done()
+    });
+  }
+
+  private processEditQuiz(contentId: number, done: () => void): void {
+    if (!this.includeQuizInEdit) { done(); return; }
+
+    const payload = {
+      title: this.quizTitle.trim(),
+      description: this.quizDescription.trim(),
+      pointsPerQuestion: this.quizPointsPerQuestion,
+      questions: this.draftQuestions.map(q => ({
+        text: q.text.trim(), correctIndex: q.correctIndex, options: q.options.map(o => o.trim())
+      }))
+    };
+
+    const obs = (this.isQuizEditMode && this.editingQuizId)
+      ? this.quizService.update(this.editingQuizId, payload)
+      : this.quizService.create(contentId, payload);
+
+    obs.subscribe({
+      next: () => { this.contentHasQuiz[contentId] = true; done(); },
+      error: () => done()
     });
   }
 
@@ -317,6 +622,20 @@ export class EducacionAdmin implements OnInit {
     this.selectedFiles = []; this.isEditMode = false; this.editingId = null; this.isSubmitting = false;
     this.wizardStep = 1; this.draftSections = []; this.includeQuizInCreate = false;
     this.quizTitle = ''; this.quizDescription = ''; this.quizPointsPerQuestion = 10; this.draftQuestions = [];
+    this.existingSections = []; this.newContentFiles = []; this.editContentCurrentFiles = [];
+    this.includeQuizInEdit = false; this.isQuizEditMode = false; this.editingQuizId = null;
+    this.quizForContentId = null;
+    // Portada y galería (create)
+    if (this.coverImagePreviewUrl) URL.revokeObjectURL(this.coverImagePreviewUrl);
+    this.coverImageFile = null; this.coverImagePreviewUrl = null;
+    this.galleryPreviews.forEach(u => URL.revokeObjectURL(u));
+    this.galleryFiles = []; this.galleryPreviews = [];
+    // Portada y galería (edit)
+    if (this.newCoverImagePreviewUrl) URL.revokeObjectURL(this.newCoverImagePreviewUrl);
+    this.newCoverImageFile = null; this.newCoverImagePreviewUrl = null;
+    this.newGalleryPreviews.forEach(u => URL.revokeObjectURL(u));
+    this.newGalleryFiles = []; this.newGalleryPreviews = [];
+    this.isLoadingEditData = false;
   }
 
   // ─────────── Helpers vista ───────────

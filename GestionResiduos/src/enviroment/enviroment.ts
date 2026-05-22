@@ -5,5 +5,5 @@ export const environment = {
   apiV1: '/api/v1',
   // API key removed — load from .env and inject at build/deploy time.
   // Do NOT commit real keys here. Use .env or server-side secret management.
-  GOOGLE_IA_API_KEY: ''
+  GOOGLE_IA_API_KEY: 'AIzaSyDK8I7R-KQu4osnimtmNggQpoPH2sZR8wE'
 };

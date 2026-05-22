@@ -1,9 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Router, RouterOutlet, ActivatedRoute, RouterLink } from '@angular/router';
+import { Router, RouterOutlet, ActivatedRoute, RouterLink, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { signal } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { AuthStateService } from '../../../services/auth-state.service';
 import { ApiService } from '../../../services/api.service';
 
@@ -20,6 +21,7 @@ export class Foro implements OnInit, OnDestroy {
   private subs = new Subscription();
 
   temas: any[] = [];
+  commentCounts: { [id: number]: number } = {};
   isLoading = false;
   error = '';
 
@@ -42,9 +44,14 @@ export class Foro implements OnInit, OnDestroy {
       if (v) this.loadTopics();
     }));
     this.subs.add(this.authState.isLoggedIn$.subscribe(v => this.isAuthenticated = v));
-    this.route.firstChild?.params.subscribe(() => {
-      this.mostrandoDetalles.set(true);
-    });
+
+    // Sincronizar mostrandoDetalles con la ruta activa
+    this.mostrandoDetalles.set(this.route.firstChild !== null);
+    this.subs.add(
+      this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
+        this.mostrandoDetalles.set(this.route.firstChild !== null);
+      })
+    );
   }
 
   ngOnDestroy() {
@@ -55,7 +62,23 @@ export class Foro implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = '';
     this.api.getActiveTopics().subscribe({
-      next: (data) => { this.temas = data; this.isLoading = false; },
+      next: (data) => {
+        this.temas = data;
+        this.isLoading = false;
+        if (data.length > 0) {
+          const requests = data.map((t: any) =>
+            this.api.getTopicComments(t.id)
+          );
+          forkJoin(requests).subscribe({
+            next: (results: any[]) => {
+              results.forEach((comments, i) => {
+                this.commentCounts[data[i].id] = Array.isArray(comments) ? comments.length : 0;
+              });
+            },
+            error: () => {}
+          });
+        }
+      },
       error: () => { this.isLoading = false; }
     });
   }

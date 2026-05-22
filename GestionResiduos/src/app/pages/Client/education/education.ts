@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { EducationService, EducationContent } from '../../../services/education.service';
 import { AuthStateService } from '../../../services/auth-state.service';
@@ -53,9 +55,30 @@ export class Education implements OnInit {
     this.isLoading = true;
     this.educationService.getAll().subscribe({
       next: (data) => {
-        this.backendContents = data;
-        this.buildGuides();
-        this.isLoading = false;
+        if (data.length === 0) {
+          this.backendContents = [];
+          this.buildGuides();
+          this.isLoading = false;
+          return;
+        }
+        // Cargar detalle completo de cada contenido para obtener portada y archivos
+        // (getAll devuelve files:[] vacío; getById devuelve el detalle completo)
+        forkJoin(
+          data.map(c =>
+            this.educationService.getById(c.id).pipe(catchError(() => of(c)))
+          )
+        ).subscribe({
+          next: (fullData) => {
+            this.backendContents = fullData;
+            this.buildGuides();
+            this.isLoading = false;
+          },
+          error: () => {
+            this.backendContents = data;
+            this.buildGuides();
+            this.isLoading = false;
+          }
+        });
       },
       error: (err) => {
         console.error('Error cargando contenidos educativos:', err);
