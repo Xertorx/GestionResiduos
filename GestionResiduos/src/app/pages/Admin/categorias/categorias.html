@@ -1,15 +1,17 @@
-<div class="pr-20 mx-auto">
+<div class="max-w-6xl mx-auto">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div data-aos="fade-down" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
     <div>
       <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
-        <lucide-icon name="tag" class="w-6 h-6 text-emerald-600"></lucide-icon>
+        <span class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <lucide-icon name="tag" class="w-5 h-5 text-emerald-600"></lucide-icon>
+        </span>
         Administración de Categorías
       </h1>
-      <p class="text-sm text-gray-500 mt-1">Gestiona las categorías de reportes</p>
+      <p class="text-sm text-gray-400 mt-1">Gestiona las categorías de reportes</p>
     </div>
     <button
-      class="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 transition-colors"
+      class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
       (click)="openCreateModal()"
     >
       <lucide-icon name="plus" class="w-4 h-4"></lucide-icon>

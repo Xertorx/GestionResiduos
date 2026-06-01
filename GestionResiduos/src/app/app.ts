@@ -24,7 +24,7 @@ export class App implements AfterViewInit {
       // ✅ Inicializa AOS solo en el cliente
       try {
         const AOS = (await import('aos')).default;
-        AOS.init({ once: true, duration: 800 });
+        AOS.init({ once: true, duration: 700, easing: 'ease-out-cubic', offset: 60 });
       } catch (e) {
         console.warn('⚠️ AOS failed to initialize', e);
       }

@@ -10,97 +10,99 @@
       </div>
 
       <!-- Nav links (desktop) -->
-      <div class="hidden md:ml-6 md:flex md:items-center md:space-x-8">
-        <a [routerLink]="'/'" class="text-emerald-600 font-medium">Inicio</a>
-        <a [routerLink]="'/eco-points'" class="text-gray-500 hover:text-emerald-600 transition">Mapa Eco-Puntos</a>
-        <a [routerLink]="'/reports'" class="text-gray-500 hover:text-emerald-600 transition">Reportes</a>
-        <a [routerLink]="'/calendar'" class="text-gray-500 hover:text-emerald-600 transition">Calendario</a>
-        <a [routerLink]="'/education'" class="text-gray-500 hover:text-emerald-600 transition">Educación</a>
-        <a [routerLink]="'/foro'" class="text-gray-500 hover:text-emerald-600 transition">Foro</a>
+      <div class="hidden md:flex md:items-center md:space-x-4 lg:space-x-6">
+        <a [routerLink]="'/'" class="text-emerald-600 font-medium text-sm">Inicio</a>
+        <a [routerLink]="'/eco-points'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Eco-Puntos</a>
+        <a [routerLink]="'/reports'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Reportes</a>
+        <a [routerLink]="'/calendar'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Calendario</a>
+        <a [routerLink]="'/education'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Educación</a>
+        <a [routerLink]="'/foro'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Foro</a>
+        <a [routerLink]="'/ranking'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Ranking</a>
+        <a [routerLink]="'/about_us'" class="text-gray-500 hover:text-emerald-600 transition text-sm">Nosotros</a>
       </div>
 
-      <!-- Auth section -->
-      @if (isBrowser && authReady) {
-        @if (!isLoggedIn) {
-          <div class="hidden md:flex items-center">
-            <a [routerLink]="'/login'" class="text-gray-500 hover:text-emerald-600 mr-4">
+      <!-- Right section: Chat + Auth -->
+      <div class="hidden md:flex md:items-center md:space-x-3">
+        @if (isBrowser && authReady) {
+          @if (!isLoggedIn) {
+            <a [routerLink]="'/login'" class="text-gray-500 hover:text-emerald-600 text-sm">
               Iniciar Sesión
             </a>
-            <a [routerLink]="'/register'" class="btn-primary text-white px-4 py-2 rounded-md font-medium">Registrarse</a>
-          </div>
-        } @else {
-          <!-- Profile dropdown -->
-          <div class="hidden md:flex items-center relative profile-dropdown-container">
-            <button (click)="toggleProfileMenu($event)"
-              class="flex items-center space-x-2 cursor-pointer bg-white rounded-full border border-emerald-100 hover:bg-emerald-50 px-2 py-1 transition">
-              <div class="w-9 h-9 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center">
-                @if (photo) {
-                  <img [src]="photo" alt="Foto de perfil" class="w-full h-full object-cover">
-                } @else {
-                  <lucide-icon name="user" class="w-5 h-5 text-emerald-600"></lucide-icon>
-                }
-              </div>
-              <span class="text-sm font-medium text-gray-700 max-w-[120px] truncate">{{ nickname || 'Usuario' }}</span>
-              <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-400 transition-transform"
-                [class.rotate-180]="isProfileMenuOpen"></lucide-icon>
-            </button>
+            <a [routerLink]="'/register'" class="btn-primary text-white px-4 py-2 rounded-md text-sm font-medium">Registrarse</a>
+          } @else {
+            <!-- Profile dropdown -->
+            <div class="relative profile-dropdown-container">
+              <button (click)="toggleProfileMenu($event)"
+                class="flex items-center space-x-2 cursor-pointer bg-white rounded-full border border-emerald-100 hover:bg-emerald-50 px-2 py-1 transition">
+                <div class="w-9 h-9 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center">
+                  @if (photo) {
+                    <img [src]="photo" alt="Foto de perfil" class="w-full h-full object-cover">
+                  } @else {
+                    <lucide-icon name="user" class="w-5 h-5 text-emerald-600"></lucide-icon>
+                  }
+                </div>
+                <span class="text-sm font-medium text-gray-700 max-w-[120px] truncate">{{ nickname || 'Usuario' }}</span>
+                <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-400 transition-transform"
+                  [class.rotate-180]="isProfileMenuOpen"></lucide-icon>
+              </button>
 
-            <!-- Dropdown menu -->
-            @if (isProfileMenuOpen) {
-              <div class="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-100 rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
-                <!-- User info header -->
-                <div class="px-4 py-3 border-b border-gray-100">
-                  <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                      @if (photo) {
-                        <img [src]="photo" alt="Foto" class="w-full h-full object-cover">
-                      } @else {
-                        <lucide-icon name="user" class="w-5 h-5 text-emerald-600"></lucide-icon>
-                      }
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-sm font-semibold text-gray-800 truncate">{{ nickname || 'Usuario' }}</p>
-                      <p class="text-xs text-gray-500 truncate">{{ email || '' }}</p>
+              <!-- Dropdown menu -->
+              @if (isProfileMenuOpen) {
+                <div class="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-100 rounded-xl shadow-lg py-2 z-50 animate-in fade-in slide-in-from-top-2">
+                  <!-- User info header -->
+                  <div class="px-4 py-3 border-b border-gray-100">
+                    <div class="flex items-center space-x-3">
+                      <div class="w-10 h-10 rounded-full overflow-hidden bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        @if (photo) {
+                          <img [src]="photo" alt="Foto" class="w-full h-full object-cover">
+                        } @else {
+                          <lucide-icon name="user" class="w-5 h-5 text-emerald-600"></lucide-icon>
+                        }
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-gray-800 truncate">{{ nickname || 'Usuario' }}</p>
+                        <p class="text-xs text-gray-500 truncate">{{ email || '' }}</p>
+                      </div>
                     </div>
                   </div>
+
+                  <!-- Menu items -->
+                  <a routerLink="/profile" (click)="isProfileMenuOpen = false"
+                    class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
+                    <lucide-icon name="user" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
+                    Mi perfil
+                  </a>
+                  <a routerLink="/profile/edit" (click)="isProfileMenuOpen = false"
+                    class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
+                    <lucide-icon name="edit" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
+                    Editar perfil
+                  </a>
+                  <a routerLink="/reports" (click)="isProfileMenuOpen = false"
+                    class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
+                    <lucide-icon name="file-text" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
+                    Mis reportes
+                  </a>
+                  <a routerLink="/foro" (click)="isProfileMenuOpen = false"
+                    class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
+                    <lucide-icon name="message-square" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
+                    Foro
+                  </a>
+
+                  <div class="border-t border-gray-100 my-1"></div>
+
+                  <button (click)="logout()"
+                    class="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
+                    <lucide-icon name="log-out" class="w-4 h-4 mr-3"></lucide-icon>
+                    Cerrar sesión
+                  </button>
                 </div>
-
-                <!-- Menu items -->
-                <a routerLink="/profile" (click)="isProfileMenuOpen = false"
-                  class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
-                  <lucide-icon name="user" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
-                  Mi perfil
-                </a>
-                <a routerLink="/profile/edit" (click)="isProfileMenuOpen = false"
-                  class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
-                  <lucide-icon name="edit" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
-                  Editar perfil
-                </a>
-                <a routerLink="/reports" (click)="isProfileMenuOpen = false"
-                  class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
-                  <lucide-icon name="file-text" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
-                  Mis reportes
-                </a>
-                <a routerLink="/foro" (click)="isProfileMenuOpen = false"
-                  class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition cursor-pointer">
-                  <lucide-icon name="message-square" class="w-4 h-4 mr-3 text-emerald-600"></lucide-icon>
-                  Foro
-                </a>
-
-                <div class="border-t border-gray-100 my-1"></div>
-
-                <button (click)="logout()"
-                  class="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition">
-                  <lucide-icon name="log-out" class="w-4 h-4 mr-3"></lucide-icon>
-                  Cerrar sesión
-                </button>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          }
+        } @else {
+          <div class="w-[180px]"></div>
         }
-      } @else {
-        <div class="w-[180px]"></div>
-      }
+      </div>
 
       <!-- Mobile menu button -->
       <div class="-mr-2 flex items-center md:hidden">
@@ -122,6 +124,8 @@
         <a routerLink="/calendar" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Calendario</a>
         <a routerLink="/education" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Educación</a>
         <a routerLink="/foro" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Foro</a>
+        <a routerLink="/ranking" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Ranking</a>
+        <a routerLink="/about_us" (click)="isMobileMenuOpen = false" class="block px-3 py-2 rounded-md text-base font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50">Nosotros</a>
       </div>
 
       @if (isBrowser && authReady) {

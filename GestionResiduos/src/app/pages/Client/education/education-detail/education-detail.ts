@@ -1,9 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CarouselComponent } from '../../../../shared/components/carousel/carousel';
-import { EducationService, EducationContent } from '../../../../services/education.service';
+import { EducationService, EducationContent, ContentProgress } from '../../../../services/education.service';
+import { QuizService } from '../../../../services/quiz.service';
 
 export interface Resource {
   id: number;
@@ -16,12 +17,14 @@ export interface Resource {
   images?: string[];
   pdfs?: { name: string; url: string }[];
   sections?: {
+    id?: number;
     title: string;
     content: string;
     icon?: string;
     summary?: string;
     images?: string[];
     pdfs?: { name: string; url: string }[];
+    videos?: string[];
     topics?: { title: string; content?: string }[];
   }[];
 }
@@ -36,194 +39,25 @@ export interface Resource {
 export class EducationDetail implements OnInit {
   resource: Resource | null = null;
   selectedSection: any = null;
-  completedSections: Set<string> = new Set();
-  resourceCompleted: boolean = false;
+  viewedSections: Set<string> = new Set();
+  progressData: ContentProgress | null = null;
+  progressLoading = false;
 
-  // ── Flag para saber si el contenido viene del backend ──
   isFromBackend = false;
   backendContent: EducationContent | null = null;
   isLoading = true;
 
-  // ── Datos locales (los que ya tenías) ──
-  private resources: Resource[] = [
-    {
-      id: 1,
-      title: 'Guía de Separación de Residuos',
-      description: 'Aprende a separar correctamente los residuos orgánicos, reciclables y especiales.',
-      type: 'Guía PDF',
-      time: '15 min',
-      author: 'Juan Pérez',
-      date: '01/11/2025',
-      images: [
-        '/img/icons/Reciclaje.png',
-        'https://picsum.photos/id/1015/800/400',
-        'https://picsum.photos/id/1020/800/400',
-        'https://picsum.photos/id/1035/800/400'
-      ],
-      pdfs: [
-        { name: 'Guía de Separación de Residuos', url: 'https://www.uaesp.gov.co/images/Guia-UAESP_SR.pdf' },
-        { name: 'Manual de Clasificación UAESP', url: 'https://www.uaesp.gov.co/content/subdireccion-aprovechamiento' }
-      ],
-      sections: [
-        {
-          title: 'Residuos Orgánicos',
-          content: 'Incluye restos de comida, cáscaras, café, etc. Los residuos orgánicos son biodegradables y pueden ser aprovechados mediante compostaje. Según la UAESP, el 60% de los residuos sólidos domiciliarios en Bogotá son materia orgánica.',
-          icon: 'leaf',
-          summary: 'Aprende a identificar residuos orgánicos',
-          images: [
-            'https://picsum.photos/id/1015/800/400',
-            'https://picsum.photos/id/1020/800/400'
-          ],
-          pdfs: [
-            { name: 'Guía de Residuos Orgánicos - UAESP', url: 'https://www.uaesp.gov.co/images/Guia-UAESP_SR.pdf' }
-          ],
-          topics: [
-            { title: 'Frutas y verduras', content: 'Se deben colocar en compost o contenedor orgánico.' },
-            { title: 'Restos de comida', content: 'Evita mezclarlos con reciclables.' }
-          ]
-        },
-        {
-          title: 'Residuos Reciclables',
-          content: 'Papel, cartón, plásticos y metales limpios. Estos materiales pueden ser procesados y transformados en nuevos productos. La UAESP recomienda limpiar y secar los materiales antes de depositarlos en los contenedores de reciclaje.',
-          icon: 'refresh-cw',
-          summary: 'Clasificación de reciclables',
-          images: [
-            'https://picsum.photos/id/1035/800/400',
-            'https://picsum.photos/id/1040/800/400'
-          ],
-          pdfs: [
-            { name: 'Manual de Clasificación de Reciclables', url: 'https://www.uaesp.gov.co/content/subdireccion-aprovechamiento' }
-          ],
-          topics: [
-            { title: 'Plásticos', content: 'Lávalos antes de depositarlos.' },
-            { title: 'Cartón', content: 'Debe estar seco y sin restos de comida.' }
-          ]
-        },
-        {
-          title: 'Residuos Especiales',
-          content: 'Baterías, pilas, electrónicos y químicos requieren tratamiento especial. Estos residuos no deben mezclarse con basura común ya que contienen sustancias peligrosas. Bogotá cuenta con puntos de recolección especializados en diferentes localidades.',
-          icon: 'alert-triangle',
-          summary: 'Cómo manejar residuos peligrosos',
-          images: [
-            'https://picsum.photos/id/1045/800/400',
-            'https://picsum.photos/id/1050/800/400'
-          ],
-          pdfs: [
-            { name: 'Protocolo de Manejo de Residuos Peligrosos - UAESP', url: 'https://www.uaesp.gov.co/images/Guia-UAESP_SR.pdf' }
-          ],
-          topics: [
-            { title: 'Baterías y pilas', content: 'Llévalas a puntos de recolección especializados.' },
-            { title: 'Electrónicos', content: 'No deben desecharse en basura común.' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 2,
-      title: 'Introducción al Compostaje',
-      description: 'Aprende a transformar tus residuos orgánicos en abono natural para plantas.',
-      type: 'Video Tutorial',
-      time: '20 min',
-      author: 'Ana Gómez',
-      date: '05/11/2025',
-      images: [
-        'https://picsum.photos/seed/201/600/400',
-        'https://picsum.photos/seed/202/600/400',
-        'https://picsum.photos/seed/203/600/400'
-      ],
-      pdfs: [
-        { name: 'Infografía', url: '/static/guides/plasticos.pdf' }
-      ],
-      sections: [
-        {
-          title: 'Qué es el Compostaje',
-          content: 'Proceso natural de descomposición de materia orgánica. El compostaje es una técnica milenaria que transforma residuos orgánicos en un abono rico en nutrientes. En Bogotá, la UAESP promueve el compostaje domiciliario como estrategia de reducción de residuos.',
-          icon: 'book-open',
-          summary: 'Conceptos básicos',
-          images: [
-            'https://picsum.photos/seed/201/600/400',
-            'https://picsum.photos/seed/202/600/400'
-          ],
-          pdfs: [
-            { name: 'Guía de Compostaje Domiciliario - Ambiente Bogotá', url: 'https://www.uaesp.gov.co/images/Guia-UAESP_SR.pdf' }
-          ],
-          topics: [
-            { title: 'Definición', content: 'Es el proceso de convertir restos orgánicos en abono.' },
-            { title: 'Beneficios', content: 'Mejora la calidad del suelo y reduce residuos.' }
-          ]
-        },
-        {
-          title: 'Materiales Compostables',
-          content: 'Restos de frutas, verduras, café, cáscaras, hojas secas. Una buena mezcla de materiales verdes (ricos en nitrógeno) y marrones (ricos en carbono) acelera el proceso de descomposición. Mantén una proporción 3:1 de marrones a verdes.',
-          icon: 'folder',
-          summary: 'Qué materiales usar',
-          images: [
-            'https://picsum.photos/seed/203/600/400',
-            'https://picsum.photos/seed/204/600/400'
-          ],
-          pdfs: [
-            { name: 'Materiales Compostables y No Compostables', url: 'https://www.uaesp.gov.co/content/subdireccion-aprovechamiento' }
-          ],
-          topics: [
-            { title: 'Verdes', content: 'Frescos, húmedos, ricos en nitrógeno.' },
-            { title: 'Marrones', content: 'Secos, ricos en carbono: hojas, ramas pequeñas.' }
-          ]
-        }
-      ]
-    },
-    {
-      id: 3,
-      title: 'Tipos de Plástico y su Reciclaje',
-      description: 'Identifica los diferentes tipos de plástico y cómo reciclarlos correctamente.',
-      type: 'Infografía',
-      time: '10 min',
-      author: 'Carlos Martínez',
-      date: '10/11/2025',
-      images: [
-        'https://picsum.photos/seed/301/600/400'
-      ],
-      pdfs: [
-        { name: 'Infografía', url: '/static/guides/plasticos.pdf' }
-      ],
-      sections: [
-        {
-          title: 'Plásticos PET',
-          content: 'Botellas de bebidas, envases de alimentos. El PET (Tereftalato de Polietileno) es uno de los plásticos más comunes y reciclables. Estos productos pueden convertirse en nuevas botellas, fibra textil o películas plásticas. Siempre limpios y sin residuos antes de reciclar.',
-          icon: 'image',
-          summary: 'Botellas y envases PET',
-          images: [
-            'https://picsum.photos/seed/301/600/400'
-          ],
-          pdfs: [
-            { name: 'Guía de Reciclaje de Plásticos PET - UAESP', url: 'https://www.uaesp.gov.co/images/Guia-UAESP_SR.pdf' }
-          ],
-          topics: [
-            { title: 'Uso', content: 'Se pueden reciclar y fabricar nuevas botellas.' }
-          ]
-        },
-        {
-          title: 'Plásticos HDPE',
-          content: 'Envases de detergente, leche, productos de limpieza. El HDPE (Polietileno de Alta Densidad) es resistente y versátil. Una vez reciclado, se convierte en tuberías, cajas plásticas, bolsas resistentes y otros productos duraderos.',
-          icon: 'trash-2',
-          summary: 'Envases HDPE',
-          images: [
-            'https://picsum.photos/seed/302/600/400'
-          ],
-          pdfs: [
-            { name: 'Clasificación de Plásticos Reciclables', url: 'https://www.uaesp.gov.co/content/subdireccion-aprovechamiento' }
-          ],
-          topics: [
-            { title: 'Reutilización', content: 'Se usan para tuberías, cajas plásticas.' }
-          ]
-        }
-      ]
-    }
-  ];
+  // ── HU22: estado del quiz para este contenido ──
+  hasQuiz = false;
+  checkingQuiz = true;
+  quizCompleted = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private educationService: EducationService
+    private educationService: EducationService,
+    private quizService: QuizService,
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {}
 
   ngOnInit(): void {
@@ -231,61 +65,104 @@ export class EducationDetail implements OnInit {
     const id = idParam ? Number(idParam) : null;
 
     if (id) {
-      // Buscar en el backend
       this.isFromBackend = true;
+
+      // Cargar contenido
       this.educationService.getById(id).subscribe({
         next: (content) => {
           this.backendContent = content;
           this.resource = this.mapBackendToResource(content);
           this.isLoading = false;
+          this.checkQuizCompletion();
+          this.loadProgress();
         },
         error: (err) => {
           console.error('Error cargando contenido del backend:', err);
           this.isLoading = false;
         }
       });
+
+      // Verificar si tiene quiz
+      this.quizService.existsForContent(id).subscribe({
+        next: (res) => {
+          this.hasQuiz = res.exists;
+          this.checkingQuiz = false;
+          this.checkQuizCompletion();
+        },
+        error: () => {
+          this.hasQuiz = false;
+          this.checkingQuiz = false;
+        }
+      });
     } else {
       this.isLoading = false;
+      this.checkingQuiz = false;
     }
   }
 
-  /**
-   * Convierte un EducationContent del backend al formato Resource.
-   * Ahora soporta MÚLTIPLES archivos: arma arrays con todas las imágenes
-   * y todos los PDFs, para que el carrusel las rote automáticamente.
-   */
   private mapBackendToResource(content: EducationContent): Resource {
-    const images = (content.files ?? [])
-      .filter(f => f.fileType === 'IMAGE')
-      .map(f => f.fileUrl);
+    // Determine primary file type from sections or top-level files
+    const allFiles = content.sections?.length
+      ? content.sections.flatMap(s => s.files)
+      : (content.files ?? []);
+    const primaryType = allFiles[0]?.fileType ?? 'OTRO';
 
-    const pdfs = (content.files ?? [])
-      .filter(f => f.fileType === 'PDF')
-      .map(f => ({ name: content.title, url: f.fileUrl }));
+    let sections: Resource['sections'];
+    let globalImages: string[];
+    let globalPdfs: { name: string; url: string }[];
 
-    const primaryType = content.files?.[0]?.fileType ?? 'OTRO';
+    if (content.sections && content.sections.length > 0) {
+      // Use real sections returned by GET /education/{id}
+      sections = content.sections.map(sec => {
+        const secImages = sec.files.filter(f => f.fileType === 'IMAGE').map(f => f.fileUrl);
+        const secPdfs   = sec.files.filter(f => f.fileType === 'PDF').map(f => ({ name: sec.title, url: f.fileUrl }));
+        const secVideos = sec.files.filter(f => f.fileType === 'VIDEO').map(f => f.fileUrl);
+        const icon = sec.files[0]?.fileType
+          ? this.getIconByFileType(sec.files[0].fileType)
+          : this.getIconByFileType(primaryType);
+        return {
+          id:      sec.id,
+          title:   sec.title,
+          content: sec.description ?? sec.content ?? content.description ?? '',
+          icon,
+          summary: sec.description ?? sec.content ?? 'Haz clic para ver más...',
+          images:  secImages,
+          pdfs:    secPdfs,
+          videos:  secVideos,
+          topics:  []
+        };
+      });
+      globalImages = sections.flatMap(s => s.images ?? []);
+      globalPdfs   = sections.flatMap(s => s.pdfs   ?? []);
+    } else {
+      // Fallback: build one section from top-level files
+      const files = content.files ?? [];
+      globalImages = files.filter(f => f.fileType === 'IMAGE').map(f => f.fileUrl);
+      globalPdfs   = files.filter(f => f.fileType === 'PDF').map(f => ({ name: content.title, url: f.fileUrl }));
+      const globalVideos = files.filter(f => f.fileType === 'VIDEO').map(f => f.fileUrl);
+      sections = [{
+        title:   content.title,
+        content: content.description ?? 'Contenido educativo subido por el administrador.',
+        icon:    this.getIconByFileType(primaryType),
+        summary: content.description ?? 'Haz clic para ver más...',
+        images:  globalImages,
+        pdfs:    globalPdfs,
+        videos:  globalVideos,
+        topics:  []
+      }];
+    }
 
     return {
-      id: content.id,
-      title: content.title,
-      description: content.description || 'Contenido educativo sobre gestión de residuos.',
-      type: primaryType,
-      time: '',
-      author: 'Administrador',
-      date: content.createdAt ? new Date(content.createdAt).toLocaleDateString() : '',
-      images: images,
-      pdfs: pdfs,
-      sections: [
-        {
-          title: content.title,
-          content: content.description || 'Contenido educativo subido por el administrador.',
-          icon: this.getIconByFileType(primaryType),
-          summary: content.description || 'Haz clic para ver más...',
-          images: images,
-          pdfs: pdfs,
-          topics: []
-        }
-      ]
+      id:          content.id,
+      title:       content.title,
+      description: content.description ?? 'Contenido educativo sobre gestión de residuos.',
+      type:        primaryType,
+      time:        '',
+      author:      'Administrador',
+      date:        content.createdAt ? new Date(content.createdAt).toLocaleDateString() : '',
+      images:      globalImages,
+      pdfs:        globalPdfs,
+      sections
     };
   }
 
@@ -294,56 +171,78 @@ export class EducationDetail implements OnInit {
       case 'PDF': return 'book-open';
       case 'IMAGE': return 'image';
       case 'VIDEO': return 'video';
-      default: return 'file';
+      default: return 'file-text';
     }
   }
 
-  goToQuiz() {
+  goToQuiz(): void {
     if (!this.resource) return;
     this.router.navigate(['/education', this.resource.id, 'quiz']);
   }
 
   openModal(section: any) {
     this.selectedSection = section;
+    this.viewedSections.add(section.title);
   }
-
-  closeModal() {
-    this.selectedSection = null;
-  }
-
-  selectSection(section: any) {
-    this.selectedSection = section;
-  }
-
-  selectTopic(topic: any) {
-    // Opcional: mostrar contenido del topic en modal o scroll en sidebar
-  }
+  closeModal() { this.selectedSection = null; }
+  selectSection(section: any) { this.selectedSection = section; }
+  selectTopic(_topic: any) {}
 
   toggleSectionCompleted(section: any): void {
-    const sectionId = section.title;
-    if (this.completedSections.has(sectionId)) {
-      this.completedSections.delete(sectionId);
-    } else {
-      this.completedSections.add(sectionId);
-    }
+    if (!section.id || this.isSectionCompleted(section)) return;
+    const contentId = this.resource?.id ?? this.backendContent?.id;
+    if (!contentId) return;
+    this.educationService.completeSectionProgress(contentId, section.id).subscribe({
+      next: () => this.loadProgress(),
+      error: (err) => console.error('Error completando sección:', err)
+    });
   }
 
   isSectionCompleted(section: any): boolean {
-    return this.completedSections.has(section.title);
+    return this.progressData?.sections?.find(s => s.sectionId === section.id)?.completed ?? false;
   }
 
   toggleResourceCompleted(): void {
-    this.resourceCompleted = !this.resourceCompleted;
-    if (this.resourceCompleted && this.resource?.sections) {
-      this.resource.sections.forEach(section => {
-        this.completedSections.add(section.title);
-      });
-    } else {
-      this.completedSections.clear();
-    }
+    if (!this.canMarkCompleted) return;
+    const contentId = this.resource?.id ?? this.backendContent?.id;
+    if (!contentId) return;
+    this.educationService.completeContent(contentId).subscribe({
+      next: (progress) => { this.progressData = progress; },
+      error: (err) => console.error('Error completando contenido:', err)
+    });
   }
 
   isResourceCompleted(): boolean {
-    return this.resourceCompleted;
+    return this.progressData?.contentCompleted ?? false;
+  }
+
+  private checkQuizCompletion(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const id = this.resource?.id ?? this.backendContent?.id;
+    if (id != null) {
+      this.quizCompleted = localStorage.getItem(`quizCompleted_${id}`) === 'true';
+    }
+  }
+
+  private loadProgress(): void {
+    const id = this.resource?.id ?? this.backendContent?.id;
+    if (!id) return;
+    this.progressLoading = true;
+    this.educationService.getProgress(id).subscribe({
+      next: (progress) => {
+        this.progressData = progress;
+        this.progressLoading = false;
+        // Marcar como vistas las secciones ya completadas
+        progress.sections.filter(s => s.completed).forEach(s => this.viewedSections.add(s.sectionTitle));
+      },
+      error: () => { this.progressLoading = false; }
+    });
+  }
+
+  get canMarkCompleted(): boolean {
+    const total = this.progressData?.totalSections ?? 0;
+    const allSectionsCompleted = total > 0 && (this.progressData?.completedSections ?? 0) >= total;
+    const quizOk = !this.hasQuiz || this.quizCompleted;
+    return allSectionsCompleted && quizOk && !this.isResourceCompleted();
   }
 }

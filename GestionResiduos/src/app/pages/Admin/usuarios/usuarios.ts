@@ -110,13 +110,17 @@ export class UsuariosAdmin implements OnInit {
     return 'bg-sky-50 text-sky-700';
   }
 
+  isActive(status: string): boolean {
+    return status === 'ACTIVO' || status === 'activo' || status === 'VERIFICADO';
+  }
+
   statusColor(status: string): string {
-    if (status === 'ACTIVO' || status === 'activo') return 'bg-emerald-50 text-emerald-700';
+    if (this.isActive(status)) return 'bg-emerald-50 text-emerald-700';
     return 'bg-red-50 text-red-700';
   }
 
   statusDot(status: string): string {
-    if (status === 'ACTIVO' || status === 'activo') return 'bg-emerald-500';
+    if (this.isActive(status)) return 'bg-emerald-500';
     return 'bg-red-500';
   }
 }

@@ -3,9 +3,12 @@ import { CommonModule } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
 import { RouterLink } from '@angular/router';
 import Swal from 'sweetalert2';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 import { EducationService, EducationContent } from '../../../services/education.service';
 import { AuthStateService } from '../../../services/auth-state.service';
+import { QuizService, UserQuizStats } from '../../../services/quiz.service';
 
 @Component({
   selector: 'app-education',
@@ -16,25 +19,35 @@ import { AuthStateService } from '../../../services/auth-state.service';
 })
 export class Education implements OnInit {
 
-  // ── Datos que vienen del backend ──
   backendContents: EducationContent[] = [];
   isLoading = true;
   errorMsg = '';
 
-  // ── Datos combinados para la vista (backend + fallback local) ──
   guides: any[] = [];
-
   isLoggedIn = false;
+
+  // ── HU22: estadísticas del usuario ──
+  stats: UserQuizStats = {
+    totalContents: 0,
+    quizzesAnswered: 0,
+    points: 0,
+    progress: 0
+  };
+  loadingStats = false;
+
+  public feedbackState: { [contentId: number]: boolean } = {};
 
   constructor(
     private educationService: EducationService,
-    private authState: AuthStateService
+    private authState: AuthStateService,
+    private quizService: QuizService
   ) {}
 
   ngOnInit(): void {
     this.loadContents();
     this.authState.isLoggedIn$.subscribe((logged) => {
       this.isLoggedIn = logged;
+      if (logged) this.loadStats();
     });
   }
 
@@ -42,9 +55,30 @@ export class Education implements OnInit {
     this.isLoading = true;
     this.educationService.getAll().subscribe({
       next: (data) => {
-        this.backendContents = data;
-        this.buildGuides();
-        this.isLoading = false;
+        if (data.length === 0) {
+          this.backendContents = [];
+          this.buildGuides();
+          this.isLoading = false;
+          return;
+        }
+        // Cargar detalle completo de cada contenido para obtener portada y archivos
+        // (getAll devuelve files:[] vacío; getById devuelve el detalle completo)
+        forkJoin(
+          data.map(c =>
+            this.educationService.getById(c.id).pipe(catchError(() => of(c)))
+          )
+        ).subscribe({
+          next: (fullData) => {
+            this.backendContents = fullData;
+            this.buildGuides();
+            this.isLoading = false;
+          },
+          error: () => {
+            this.backendContents = data;
+            this.buildGuides();
+            this.isLoading = false;
+          }
+        });
       },
       error: (err) => {
         console.error('Error cargando contenidos educativos:', err);
@@ -55,11 +89,19 @@ export class Education implements OnInit {
     });
   }
 
-  /**
-   * Combina los contenidos del backend con las tarjetas locales de ejemplo.
-   * Usa el primer archivo de tipo IMAGE como portada de la tarjeta;
-   * si no hay imagen, cae a un placeholder de picsum.
-   */
+  loadStats(): void {
+    this.loadingStats = true;
+    this.quizService.getMyStats().subscribe({
+      next: (data) => {
+        this.stats = data;
+        this.loadingStats = false;
+      },
+      error: () => {
+        this.loadingStats = false;
+      }
+    });
+  }
+
   private buildGuides(): void {
     this.guides = this.backendContents.map((c) => {
       const primaryType = c.files?.[0]?.fileType ?? 'OTRO';
@@ -86,7 +128,7 @@ export class Education implements OnInit {
       case 'PDF': return 'book-open';
       case 'IMAGE': return 'image';
       case 'VIDEO': return 'video';
-      default: return 'file';
+      default: return 'file-text';
     }
   }
 
@@ -99,11 +141,43 @@ export class Education implements OnInit {
     }
   }
 
-  openModal() {
-    Swal.fire({
-      title: 'Gracias por darnos tu opinión',
-      icon: 'success',
-      draggable: true
+  public hasVoted(contentId: number): boolean {
+    return !!this.feedbackState[contentId];
+  }
+
+  public sendFeedback(contentId: number, useful: boolean): void {
+    if (this.hasVoted(contentId)) return;
+    this.educationService.sendFeedback(contentId, useful).subscribe({
+      next: (res) => {
+        if (
+          (res && (res.alreadyVoted || res.useful !== undefined || res.notUseful !== undefined)) ||
+          (res && typeof res.message === 'string' && res.message.includes('Ya se registró el feedback'))
+        ) {
+          this.feedbackState[contentId] = true;
+        }
+        if (res && typeof res.message === 'string' && res.message.includes('Ya se registró el feedback')) {
+          Swal.fire('Info', 'Ya enviaste feedback para este contenido.', 'info');
+        } else {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Gracias por tu feedback!',
+            text: useful ? 'Tu opinión nos ayuda a mejorar el contenido.' : 'Gracias por ayudarnos a mejorar.',
+            timer: 2000,
+            showConfirmButton: false
+          });
+        }
+      },
+      error: (err) => {
+        if (
+          err?.error?.alreadyVoted ||
+          (err?.error?.message && typeof err.error.message === 'string' && err.error.message.includes('Ya se registró el feedback'))
+        ) {
+          this.feedbackState[contentId] = true;
+          Swal.fire('Info', 'Ya enviaste feedback para este contenido.', 'info');
+        } else {
+          Swal.fire('Error', 'No se pudo enviar tu feedback.', 'error');
+        }
+      }
     });
   }
 }

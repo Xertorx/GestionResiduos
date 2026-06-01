@@ -8,7 +8,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterModule, LucideAngularModule, CommonModule], 
+  imports: [RouterModule, LucideAngularModule, CommonModule],
   templateUrl: './header.html',
   styleUrl: './header.scss'
 })

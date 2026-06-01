@@ -5,7 +5,7 @@ import {
 } from '@angular/core';
 import { provideRouter, withRouterConfig } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptorsFromDi } from '@angular/common/http';
 import { routes } from './app.routes';
 import { LUCIDE_ICONS } from './shared/components/lucide-icons';
 import { LucideAngularModule } from 'lucide-angular';
@@ -22,8 +22,7 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideClientHydration(withEventReplay()),
-    provideHttpClient(withFetch()),
+    provideHttpClient(withFetch(), withInterceptorsFromDi()),
     importProvidersFrom(LucideAngularModule.pick(LUCIDE_ICONS))
-    // ← sin nada de Google aquí
   ]
 };

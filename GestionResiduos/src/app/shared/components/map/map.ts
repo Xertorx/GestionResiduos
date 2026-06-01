@@ -4,6 +4,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../../enviroment/enviroment';
 
 //Interface de la respuesta de la API para los ecopuntos
 export interface EcoPoint{
@@ -58,7 +59,7 @@ export class Map implements OnInit{
   });
   
   getEcopoints() {
-    this.http.get<EcoPoint[]>('/api/ecopoints').subscribe({
+    this.http.get<EcoPoint[]>(`${environment.apiUrl}/ecopoints/active`).subscribe({
       next: (data) => {
         this.EcoPoints.set(data);
         this.cdr.markForCheck();

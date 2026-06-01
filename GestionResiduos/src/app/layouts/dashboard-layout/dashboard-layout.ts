@@ -38,8 +38,20 @@ export class DashboardLayout implements OnInit, OnDestroy {
 
   @HostListener('window:scroll', [])
   onWindowScroll() {
-    // activa sombra si se baja más de 10px
     this.isScrolled = window.scrollY > 10;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.profile-menu-container')) {
+      this.isProfileMenuOpen = false;
+    }
+  }
+
+  toggleProfileMenu(event: MouseEvent) {
+    event.stopPropagation();
+    this.isProfileMenuOpen = !this.isProfileMenuOpen;
   }
 
   // Definición del menú de la barra lateral
@@ -52,7 +64,8 @@ export class DashboardLayout implements OnInit, OnDestroy {
       label: 'Reportes', icon: 'BarChart2', route: '',
       children: [
         { label: 'Adm. Categorías', route: '/dashboard/reportes/categorias', icon: 'tag' },
-        { label: 'Adm. Reportes', route: '/dashboard/reportes', icon: 'file-text' }
+        { label: 'Adm. Reportes', route: '/dashboard/reportes', icon: 'file-text' },
+        { label: 'Estadísticas de Reportes', route: '/dashboard/report-stats', icon: 'pie-chart' }
       ]
     },
     { label: 'Educación', route: '/dashboard/educacion', icon: 'book-open' },

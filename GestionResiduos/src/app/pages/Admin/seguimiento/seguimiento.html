@@ -1,11 +1,266 @@
-<div class="bg-white rounded-lg shadow p-6">
-  <h2 class="text-xl font-semibold mb-4">Seguimiento</h2>
-  <div class="grid grid-cols-2 gap-4">
-    @for (m of metrics; track m.id) {
-      <div class="p-4 border rounded">
-        <div class="text-sm text-gray-500">{{ m.etiqueta }}</div>
-        <div class="text-2xl font-bold">{{ m.valor }}</div>
-      </div>
-    }
+<div class="max-w-7xl mx-auto py-6 px-2 sm:px-0">
+
+  <!-- Header -->
+  <div data-aos="fade-down" class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <span class="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+          <lucide-icon name="bar-chart-2" class="w-5 h-5 text-emerald-600"></lucide-icon>
+        </span>
+        Seguimiento y estadísticas
+      </h1>
+      <p class="text-sm text-gray-400 mt-1">Métricas en tiempo real del sistema de gestión de residuos</p>
+    </div>
+    <div class="flex items-center gap-3">
+      @if (lastUpdated) {
+        <span class="text-xs text-gray-400">Actualizado: {{ lastUpdated | date:'HH:mm:ss' }}</span>
+      }
+      <button (click)="loadData()" [disabled]="isLoading"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition disabled:opacity-50">
+        <lucide-icon name="refresh-cw" class="w-4 h-4" [class.animate-spin]="isLoading"></lucide-icon>
+        Actualizar
+      </button>
+    </div>
   </div>
+
+  <!-- Skeleton loading -->
+  @if (isLoading) {
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      @for (i of [1,2,3,4,5,6,7,8]; track i) {
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 animate-pulse">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-gray-100"></div>
+            <div class="h-3 bg-gray-100 rounded w-24"></div>
+          </div>
+          <div class="h-9 bg-gray-100 rounded w-16"></div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!isLoading && !error) {
+
+    <!-- ══ USUARIOS ══ -->
+    <section data-aos="fade-up" class="mb-8">
+      <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <lucide-icon name="users" class="w-4 h-4"></lucide-icon> Usuarios
+      </h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="users" class="w-5 h-5 text-blue-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Total registrados</span>
+          </div>
+          <p class="text-3xl font-extrabold text-gray-900">{{ totalUsers }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="user-check" class="w-5 h-5 text-emerald-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Activos</span>
+          </div>
+          <p class="text-3xl font-extrabold text-emerald-700">{{ activeUsers }}</p>
+          <p class="text-xs text-gray-400 mt-1">{{ activeUsersPercent }}% del total</p>
+          <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-emerald-500 rounded-full transition-all" [style.width]="activeUsersPercent + '%'"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="user-x" class="w-5 h-5 text-red-500"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Inactivos</span>
+          </div>
+          <p class="text-3xl font-extrabold text-red-600">{{ inactiveUsers }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="shield" class="w-5 h-5 text-purple-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Por rol</span>
+          </div>
+          <div class="space-y-1.5 mt-1">
+            @for (r of usersByRole; track r.role) {
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-500 truncate">{{ r.role }}</span>
+                <span class="text-sm font-bold text-gray-800 ml-2">{{ r.count }}</span>
+              </div>
+            }
+            @if (usersByRole.length === 0) {
+              <span class="text-xs text-gray-300">Sin datos</span>
+            }
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ ECOPUNTOS ══ -->
+    <section data-aos="fade-up" class="mb-8">
+      <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <lucide-icon name="map-pin" class="w-4 h-4"></lucide-icon> Ecopuntos
+      </h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="map-pin" class="w-5 h-5 text-teal-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Total ecopuntos</span>
+          </div>
+          <p class="text-3xl font-extrabold text-gray-900">{{ totalEcopoints }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="check-circle" class="w-5 h-5 text-emerald-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Activos</span>
+          </div>
+          <p class="text-3xl font-extrabold text-emerald-700">{{ activeEcopointsCount }}</p>
+          <p class="text-xs text-gray-400 mt-1">{{ activeEcopointsPercent }}% del total</p>
+          <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-emerald-500 rounded-full transition-all" [style.width]="activeEcopointsPercent + '%'"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="minus-circle" class="w-5 h-5 text-orange-500"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Inactivos</span>
+          </div>
+          <p class="text-3xl font-extrabold text-orange-600">{{ inactiveEcopointsCount }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-lime-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="recycle" class="w-5 h-5 text-lime-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Por tipo de residuo</span>
+          </div>
+          <div class="space-y-1.5 mt-1">
+            @for (t of ecopointsByType; track t.type) {
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-500 truncate">{{ formatResidueType(t.type) }}</span>
+                <span class="text-sm font-bold text-gray-800 ml-2">{{ t.count }}</span>
+              </div>
+            }
+            @if (ecopointsByType.length === 0) {
+              <span class="text-xs text-gray-300">Sin datos</span>
+            }
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ REPORTES ══ -->
+    <section data-aos="fade-up" class="mb-8">
+      <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <lucide-icon name="flag" class="w-4 h-4"></lucide-icon> Reportes ciudadanos
+      </h2>
+      <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="flag" class="w-5 h-5 text-gray-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Total</span>
+          </div>
+          <p class="text-3xl font-extrabold text-gray-900">{{ totalReports }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="clock" class="w-5 h-5 text-amber-500"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Pendientes</span>
+          </div>
+          <p class="text-3xl font-extrabold text-amber-600">{{ pendingReports }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="eye" class="w-5 h-5 text-blue-500"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">En revisión</span>
+          </div>
+          <p class="text-3xl font-extrabold text-blue-600">{{ inReviewReports }}</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="check-circle" class="w-5 h-5 text-emerald-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Resueltos</span>
+          </div>
+          <p class="text-3xl font-extrabold text-emerald-700">{{ resolvedReports }}</p>
+          <p class="text-xs text-gray-400 mt-1">{{ resolvedReportsPercent }}% resueltos</p>
+          <div class="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="h-full bg-emerald-500 rounded-full transition-all" [style.width]="resolvedReportsPercent + '%'"></div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="x-circle" class="w-5 h-5 text-red-500"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Rechazados</span>
+          </div>
+          <p class="text-3xl font-extrabold text-red-600">{{ rejectedReports }}</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ══ EDUCACIÓN ══ -->
+    <section data-aos="fade-up" class="mb-2">
+      <h2 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <lucide-icon name="book-open" class="w-4 h-4"></lucide-icon> Educación ambiental
+      </h2>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
+              <lucide-icon name="book-open" class="w-5 h-5 text-indigo-600"></lucide-icon>
+            </div>
+            <span class="text-sm font-medium text-gray-500">Contenidos publicados</span>
+          </div>
+          <p class="text-3xl font-extrabold text-indigo-700">{{ educationCount }}</p>
+        </div>
+
+      </div>
+    </section>
+
+  }
+
+  <!-- Error -->
+  @if (!isLoading && error) {
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+      <lucide-icon name="alert-triangle" class="w-8 h-8 mx-auto mb-2 text-red-400"></lucide-icon>
+      <p class="text-red-600 font-medium">{{ error }}</p>
+      <button (click)="loadData()" class="mt-3 text-sm text-emerald-600 underline hover:text-emerald-800">Reintentar</button>
+    </div>
+  }
+
 </div>

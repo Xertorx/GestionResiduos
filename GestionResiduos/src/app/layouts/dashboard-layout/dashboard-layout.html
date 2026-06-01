@@ -9,30 +9,35 @@
 <div class="min-h-screen flex bg-gray-50 ">
   <!-- Sidebar -->
   <aside
-    class="w-64 bg-white border-r border-emerald-100 flex flex-col fixed inset-y-0 z-30 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0"
+    class="w-64 bg-white border-r border-gray-100 flex flex-col fixed inset-y-0 z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-lg lg:shadow-none"
     [class.-translate-x-full]="!isSidebarOpen">
     <!-- Header del Sidebar -->
-    <div class="p-4 bg-emerald-600 text-white font-semibold flex items-center justify-between">
+    <div class="p-5 bg-gradient-to-r from-emerald-700 to-emerald-600 text-white flex items-center justify-between">
       <a href="" class="flex items-center space-x-2">
-        <lucide-icon name="trash-2" class="h-8 w-8"></lucide-icon>
-        <span class="text-lg">EcoBolivar</span>
+        <div class="bg-white/20 p-1.5 rounded-lg">
+          <lucide-icon name="trash-2" class="h-6 w-6"></lucide-icon>
+        </div>
+        <span class="text-lg font-bold tracking-tight">EcoBolivar</span>
       </a>
-      <button class="lg:hidden p-1 hover:bg-emerald-700 rounded-md" (click)="toggleSidebar()">
+      <button class="lg:hidden p-1 hover:bg-white/20 rounded-md transition" (click)="toggleSidebar()">
         <lucide-icon name="chevron-left" class="h-5 w-5"></lucide-icon>
       </button>
     </div>
 
     <!-- Navegación -->
-    <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+    <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">Menú</p>
       @for (item of menuItems; track item.label) {
       @if (item.children) {
       <!-- Item con submenú -->
       <div>
         <button
-          class="w-full flex items-center justify-between px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+          class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-all text-sm font-medium"
           (click)="toggleSubmenu(item.label)">
           <span class="flex items-center">
-            <lucide-icon [name]="item.icon" class="w-5 h-5 mr-2 text-emerald-600"></lucide-icon>
+            <span class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center mr-2.5">
+              <lucide-icon [name]="item.icon" class="w-4 h-4 text-emerald-600"></lucide-icon>
+            </span>
             {{ item.label }}
           </span>
           <lucide-icon [name]="expandedMenu === item.label ? 'chevron-up' : 'chevron-down'"
@@ -42,7 +47,7 @@
         <div class="ml-4 mt-1 space-y-0.5 border-l-2 border-emerald-100 pl-2">
           @for (child of item.children; track child.label) {
           <a [routerLink]="child.route"
-            class="flex items-center px-3 py-1.5 rounded-md text-sm text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
+            class="flex items-center px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-emerald-50 hover:text-emerald-700 transition-all font-medium">
             <lucide-icon [name]="child.icon" class="w-4 h-4 mr-2 text-emerald-500"></lucide-icon>
             {{ child.label }}
           </a>
@@ -53,9 +58,11 @@
       } @else {
       <!-- Item normal -->
       <a [routerLink]="item.route"
-        class="flex items-center px-3 py-2 rounded-md text-gray-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors"
+        class="flex items-center px-3 py-2.5 rounded-xl text-gray-600 hover:bg-emerald-50 hover:text-emerald-700 transition-all text-sm font-medium"
         [attr.data-father]="item.label">
-        <lucide-icon [name]="item.icon" class="w-5 h-5 mr-2 text-emerald-600"></lucide-icon>
+        <span class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center mr-2.5">
+          <lucide-icon [name]="item.icon" class="w-4 h-4 text-emerald-600"></lucide-icon>
+        </span>
         {{ item.label }}
       </a>
       }
@@ -63,18 +70,18 @@
     </nav>
 
     <!-- Footer del Sidebar -->
-    <div class="p-4 border-t border-emerald-100">
+    <div class="p-4 border-t border-gray-100 bg-gray-50">
       <div class="flex items-center space-x-3">
-        <div class="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
-          <lucide-icon name="user" class="w-6 h-6"></lucide-icon>
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+          <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
         </div>
-        <div class="flex-1">
-          <p class="text-sm font-medium text-gray-800">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
-          <p class="text-xs text-gray-500">{{ authReady && email ? email : 'Sin correo disponible' }}</p>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-semibold text-gray-800 truncate">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
+          <p class="text-xs text-gray-400 truncate">{{ authReady && email ? email : 'Sin correo disponible' }}</p>
         </div>
-        <button class="p-2 rounded-md hover:bg-emerald-50 text-emerald-600" aria-label="Cerrar sesión"
+        <button class="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition" aria-label="Cerrar sesión"
           title="Cerrar sesión">
-          <lucide-icon name="log-out" class="h-5 w-5"></lucide-icon>
+          <lucide-icon name="log-out" class="h-4 w-4"></lucide-icon>
         </button>
       </div>
     </div>
@@ -89,13 +96,16 @@
   <div class="flex-1 flex flex-col min-h-screen">
     <!-- Header -->
     <header #headerRef
-      class="bg-white border border-b p-4 flex items-center justify-between sticky top-0 border-b border-emerald-100 transition-all duration-200 ease-in-out z-40"
+      class="bg-white border-b border-gray-100 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 transition-all duration-200 ease-in-out z-40"
       [class.shadow-md]="isScrolled">
-      <div class="flex-1 flex items-center space-x-2 lg:ml-32">
-        <button class="lg:hidden p-2 rounded-md hover:bg-emerald-50 text-emerald-700" (click)="toggleSidebar()">
-          <lucide-icon name="menu" class="h-6 w-6"></lucide-icon>
+      <div class="flex items-center gap-3">
+        <button class="lg:hidden p-2 rounded-xl hover:bg-emerald-50 text-emerald-700 transition" (click)="toggleSidebar()">
+          <lucide-icon name="menu" class="h-5 w-5"></lucide-icon>
         </button>
-        <h1 class="text-xl font-bold text-gray-800">Dashboard</h1>
+        <div class="flex items-center gap-2">
+          <span class="hidden sm:flex w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+          <h1 class="text-base sm:text-lg font-bold text-gray-800">Dashboard</h1>
+        </div>
       </div>
 
       <!--  Sección de notificaciones + menú de usuario -->
@@ -105,14 +115,15 @@
         </button>
 
         <!-- Botón del perfil -->
-        <div class="relative" (click)="isProfileMenuOpen = !isProfileMenuOpen">
-          <div
-            class="flex items-center cursor-pointer bg-white rounded-full border border-emerald-100 hover:bg-emerald-50 p-1">
+        <div class="relative profile-menu-container">
+          <button (click)="toggleProfileMenu($event)"
+            class="flex items-center cursor-pointer bg-white rounded-full border border-emerald-100 hover:bg-emerald-50 p-1 transition">
             <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center">
               <lucide-icon name="user" class="w-5 h-5 text-emerald-600"></lucide-icon>
             </div>
-            <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-500 ml-2"></lucide-icon>
-          </div>
+            <lucide-icon name="chevron-down" class="w-4 h-4 text-gray-500 ml-2 transition-transform"
+              [class.rotate-180]="isProfileMenuOpen"></lucide-icon>
+          </button>
 
           <!-- Menú desplegable -->
           @if (isProfileMenuOpen) {
@@ -121,24 +132,21 @@
               <div class="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
                 <lucide-icon name="user" class="w-5 h-5"></lucide-icon>
               </div>
-              <div>
-                <p class="font-medium text-gray-800">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
-                <p class="text-sm text-gray-500">{{ authReady && email ? email : 'Sin correo disponible' }}</p>
+              <div class="min-w-0">
+                <p class="font-medium text-gray-800 truncate">{{ authReady && nickname ? nickname : 'Usuario' }}</p>
+                <p class="text-sm text-gray-500 truncate">{{ authReady && email ? email : 'Sin correo' }}</p>
               </div>
             </div>
-            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50">
-              <lucide-icon name="user" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> My account
+            <a routerLink="/profile" (click)="isProfileMenuOpen = false"
+               class="flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition">
+              <lucide-icon name="user" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon>
+              Mi cuenta
             </a>
-            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50">
-              <lucide-icon name="shield" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Privacy policy
-            </a>
-            <a href="#" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50">
-              <lucide-icon name="message-square" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Share feedback
-            </a>
-            <div class="border-t border-gray-100"></div>
-            <button class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-emerald-50"
+            <div class="border-t border-gray-100 my-1"></div>
+            <button class="w-full text-left flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
               (click)="openModal()">
-              <lucide-icon name="log-out" class="w-4 h-4 mr-2 text-emerald-600"></lucide-icon> Sign out
+              <lucide-icon name="log-out" class="w-4 h-4 mr-2"></lucide-icon>
+              Cerrar sesión
             </button>
           </div>
           }
@@ -147,16 +155,13 @@
     </header>
 
     <!-- Contenido dinámico -->
-    <main class="flex-1 pt-6 transition-all duration-200 ease-in-out lg:ml-12 pl-2 pr-4 lg:pr-8">
-      <div class="pt-6 rounded-lg z-50">
-        <router-outlet></router-outlet>
-      </div>
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-200 ease-in-out">
+      <router-outlet></router-outlet>
     </main>
 
     <!-- Footer -->
-    <footer
-      class="bg-white border-t border-emerald-100 text-center py-4 text-gray-500 text-sm transition-all duration-200 ease-in-out lg:ml-64">
-      © 2025 Ciudad Bolívar Verde — Todos los derechos reservados
+    <footer class="bg-white border-t border-gray-100 text-center py-3 text-gray-400 text-xs">
+      © 2025 EcoBolivar — Todos los derechos reservados
     </footer>
   </div>
 </div>

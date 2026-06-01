@@ -136,6 +136,7 @@ export class ReportesAdmin implements OnInit {
       'Cambiar estado',
       `¿Cambiar el estado del reporte #${this.selectedReport.id} de "${this.formatStatus(this.selectedReport.status)}" a "${this.formatStatus(this.newStatus)}"?`,
       () => {
+<<<<<<< HEAD
         const targetStatus = this.newStatus;
         const ciudadano = this.selectedReport!.userName || 'el ciudadano';
         this.http.patch(
@@ -143,14 +144,21 @@ export class ReportesAdmin implements OnInit {
           null,
           { headers: this.authHeaders() }
         ).subscribe({
+=======
+  this.api.changeReportStatus(this.selectedReport!.id, this.newStatus).subscribe({
+>>>>>>> 74423d3780f9dcc6d4a55fcf9998d45dfc82f890
           next: () => {
-            this.selectedReport!.status = targetStatus;
+            this.selectedReport!.status = this.newStatus;
             this.loadReports();
+<<<<<<< HEAD
 
             // HU27: Mostrar modal confirmando que se envió la notificación
             this.notificationMessage = `Se envió un correo a ${ciudadano} notificando el nuevo estado: "${this.formatStatus(targetStatus)}".`;
             this.showNotificationSentModal = true;
             this.closeDetail();
+=======
+            this.loadStatistics();
+>>>>>>> 74423d3780f9dcc6d4a55fcf9998d45dfc82f890
           },
           error: () => {
             this.error = 'No se pudo cambiar el estado del reporte.';
@@ -227,6 +235,7 @@ export class ReportesAdmin implements OnInit {
     if (type === 'incumplimiento_calendario') return 'Incumplimiento';
     return type;
   }
+<<<<<<< HEAD
 
   private authHeaders(): HttpHeaders {
     const token = this.authState.getAccessToken();
@@ -234,3 +243,6 @@ export class ReportesAdmin implements OnInit {
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 }
+=======
+}
+>>>>>>> 74423d3780f9dcc6d4a55fcf9998d45dfc82f890

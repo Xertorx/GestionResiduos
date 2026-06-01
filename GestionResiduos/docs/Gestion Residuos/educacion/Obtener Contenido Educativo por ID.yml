@@ -1,0 +1,21 @@
+info:
+  name: Obtener Contenido Educativo por ID
+  type: http
+  seq: 2
+
+http:
+  method: GET
+  url: http://localhost:8080/api/v1/education/{{id}}
+  headers:
+    - name: Content-Type
+      value: application/json
+  auth: inherit
+
+docs: "Obtiene un contenido educativo específico por su ID. No requiere autenticación."
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

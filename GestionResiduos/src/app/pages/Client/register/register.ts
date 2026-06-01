@@ -1,4 +1,4 @@
-import { Component, OnInit, NgZone, Inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, NgZone, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
@@ -32,7 +32,8 @@ export interface GoogleRegisterRequest {
   templateUrl: './register.html',
   styleUrl: './register.scss'
 })
-export class Register implements OnInit {
+export class Register implements OnInit, AfterViewInit, OnDestroy {
+  private googleInterval: any;
 
   form: FormGroup;
   googleForm: FormGroup;
@@ -78,19 +79,29 @@ export class Register implements OnInit {
     });
   }
 
-  ngOnInit() {
+  ngOnInit() {}
+
+  ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
       this.initGoogleSDK();
     }
   }
 
+  ngOnDestroy() {
+    if (this.googleInterval) {
+      clearInterval(this.googleInterval);
+    }
+  }
+
   initGoogleSDK() {
-    const waitForGoogle = setInterval(() => {
+    this.googleInterval = setInterval(() => {
       if (typeof (window as any).google !== 'undefined') {
-        clearInterval(waitForGoogle);
+        clearInterval(this.googleInterval);
 
         google.accounts.id.initialize({
           client_id: environment.googleClientId,
+          use_fedcm_for_prompt: false,
+          use_fedcm_for_button: false,
           callback: (response: any) => {
             this.ngZone.run(async () => {
               await this.handleGoogleCallback(response);
